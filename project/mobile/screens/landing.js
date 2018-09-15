@@ -2,16 +2,22 @@
 import React from 'react';
 import {Button, Text, View} from 'native-base'
 
-class Landing extends React.Component{
+class LandingScreen extends React.Component{
+    register = ()=>{
+        this.props.navigation.navigate("registration")
+    }
+    login = ()=>{
+        this.props.navigation.navigate("login")
+    }
 
     render(){
         return <View>
             <Text> ESPRESSO </Text>
-            
-            <Button>
+
+            <Button onPress={this.register}>
                 <Text> Register </Text>
             </Button>
-            <Button>
+            <Button onPress={this.login}>
                 <Text> Login </Text>
             </Button>
 
@@ -22,4 +28,4 @@ class Landing extends React.Component{
 
 }
 
-export default Landing
+export default LandingScreen
