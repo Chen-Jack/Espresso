@@ -6,30 +6,58 @@ class RegistrationForm extends React.Component{
         super(props)
 
         this.state = {
-            errors : [],
+            form_errors : [],
             usernameField: "",
             passwordField: "",
-            passwordConfirmField: ""
+            passwordConfirmField: "",
+            emailField: ""
         }
     }
     submitForm = ()=>{
         const formData = {
             username: this.state.usernameField,
             password: this.state.passwordField,
-            passwordConfirm: this.state.passwordConfirmField
+            passwordConfirm: this.state.passwordConfirmField,
+            email: this.state.emailField
         }
 
-  
-        //if good navigate to home
-        this.props.success()
-     
-        
-        //if bad, just show errors
+        fetch("http:/localhost:3000/create-account",{
+            method: "POST",
+            headers:{
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then((res)=>{
+            console.log("THE STATUS IS", res.status);
+            if(res.ok){
+                //if good, save token and navigate to home
+                this.props.success()
+            }
+            if(res.status === 400){
+                //if bad, just show errors
+                console.log("400 status");
+                res.json().then((errors_text)=>{
+                    console.log("RESPONSE", errors_text);
+                    this.setState({
+                        form_errors: errors_text
+                    })
+                })
+            }
+            else{
+                console.log("Unknown status");
+            }
+
+        })
+        .catch((err)=>{
+            console.log(err);
+        }) 
     }
 
     render(){
         return <View>
-            {this.state.errors.map((error)=>{
+            {this.state.form_errors.map((error)=>{
                 return <Text> {error} </Text>
             })}
 
@@ -42,6 +70,9 @@ class RegistrationForm extends React.Component{
                 </Item>
                 <Item>
                     <Input onChangeText={(txt)=>this.setState({passwordConfirmField:txt})} placeholder="Confirm Password" value={this.state.passwordConfirmField}/>
+                </Item>
+                <Item>
+                    <Input onChangeText={(txt)=>this.setState({emailField:txt})} placeholder="Email" value={this.state.emailField}/>
                 </Item>
             </Form>
             <Button onPress={this.submitForm}>
