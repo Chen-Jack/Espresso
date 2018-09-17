@@ -5,6 +5,8 @@ const bodyParser = require('body-parser')
 const { check, body ,validationResult } = require('express-validator/check');
 const dynamo = require('./dynamo.js')
 
+const bcrypt = require('bcryptjs')
+
 const User = require('./Models/User.js')
 
 const app = express()
@@ -34,21 +36,11 @@ dynamo.createTables(function(err) {
 app.use(bodyParser.json())
 
 app.get('/', (req,res)=>{
+
     res.send("Home Page")
     
 })
 
-
-// })
-// app.get('/test', (req,res)=>{
-//     User.create({username: "test", password: "idk", email:"test@gmail.com"}, (err, user)=>{
-//         if(err)
-//             console.log(err);
-//         else
-//             console.log(`Created ${user}`);
-//         res.end()
-//     })
-// })
 
 // app.get('/test-update', (req,res)=>{
 //     User.update({username: "test", email:"test2@gmail.com"}, (err,user)=>{
@@ -88,20 +80,37 @@ const formValidationChain = [
 
 app.post('/create-account', formValidationChain, (req,res)=>{
     const username = req.body.username
-    const password = req.body.password
+    const raw_password = req.body.password
     const email = req.body.email
 
-    User.create({id : uuid(), username, password, email}, (err,user)=>{
+    
+  
+
+    bcrypt.hash(raw_password, 8, function(err, hash) {
         if(err){
-            res.status(400).send(err)
-        }
-        else if(!user){
-            res.status(400).send()
+            console.log("Error with hashing password");
+            res.status(400).end()
         }
         else{
-            res.status(200).json(user)
+            const newUser = {
+                id: uuid(),
+                username,
+                password: hash,
+                email
+            }  
+
+            User.create( newUser, (err,user)=>{
+                if(err){
+                    console.log("Error creating user", err);
+                    res.status(400).send(err)
+                }
+                else{
+                    res.status(200).json(user)
+                }
+            })
         }
     })
-    
 })
+
+
 

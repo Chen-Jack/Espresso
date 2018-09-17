@@ -12,8 +12,5 @@ var User = dynamo.define('User', {
     }
   });
 
-// User.test = function(){
-//   console.log("Test success")
-// }
 
 module.exports = User

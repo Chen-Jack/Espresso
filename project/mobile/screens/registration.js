@@ -33,13 +33,14 @@ class RegistrationForm extends React.Component{
             console.log("THE STATUS IS", res.status);
             if(res.ok){
                 //if good, save token and navigate to home
+                console.log("IS IT OKAY?", this.props.success);
                 this.props.success()
             }
             if(res.status === 400){
                 //if bad, just show errors
                 console.log("400 status");
                 res.json().then((errors_text)=>{
-                    console.log("RESPONSE", errors_text);
+                    console.log("RESPONSE", errors_text, "?");
                     this.setState({
                         form_errors: errors_text
                     })
@@ -51,7 +52,7 @@ class RegistrationForm extends React.Component{
 
         })
         .catch((err)=>{
-            console.log(err);
+            console.log("ERROR", err);
         }) 
     }
 
