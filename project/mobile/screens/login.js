@@ -26,10 +26,9 @@ class LoginForm extends React.Component{
             body: JSON.stringify(formData)
         })
         .then((res)=>{
-            console.log("THE STATUS IS", res.status);
             if(res.ok)
-                this.props.success()
-            if(res.status === 400){
+                this.props.successRedirect()
+            else if(res.status === 400){
                 res.json().then((errors_text)=>{
                     this.setState({
                         form_errors: errors_text
@@ -39,7 +38,6 @@ class LoginForm extends React.Component{
             else{
                 console.log("Unknown status");
             }
-
         })
         .catch((err)=>{
             console.log("ERROR", err);
@@ -73,7 +71,7 @@ class LoginScreen extends React.Component{
         return <Container>
             <Content>
                 <Text> Login </Text>
-                <LoginForm success={()=>this.props.navigation.navigate("home")}/>
+                <LoginForm successRedirect={()=>this.props.navigation.navigate("home")}/>
             </Content>
         </Container>
     }

@@ -92,6 +92,25 @@ app.post('/create-account', (req,res)=>{
     res.status(200).end()
 })
 
+app.post('/login-account', (req,res)=>{
+    const username = req.body.username
+    const raw_password = req.body.password
+
+    User.verify(username, raw_password, (err, isValid)=>{
+        if(err)
+            console.log(err);
+        else if(isValid === true){
+            res.status(200).end()
+        }
+        else{ //Res is false
+            //React Native forms need errors in array form
+            const errors = ["Incorrect username and or password"]
+            res.status(400).json(errors)
+        }
+    })   
+})
+
+
 
 
 
