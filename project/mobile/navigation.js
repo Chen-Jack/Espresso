@@ -4,12 +4,14 @@ import LandingScreen from './screens/landing'
 import TestScreen from './screens/test'
 import RegistrationScreen from './screens/registration'
 import HomeScreen from './screens/home'
+import LoginScreen from './screens/login';
 
 const StackNavigation = createStackNavigator({
     registration: RegistrationScreen,
     test: TestScreen,
     landing: LandingScreen,
-    home: HomeScreen
+    home: HomeScreen,
+    login: LoginScreen
     
 })
 
