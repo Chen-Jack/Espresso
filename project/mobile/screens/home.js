@@ -58,6 +58,23 @@ class HomeScreen extends React.Component{
                     <Text> Logout</Text>
                 </Button>
                 <Text> Home Page of {this.state.user.username}</Text>
+                <Button onPress={()=>{
+                    AsyncStorage.getItem('session_token', (err, token)=>{
+                        fetch('http://localhost:3000/create-task',{
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({title: "idk"})
+                        }).then((res)=>{
+                            console.log(res.status);
+                        })
+                    })
+                }}>
+                    <Text> Test </Text>
+                </Button>
             </Content>
         </Container>
     }

@@ -5,6 +5,7 @@ const bodyParser = require('body-parser')
 const { check, body ,validationResult } = require('express-validator/check');
 const db = require('./db')
 const User = require('./Models/User')
+const Task = require('./Models/Task')
 const config = require('./config')
 const jwt = require('jsonwebtoken')
 
@@ -81,6 +82,17 @@ app.get('/test', (req,res)=>{
     
 // ]
 
+extractPayloadFromHeader = function(headers){
+    try{
+        const token = headers.authorization.split(' ')[1]
+        const payload = jwt.verify(token, config.jwt.secret)
+        return payload
+    }catch(err){
+        console.log("Error extracting id from token", err);
+        return null;
+    }
+}
+
 app.post('/create-account', (req,res)=>{
     const username = req.body.username
     const raw_password = req.body.password
@@ -112,18 +124,36 @@ app.post('/login-account', (req,res)=>{
 })
 
 app.get('/get-user-data', (req,res)=>{
-    const token = req.headers.authorization.split(' ')[1]
-    const payload = jwt.verify(token, config.jwt.secret)
-    console.log("payload", payload);
+
+    const payload = extractPayloadFromHeader(req.headers)
+    if(!payload)
+        return res.status(401).end()
 
     User.findById(payload.id, (err, user)=>{
         if(err || !user)
             res.status(400).end()
         else
             res.status(200).json({username: user.username})
-    })
+    })    
+})
 
-    
+
+app.post('/create-task', (req,res)=>{
+    const payload = extractPayloadFromHeader(req.headers)
+    if(!payload || !payload.hasOwnProperty('id'))
+        return res.status(401).end()
+   
+        
+    const user_id = payload.id
+    const task_title = req.body.title
+    const task_details = req.body.details
+
+    Task.create(user_id, task_title, task_details, (err)=>{
+        if(err)
+            console.log("Problem creating task", err);
+        else
+            res.status(200).end()
+    })  
 })
 
 

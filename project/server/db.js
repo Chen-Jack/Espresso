@@ -13,7 +13,7 @@ connection.connect((err)=>{
 });
 
 
-//USER SCHEMA
+//USER TABLE
 connection.query(`CREATE TABLE IF NOT EXISTS 
     user(
         id VARCHAR(36) NOT NULL PRIMARY KEY,
@@ -24,6 +24,25 @@ connection.query(`CREATE TABLE IF NOT EXISTS
             console.log("Error when creating User Table", err);
         else{
             console.log("User Table is now ready");
+        }
+    }
+)
+
+//TASK TABLE
+connection.query(`CREATE TABLE IF NOT EXISTS 
+    task(
+        id VARCHAR(36) NOT NULL PRIMARY KEY,
+        creator_id VARCHAR(36) NOT NULL,
+        title TEXT NOT NULL,
+        details TEXT, 
+        completed BOOLEAN NOT NULL DEFAULT false,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (creator_id) REFERENCES user(id)
+    )`, (err, results, fields)=>{
+        if(err)
+            console.log("Error when creating Task Table", err);
+        else{
+            console.log("Task Table is now ready");
         }
     }
 )

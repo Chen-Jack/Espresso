@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 const config = require('./../config')
 
 /*
-User Schema
+user Schema
   id VARCHAR(36) NOT NULL PRIMARY KEY,
   username TEXT NOT NULL,
   password TEXT NOT NULL
