@@ -1,11 +1,7 @@
 var mysql = require('mysql');
+var config = require('./config')
 
-var connection = mysql.createConnection({
-  host     : 'project.cnh5iw45vbx8.us-east-2.rds.amazonaws.com',
-  user     : 'dSlwIr1vz8YRdfsF',
-  password : 'yqf3HccwvGEe7RMt',
-  database: 'task_app'
-});
+var connection = mysql.createConnection(config.db_credentials);
  
 connection.connect((err)=>{
     if(err){
