@@ -34,7 +34,7 @@ app.get('/', (req,res)=>{
 })
 
 app.get('/test', (req,res)=>{
-    User.find("ad", (err, user)=>{
+    User.find("fds", (err, user)=>{
         if(err)
             console.log(`Error with finding ${ad}`, err);
         else

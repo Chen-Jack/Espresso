@@ -42,18 +42,19 @@ class User{
   //Callback accepts an error and result
   static find(username, callback=()=>{}){
     db.query(`SELECT * FROM user WHERE username = ?`, username, (err, results, fields)=>{
-      if(err)
-        callback(err , null)
-      else{
-        //Return the first user of the search
-        const user = {
-          id: results[0].id,
-          username: results[0].username,
-          password: results[0].password
-        }
-
-        callback(null, user)
+      if(err || results.length === 0){
+        console.log("No users returned");
+        return callback(err , null)
       }
+      //Return the first user of the search
+      const user = {
+        id: results[0].id,
+        username: results[0].username,
+        password: results[0].password
+      }
+
+      callback(null, user)
+    
     })
   }
 
@@ -61,6 +62,11 @@ class User{
   //The callback should accept error or a jwt token
   static verify(username, raw_password, callback=(err,jwt)=>{}){
     User.find(username, (err, user_query)=>{
+      if(err || user_query.length === 0){
+        console.log("No user to verify");
+        return callback(err,jwt)
+      }
+
       bcrypt.compare(raw_password, user_query.password, (err, res)=>{
         //If error or no match, then callback with no token
         if(err || res === false)
