@@ -1,5 +1,6 @@
 import React from 'react'
 import {Container, Content, Input, Text, View, Button, Form, Item} from 'native-base'
+import { AsyncStorage } from "react-native"
 
 class LoginForm extends React.Component{
     constructor(props) {
@@ -7,11 +8,27 @@ class LoginForm extends React.Component{
 
         this.state = {
             form_errors : [],
-            usernameField: "",
+            usernameField: "",      
             passwordField: "",
         }
     }
-    submitForm = ()=>{
+
+    _storeSessionToken = (token)=>{
+        return new Promise((resolve, reject) =>{
+            AsyncStorage.setItem("session_token", token, (err)=>{
+                if(err){
+                    console.log("Error with async storage storing token", err);
+                    reject(err)
+                }
+                else{
+                    resolve()
+                    console.log("Successfully stored token");
+                }
+            })
+        })
+    }
+
+    _submitForm = ()=>{
         const formData = {
             username: this.state.usernameField,
             password: this.state.passwordField,
@@ -28,8 +45,10 @@ class LoginForm extends React.Component{
         .then((res)=>{
             if(res.ok){
                 res.json().then((token)=>{
-                    console.log("Login GOod got token", token);
-                    this.props.successRedirect()
+                    console.log("Login Good got token", token);
+                    this._storeSessionToken(token).then(()=>{
+                        this.props.successRedirect()
+                    })
                 })
             }
             else if(res.status === 400){
@@ -62,7 +81,7 @@ class LoginForm extends React.Component{
                     <Input onChangeText={(txt)=>this.setState({passwordField: txt})} placeholder="Password" value={this.state.passwordField}/>
                 </Item>
             </Form>
-            <Button onPress={this.submitForm}>
+            <Button onPress={this._submitForm}>
                 <Text> SUBMIT </Text>
             </Button>
         </View>

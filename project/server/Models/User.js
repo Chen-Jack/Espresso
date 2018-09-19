@@ -73,8 +73,9 @@ class User{
           callback(err, null)
 
         else{ //valid match
+          console.log("SIGNING", user_query.id);
           jwt.sign({ id: user_query.id }, config.jwt.secret, (err, token)=>{
-            console.log("GOOD SIGNING");
+            console.log("Created Token", token);
             callback(err, token)
           })
         }

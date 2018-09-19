@@ -1,5 +1,6 @@
 import React from 'react'
 import {Container, Content, Input, Text, View, Button, Form, Item} from 'native-base'
+import {AsyncStorage} from 'react-native'
 
 class RegistrationForm extends React.Component{
     constructor(props) {
@@ -13,6 +14,22 @@ class RegistrationForm extends React.Component{
             emailField: ""
         }
     }
+
+    _storeSessionToken = (token)=>{
+        return new Promise((resolve, reject) =>{
+            AsyncStorage.setItem("session_token", token, (err)=>{
+                if(err){
+                    console.log("Error with async storage storing token", err);
+                    reject(err)
+                }
+                else{
+                    resolve()
+                    console.log("Successfully stored token");
+                }
+            })
+        })
+    }
+
     submitForm = ()=>{
         const formData = {
             username: this.state.usernameField,
@@ -35,7 +52,9 @@ class RegistrationForm extends React.Component{
                 //if good, save token and navigate to home
                 res.json().then((token)=>{
                     console.log("Receieved token", token);
-                    this.props.successRedirect()
+                    this._storeSessionToken(token).then(()=>{
+                        this.props.successRedirect()
+                    })
                 })
             }
             if(res.status === 400){
