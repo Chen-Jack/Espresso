@@ -33,8 +33,10 @@ class RegistrationForm extends React.Component{
             console.log("THE STATUS IS", res.status);
             if(res.ok){
                 //if good, save token and navigate to home
-                console.log("IS IT OKAY?", this.props.success);
-                this.props.success()
+                res.json().then((token)=>{
+                    console.log("Receieved token", token);
+                    this.props.successRedirect()
+                })
             }
             if(res.status === 400){
                 //if bad, just show errors
@@ -89,7 +91,7 @@ class RegistrationScreen extends React.Component{
         return <Container>
             <Content>
                 <Text> REGISTER </Text>
-                <RegistrationForm success={()=>this.props.navigation.navigate("home")}/>
+                <RegistrationForm successRedirect={()=>this.props.navigation.navigate("home")}/>
             </Content>
         </Container>
     }

@@ -26,8 +26,12 @@ class LoginForm extends React.Component{
             body: JSON.stringify(formData)
         })
         .then((res)=>{
-            if(res.ok)
-                this.props.successRedirect()
+            if(res.ok){
+                res.json().then((token)=>{
+                    console.log("Login GOod got token", token);
+                    this.props.successRedirect()
+                })
+            }
             else if(res.status === 400){
                 res.json().then((errors_text)=>{
                     this.setState({

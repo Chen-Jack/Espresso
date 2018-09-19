@@ -7,12 +7,11 @@ import HomeScreen from './screens/home'
 import LoginScreen from './screens/login';
 
 const StackNavigation = createStackNavigator({
-    login: LoginScreen,
-    registration: RegistrationScreen,
-    test: TestScreen,
     landing: LandingScreen,
+    test: TestScreen,
     home: HomeScreen,
-    
+    login: LoginScreen,
+    registration: RegistrationScreen,    
 })
 
 export default ()=>{

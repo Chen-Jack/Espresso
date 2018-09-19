@@ -27,6 +27,8 @@ app.get('/', (req,res)=>{
     db.query(`SELECT * FROM user`, (err, results, fields)=>{
         console.log("USER TABLE", results);
     })
+
+    User.verify("Shelly", "5")
     res.send("Home Page")
     
 })
@@ -82,31 +84,28 @@ app.post('/create-account', (req,res)=>{
     const raw_password = req.body.password
     const email = req.body.email
 
-    User.create(username, raw_password, (err)=>{
+    User.create(username, raw_password, (err, token)=>{
         if(err)
-            console.log(err);
+            res.status(400).json(["Failed to create account"])
         else
-            console.log(`Successfully created user ${username}`);
+            res.status(200).json(token)      
     })
-    
-    res.status(200).end()
 })
 
 app.post('/login-account', (req,res)=>{
     const username = req.body.username
     const raw_password = req.body.password
 
-    User.verify(username, raw_password, (err, isValid)=>{
+    User.verify(username, raw_password, (err, token)=>{
         if(err)
             console.log(err);
-        else if(isValid === true){
-            res.status(200).end()
-        }
-        else{ //Res is false
-            //React Native forms need errors in array form
+        else if(!token){ //Verification is false. No Token
+            //React Native Form renders an array of error strings
             const errors = ["Incorrect username and or password"]
             res.status(400).json(errors)
         }
+        else //Verification Success. Token Generated
+            res.status(200).json(token)
     })   
 })
 
