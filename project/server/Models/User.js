@@ -58,6 +58,22 @@ class User{
     })
   }
 
+  static findById(id, callback=()=>{}){
+    db.query(`SELECT * FROM user WHERE id = ?`, id, (err, results, fields)=>{
+      if(err || results.length === 0){
+        console.log("No users returned");
+        return callback(err , null)
+      }
+      //Return the first user of the search
+      const user = {
+        id: results[0].id,
+        username: results[0].username,
+        password: results[0].password
+      }
+      callback(null, user)
+    })   
+  }
+
   //Checks to see if the username and password is a match
   //The callback should accept error or a jwt token
   static verify(username, raw_password, callback=(err,jwt)=>{}){

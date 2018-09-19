@@ -5,6 +5,8 @@ const bodyParser = require('body-parser')
 const { check, body ,validationResult } = require('express-validator/check');
 const db = require('./db')
 const User = require('./Models/User')
+const config = require('./config')
+const jwt = require('jsonwebtoken')
 
 const app = express()
 const DEFAULT_PORT = 3000
@@ -107,6 +109,21 @@ app.post('/login-account', (req,res)=>{
         else //Verification Success. Token Generated
             res.status(200).json(token)
     })   
+})
+
+app.get('/get-user-data', (req,res)=>{
+    const token = req.headers.authorization.split(' ')[1]
+    const payload = jwt.verify(token, config.jwt.secret)
+    console.log("payload", payload);
+
+    User.findById(payload.id, (err, user)=>{
+        if(err || !user)
+            res.status(400).end()
+        else
+            res.status(200).json({username: user.username})
+    })
+
+    
 })
 
 
