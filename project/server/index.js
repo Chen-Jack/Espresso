@@ -146,13 +146,15 @@ app.post('/create-task', (req,res)=>{
         
     const user_id = payload.id
     const task_title = req.body.title
-    const task_details = req.body.details
+    const task_details = req.body.detail
 
     Task.create(user_id, task_title, task_details, (err)=>{
         if(err)
             console.log("Problem creating task", err);
-        else
+        else{
+            console.log("Created task");
             res.status(200).end()
+        }
     })  
 })
 
