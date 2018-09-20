@@ -63,6 +63,8 @@ class TaskCreationForm extends React.Component{
             <Button onPress={this._submitForm}>
                 <Text>Submit</Text>
             </Button>
+
+            
         </View>
     }
 }
@@ -124,6 +126,10 @@ class HomeScreen extends React.Component{
                
 
                 <TaskCreationForm/>
+
+                <Button onPress={()=>{this.props.navigation.navigate('temp_home')}}>
+                    <Text> Temp Screen</Text>
+                </Button>
             </Content>
         </Container>
     }

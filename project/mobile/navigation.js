@@ -5,13 +5,15 @@ import TestScreen from './screens/test'
 import RegistrationScreen from './screens/registration'
 import HomeScreen from './screens/home'
 import LoginScreen from './screens/login';
+import TempScreen from './screens/temp_home'
 
 const StackNavigation = createStackNavigator({
     landing: LandingScreen,
     test: TestScreen,
     home: HomeScreen,
     login: LoginScreen,
-    registration: RegistrationScreen,    
+    registration: RegistrationScreen,
+    temp_home: TempScreen   
 })
 
 export default ()=>{
