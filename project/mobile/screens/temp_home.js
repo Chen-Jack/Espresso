@@ -30,24 +30,16 @@ class TaskCard extends React.Component{
 }
 
 class TaskCarousel extends React.Component{
-    constructor(props) {
-        super(props)
 
-        this.state = {
-            data: [{title: "Test React", detail:"Make sure that it works"},
-        {title: "Go to ReactNYC", detail:"Make sure you grab as much food as possbile"},
-        {title: "Work on react native testing", detail:" yea"}]
-        }
-    }
     _renderTask = ({item,index})=>{
-        return <TaskCard title={item.title} detail={item.detail} />
+        return <TaskCard title={item} detail={"TEST"} />
     }
     render(){
         return (
             <Carousel
                 
                 layout={'default'} 
-                data={this.state.data}
+                data={this.props.data}
                 renderItem={this._renderTask}
                 sliderWidth={Dimensions.get('window').width}
                 itemWidth={Dimensions.get('window').width/2}
@@ -65,7 +57,7 @@ class HomeScreen extends React.Component{
             user : {
                 username: ""
             },
-            selected_date : ""
+            task_data : []
         }   
 
         this.carousel = React.createRef()
@@ -84,7 +76,32 @@ class HomeScreen extends React.Component{
             alignSelf: 'center'
         }
     };
+   _generateTaskData = ()=>{
+        const day_variance = 20;
+        const seconds_per_year = 31540000;
+        const seconds_per_day = 86400;
+        let task_set = [];
 
+        //We generate tasks by going back by n/2 days, and then generate the following n days
+        //so we have tasks for the past/next n/2 days.
+
+        //Get starting time in seconds
+        let starting_epoch_time = Math.floor((new Date()).getTime()/1000) - (seconds_per_day * day_variance/2)
+
+        //Generate an array of task data ranging from +/- day_variance from now
+        for(let i = 0; i < day_variance; i++){
+            //Convert from seconds back into miliseconds for constructor
+            const date = new Date((starting_epoch_time + (i * seconds_per_day))*1000) 
+            task_set.push(date.toDateString())
+        }
+
+        this.setState({
+            task_data: task_set
+        }, ()=>{
+            console.log("TASK DATA", this.state.task_data);
+        })
+        
+    }
     componentDidMount(){
         AsyncStorage.getItem("session_token", (err, session_token)=>{
             fetch("http://localhost:3000/get-user-data", {
@@ -103,6 +120,8 @@ class HomeScreen extends React.Component{
                 }
             )
         })
+
+        this._generateTaskData()
     }
 
     _logout = ()=>{
@@ -131,8 +150,10 @@ class HomeScreen extends React.Component{
                     '2018-09-19': {marked: true}
                     
                   }} />
-                <TaskCarousel  />
-                
+                <TaskCarousel data = {this.state.task_data} />
+                <Button>
+                    <Text> ? </Text>
+                </Button>
                
             </Content>
         </Container>
