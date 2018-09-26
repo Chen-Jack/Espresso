@@ -3,9 +3,9 @@ import {createStackNavigator} from 'react-navigation'
 import LandingScreen from './screens/landing'
 import TestScreen from './screens/test'
 import RegistrationScreen from './screens/registration'
-import HomeScreen from './screens/home'
+import HomeScreen from './screens/home/home'
 import LoginScreen from './screens/login';
-import TempScreen from './screens/temp_home'
+import TempScreen from './screens/home/temp_home'
 
 const StackNavigation = createStackNavigator({
     landing: LandingScreen,
