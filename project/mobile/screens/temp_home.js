@@ -30,6 +30,25 @@ class TaskCard extends React.Component{
 }
 
 class TaskCarousel extends React.Component{
+    constructor(props) {
+        super(props)
+        
+        this.carousel = React.createRef()
+    }
+
+ 
+
+    updateToDate = (date)=>{
+        console.log("Called");
+        console.log("Date is",date);
+        console.log("Task data is", this.props.task_data);
+     
+        if(this.props.task_data.includes(date)){
+            console.log("Get at it boi");
+            const index = this.props.task_data.indexOf(date)
+            this.carousel.current.snapToItem(index)
+        }
+    }
 
     _renderTaskCard = ({item,index})=>{
         return <TaskCard title={item} detail={"TEST"} />
@@ -47,6 +66,7 @@ class TaskCarousel extends React.Component{
     render(){
         return (
             <Carousel
+                ref = {this.carousel}
                 onSnapToItem = {this._handleCardSelection}
                 layout={'default'} 
                 data={this.props.task_data}
@@ -68,7 +88,7 @@ class HomeScreen extends React.Component{
                 username: ""
             },
             task_data : [],
-            selected_date: new Date().toISOString().substring(0,10)
+            selected_date: new Date().toISOString()
         }   
 
         console.log("Current date is", this.state.selected_date);
@@ -89,36 +109,38 @@ class HomeScreen extends React.Component{
         }
     };
 
-    updateCurrentSelectedDate=(isodate)=>{
+    _onDateSelection=(isodate)=>{
         console.log("UPDATING SELECTED DATE");
         this.setState({
             selected_date: isodate
         }, (err)=>{
             if(err)
                 console.log("updateCurrentSelectedDate", err);
-            else
+            else{
                 console.log("Selected date is now", this.state.selected_date);
+                this.carousel.current.updateToDate(this.state.selected_date)
+            }
         })
+
+        
     }
 
-
    _generateTaskData = ()=>{
-        const day_variance = 20;
-        const seconds_per_year = 31540000;
+        const day_variance = 20; //How many days of tasks you will show.
         const seconds_per_day = 86400;
         let task_set = [];
 
         //We generate tasks by going back by n/2 days, and then generate the following n days
-        //so we have tasks for the past/next n/2 days.
+        //so we have tasks for the +/- n/2 days.
 
-        //Get starting time in seconds
-        let starting_epoch_time = Math.floor(Date.now()/1000 - (seconds_per_day * day_variance/2))
+        //Get starting date in seconds
+        let starting_date_in_epoch = Math.floor(Date.now()/1000 - (seconds_per_day * day_variance/2))
 
         //Generate an array of task data ranging from +/- day_variance from now
         for(let i = 0; i < day_variance; i++){
-            //Convert from seconds back into miliseconds for constructor
-            const date = new Date((starting_epoch_time + (i * seconds_per_day))*1000) 
-            task_set.push(date.toISOString().substring(0,10))
+            //Convert from seconds back into miliseconds for date constructor
+            const date = new Date((starting_date_in_epoch + (i * seconds_per_day)) * 1000) 
+            task_set.push(date.toISOString().substring(0,10)) //Only select the date part of ISO date
         }
 
         this.setState({
@@ -168,14 +190,20 @@ class HomeScreen extends React.Component{
     render(){
         return <Container>
             <Content>
-                <Calendar current = {this.state.selected_date}/>
+                <Calendar
+                    onDayPress={(day)=>this._onDateSelection(day.dateString)}
+                    markedDates={{
+                        [this.state.selected_date]: {selected: true, selectedColor: 'lightblue'},
+                      }}/>
 
-                <TaskCarousel 
-                    handleDateSelection={this.updateCurrentSelectedDate} 
+                <TaskCarousel
+                    ref = {this.carousel}
+                    selected_date = {this.props.selected_date}
+                    handleDateSelection={this._onDateSelection} 
                     task_data={this.state.task_data} />
 
-                <Button>
-                    <Text> ? </Text>
+                <Button onPress={()=>console.log(this.state.selected_date)}>
+                    <Text>uh</Text>
                 </Button>
                
             </Content>
