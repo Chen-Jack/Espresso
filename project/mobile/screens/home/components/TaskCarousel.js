@@ -39,11 +39,15 @@ export default class TaskCarousel extends React.Component{
  
 
     updateToDate = (date)=>{
-     
-        if(this.props.task_data.includes(date)){
-            const index = this.props.task_data.indexOf(date)
+        console.log("CALLED!!!")
+        const index = this.props.task_data.findIndex((task)=>{
+            console.log("TEST", task.date, "===?", date);
+            return task.date === date ? true : false
+        })
+
+        console.log("INDEX IS", index);
+        if(index)
             this.carousel.current.snapToItem(index)
-        }
     }
 
     _renderTaskCard = ({item: task, index})=>{

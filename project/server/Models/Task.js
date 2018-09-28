@@ -21,6 +21,27 @@ class Task{
             })
     }
 
+    static getTasksCreatedBy(creator_id, callback){
+        const sql_query = `SELECT * FROM task WHERE creator_id = (?)`
+
+        db.query(sql_query, creator_id, (err, results, fields)=>{
+
+            const cleaned_results = results.map((result)=>{
+                return {
+                    id: result.id,
+                    creator_id: result.creator_id,
+                    title: result.title,
+                    details: result.title,
+                    completed: result.completed,
+                    created_at: result.created_at
+                }
+            })
+
+            if(callback)
+                callback(err,cleaned_results)
+        })
+    }
+
 
 }
 

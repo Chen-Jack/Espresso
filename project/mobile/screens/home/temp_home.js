@@ -160,11 +160,11 @@ class HomeScreen extends React.Component{
     }
 
    _generateEmptyTaskSet = ()=>{
-        const day_variance = 10; //How many days of tasks you will show.
+        const day_variance = 30; //How many days of tasks you will show.
         const seconds_per_day = 86400;
         let task_set = [];
 
-        const past_days_allowed = 30; //How far back in time do you want to see
+        const past_days_allowed = 15; //How far back in time do you want to see
 
         //Get starting date in seconds
         let starting_date_in_epoch = Math.floor(Date.now()/1000 - (seconds_per_day * past_days_allowed))
@@ -229,7 +229,8 @@ class HomeScreen extends React.Component{
         return <Container>
             <Content>
                 <Calendar
-                    onDayPress={(day)=>this._onDateSelection(day.dateString)}
+                    onDayPress={(day)=>{
+                        this._onDateSelection(day.dateString)}}
                     markedDates={{
                         [this.state.selected_date]: {selected: true, selectedColor: 'lightblue'},
                       }}/>
