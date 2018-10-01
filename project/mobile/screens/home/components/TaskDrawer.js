@@ -11,8 +11,7 @@ const TaskList = ({task_data = []})=>{
         <FlatList
             data = {task_data}
             renderItem = {({item: task, index})=>{
-                console.log("TASK/", task);
-                return  <Text>Date : {task.date}</Text>
+                return  <Text> {task.title}</Text>
             }}/> 
     )
 }

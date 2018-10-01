@@ -182,6 +182,29 @@ class HomeScreen extends React.Component{
         return task_set
     }
 
+    _populateTaskSet = ()=>{
+        AsyncStorage.getItem("session_token", (err, session_token)=>{
+            fetch("http://localhost:3000/retrieve-tasks-by-user", {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${session_token}`
+                }
+            }).then(
+                (res)=>{
+                    console.log("STATUS IS", res.status);
+                    if(res.ok){
+                        res.json().then((tasks)=>{
+                            console.log("TASKS ARE", tasks);
+                            this.setState({
+                                task_data: tasks
+                            })
+                        })
+                    }
+                }
+            )
+        })
+    }
+
 
     componentDidMount(){
         AsyncStorage.getItem("session_token", (err, session_token)=>{
@@ -202,7 +225,8 @@ class HomeScreen extends React.Component{
             )
         })
 
-        
+        this._populateTaskSet()
+
     }
 
     _logout = ()=>{
@@ -243,6 +267,14 @@ class HomeScreen extends React.Component{
 
                 <TaskCreationModalPrompt />
                 <TaskDrawer task_data = {this.state.task_data}/>
+
+                <Button onPress={()=>console.log(this.state.task_data)}>
+                    <Text> Test Tasks</Text>
+                </Button>
+
+                <Button onPress = {this._logout}> 
+                    <Text> Logout</Text>
+                </Button>
 
             </Content>
         </Container>

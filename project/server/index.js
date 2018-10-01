@@ -27,13 +27,7 @@ app.use(cors())
 app.use(bodyParser.json())
 
 app.get('/', (req,res)=>{
-    db.query(`SELECT * FROM user`, (err, results, fields)=>{
-        console.log("USER TABLE", results);
-    })
-
-    User.verify("Shelly", "5")
     res.send("Home Page")
-    
 })
 
 app.get('/test', (req,res)=>{
