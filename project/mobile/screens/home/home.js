@@ -119,7 +119,8 @@ class HomeScreen extends React.Component{
             user : {
                 username: ""
             },
-            task_data : this._generateEmptyTaskSet(),
+            task_data : [],
+            allocated_task_data : this._generateEmptyTaskSet(),
             selected_date: new Date().toISOString().substring(0,10),
             promptTaskCreation: false
         }   
@@ -263,17 +264,21 @@ class HomeScreen extends React.Component{
                     ref = {this.carousel}
                     selected_date = {this.state.selected_date}
                     handleDateSelection={this._onDateSelection} 
-                    task_data={this.state.task_data} />
+                    task_data={this.state.allocated_task_data} />
 
                 <TaskCreationModalPrompt />
                 <TaskDrawer task_data = {this.state.task_data}/>
 
-                <Button onPress={()=>console.log(this.state.task_data)}>
+                {/* <Button onPress={()=>console.log(this.state.task_data)}>
                     <Text> Test Tasks</Text>
-                </Button>
+                </Button> */}
 
                 <Button onPress = {this._logout}> 
                     <Text> Logout</Text>
+                </Button>
+
+                <Button onPress= {()=>this.props.navigation.navigate("sandbox")}>
+                      <Text> SandBox </Text>
                 </Button>
 
             </Content>

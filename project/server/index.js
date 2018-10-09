@@ -157,8 +157,7 @@ app.post('/retrieve-tasks-by-user', (req,res)=>{
     if(!payload || !payload.hasOwnProperty('id'))
         return res.status(401).end()
 
-    const user_id = "60146169-361a-46ec-9f8a-ea98e3b922d7"
-    Task.getTasksCreatedBy(user_id, (err, tasks)=>{
+    Task.getTasksCreatedBy(payload.id, (err, tasks)=>{
         if(err)
             res.status(400).send(err.message)
         else

@@ -25,17 +25,23 @@ class Task{
         const sql_query = `SELECT * FROM task WHERE creator_id = (?)`
 
         db.query(sql_query, creator_id, (err, results, fields)=>{
-
-            const cleaned_results = results.map((result)=>{
-                return {
-                    id: result.id,
-                    creator_id: result.creator_id,
-                    title: result.title,
-                    details: result.title,
-                    completed: result.completed,
-                    created_at: result.created_at
-                }
-            })
+            
+            let cleaned_results = [];
+            if(results){
+                cleaned_results = results.map((result)=>{
+                    return {
+                        id: result.id,
+                        creator_id: result.creator_id,
+                        title: result.title,
+                        details: result.title,
+                        completed: result.completed,
+                        created_at: result.created_at
+                    }
+                })
+            }
+            else{
+                console.log("There were no results returned for getTasksCreatedBy()");
+            }
 
             if(callback)
                 callback(err,cleaned_results)

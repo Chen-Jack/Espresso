@@ -1,20 +1,9 @@
 import React from 'react'
 import {View, FlatList, Text, Header, Animated, Dimensions, TouchableHighlight} from 'react-native'
-import {Badge, Item} from 'native-base'
+import {Badge, Item, Card, CardItem} from 'native-base'
 import Modal from 'react-native-modal'
-
-import {Button,List} from 'native-base'
-
-const TaskList = ({task_data = []})=>{
-    console.log("TASK PLS", task_data);
-    return (
-        <FlatList
-            data = {task_data}
-            renderItem = {({item: task, index})=>{
-                return  <Text> {task.title}</Text>
-            }}/> 
-    )
-}
+import TravelingCard from './TravelingCard'
+import TravelableList from './TravelableList'
 
 export default class TaskDrawer extends React.Component{
     constructor(props) {
@@ -24,7 +13,6 @@ export default class TaskDrawer extends React.Component{
             visible: false
         }
 
-        console.log('waot', this.props.task_data);
     }
 
     toggleDrawer = ()=>{
@@ -52,18 +40,22 @@ export default class TaskDrawer extends React.Component{
             <Modal
                 animationInTiming = {800}
                 animationOutTiming = {800}
-                animationIn = {"slideInUp"}
-                animationOut = {"slideOutDown"}
-                swipeDirection = {"down"}
-                onSwipe = {()=>this.toggleDrawer()}
+                animationIn = {"slideInDown"}
+                animationOut = {"slideOutUp"}
                 isVisible = {this.state.visible}
                 onBackdropPress = {()=>this.toggleDrawer()}
                 hideModalContentWhileAnimating = {true}
                 style={{padding: 0, margin: 0}}>
                 
-                <View style={{padding:0, margin:0, position: "absolute", bottom: 0, left:0, backgroundColor: "#efefef", width: Dimensions.get('window').width, height:Dimensions.get('window').height*0.75}}>
+                <View style={{padding:0, margin:0, position: "absolute", top: 0, left:0, backgroundColor: "#efefef", width: Dimensions.get('window').width, height:Dimensions.get('window').height*0.75}}>
                   <Text> Tasks </Text>
-                  <TaskList task_data={this.props.task_data}/>
+
+                  <TravelableList 
+                    data = {this.task_data}
+                    renderItem = {({item: task, index})=>{
+                        return <TravelingCard title={task.title} created_at={task.created_at} details={task.details}/>
+                    }}/>
+
                 </View>
             
             </Modal>
