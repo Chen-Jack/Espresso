@@ -2,12 +2,13 @@ import React from 'react'
 import Carousel from 'react-native-snap-carousel'
 import {View,Button, Text, Card, CardItem, Body} from 'native-base'
 import {Dimensions} from 'react-native'
+import TravelingCard from './TravelingCard'
 
 class TaskCard extends React.Component{
     //Every task includes a title (required), detail (optional), and date (optional)
 
     render(){
-        return (<Card>
+        return <Card>
             <CardItem header bordered>
                 <Text>{this.props.date}</Text>
             </CardItem>
@@ -23,7 +24,7 @@ class TaskCard extends React.Component{
                </Text>
              </Body>
            </CardItem>
-       </Card>)
+       </Card>
     }
 }
 
@@ -51,7 +52,6 @@ export default class TaskCarousel extends React.Component{
     }
 
     _renderTaskCard = ({item: task, index})=>{
-        console.log("Item", task);
         //By default in React Native/JS, every item in the data array is called item.
         return <TaskCard index={index} title={task.title} detail={task.detail} date={task.date}/>
     }

@@ -1,12 +1,15 @@
 //The home page for an account
 
 import React from 'react'
-import {View, InputGroup , Input, Textarea,Container, Content, Text, Button} from 'native-base'
+import {View, Drawer, Footer, FooterTab, InputGroup , Input, Textarea,Container, Content, Text, Button} from 'native-base'
 import {AsyncStorage, TouchableHighlight} from 'react-native'
 import Modal from 'react-native-modal'
 import { Calendar } from 'react-native-calendars';
 import TaskCarousel from './components/TaskCarousel'
 import TaskDrawer from './components/TaskDrawer'
+import TravelingCard from './components/TravelingCard'
+import TravelableList from './components/TravelableList'
+import Draggable from './components/Draggable'
 
 class TaskCreationForm extends React.Component{
     constructor(props) {
@@ -146,13 +149,15 @@ class HomeScreen extends React.Component{
     };
 
     _onDateSelection=(isodate)=>{
+        console.log("Date Selection");
         this.setState({
             selected_date: isodate
         }, (err)=>{
             if(err)
-                console.log("updateCurrentSelectedDate", err);
+                pass
+                // console.log("updateCurrentSelectedDate", err);
             else{
-                console.log("selected", this.state.selected_date);
+                // console.log("selected", this.state.selected_date);
                 this.carousel.current.updateToDate(this.state.selected_date)
             }
         })
@@ -254,6 +259,9 @@ class HomeScreen extends React.Component{
         return <Container>
             <Content>
                 <Calendar
+                    // dayComponent={({date, state}) => {
+                    //     return (<View onStartShouldSetResponder = {()=>true} onResponderGrant={({nativeEvent})=>console.log(nativeEvent.target)} onLayout={({nativeEvent})=>{console.log("LAYOUT", nativeEvent);}} style={{flex: 1}}><Text style={{textAlign: 'center', color: state === 'disabled' ? 'gray' : 'black'}}>{date.day}</Text></View>);
+                    // }}
                     onDayPress={(day)=>{
                         this._onDateSelection(day.dateString)}}
                     markedDates={{
@@ -266,22 +274,35 @@ class HomeScreen extends React.Component{
                     handleDateSelection={this._onDateSelection} 
                     task_data={this.state.allocated_task_data} />
 
-                <TaskCreationModalPrompt />
-                <TaskDrawer task_data = {this.state.task_data}/>
+            
+                
 
                 {/* <Button onPress={()=>console.log(this.state.task_data)}>
                     <Text> Test Tasks</Text>
                 </Button> */}
 
-                <Button onPress = {this._logout}> 
-                    <Text> Logout</Text>
-                </Button>
 
-                <Button onPress= {()=>this.props.navigation.navigate("sandbox")}>
+                {/* <Button onPress= {()=>this.props.navigation.navigate("sandbox")}>
                       <Text> SandBox </Text>
-                </Button>
+                </Button> */}
 
+    
+            
+             
             </Content>
+            <Footer >
+                <FooterTab>
+                    <Button>
+                        <TaskCreationModalPrompt />
+                    </Button>
+                    <Button style={{flex: 1}}>
+                        <TaskDrawer task_data = {this.state.task_data}/>
+                    </Button>
+                    <Button onPress = {this._logout}> 
+                        <Text> Logout</Text>
+                    </Button>
+                </FooterTab>
+            </Footer>
         </Container>
     }
 }

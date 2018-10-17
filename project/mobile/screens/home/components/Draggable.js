@@ -1,27 +1,20 @@
 import React from 'react'
-import {TouchableHighlight, Animated, PanResponder} from 'react-native'
-import {Badge, Item, Card, CardItem,Text, View} from 'native-base'
-import Modal from 'react-native-modal'
+import ReactNative, { View, Text, TouchableHighlight, PanResponder, Animated, FlatList} from 'react-native'
+import {Button} from 'native-base'
 
 
-export default class TravelingCard extends React.Component{
-    constructor(props){
+export default class Draggable extends React.Component{
+    constructor(props) {
         super(props)
 
         this.state = {
-            pan: new Animated.ValueXY(),
-            isFocus: false    //Used for zIndexing purposes. When true, we make the card on top
+            pan: new Animated.ValueXY()
         }
-        
     }
-
-    _onStartMove = this.props.onStartMove ? this.props.onStartMove : ()=>{}
-    _onMove = this.props.onMove ? this.props.onMove : ()=>{}
-    _onStopMove = this.props.onStopMove ? this.props.onStopMove : ()=>{}
 
     componentWillMount(){
         this._panResponder = PanResponder.create({
-            onStartShouldSetResponder: (evt, gesture) => true,
+            onStartShouldSetResponder: (evt, gesture)=> true,
             onStartShouldSetResponderCapture: (evt, gestureState) => true,
 
             onStartShouldSetPanResponder: (evt, gestureState) => true,
@@ -31,11 +24,10 @@ export default class TravelingCard extends React.Component{
             onMoveShouldSetPanResponderCapture: () => true,
         
             onPanResponderGrant: (e, gestureState) => {
-                this.setState({
-                    isFocus : true
-                })
-                this.forceUpdate();
-
+                console.log("Granted");
+                // e.preventDefault()
+                // e.stopPropagation()
+                // this.props.stopScroll()
                 //Set offset to x,y and set x,y to 0. (Make start position the origin)
                 this.state.pan.setOffset({x: this.state.pan.x._value, y: this.state.pan.y._value})
                 this.state.pan.setValue({x: 0, y: 0});
@@ -43,14 +35,13 @@ export default class TravelingCard extends React.Component{
 
             onPanResponderMove : ({nativeEvent}, gestureState) => {
                 this.state.pan.setValue({x: gestureState.dx, y : gestureState.dy})
-                this._onMove()
+                // this.props.stopScroll()
+                console.log("y", nativeEvent.pageY);
+              
             },
         
 
             onPanResponderEnd: (e, gestureState) => {
-                this.setState({
-                    isFocus : false
-                })
                 this.state.pan.flattenOffset();
                 Animated.spring(
                     // Animate value over time
@@ -59,12 +50,15 @@ export default class TravelingCard extends React.Component{
                       toValue: {x:0, y:0}, bounciness: 12, speed: 20 // Animate to final value of 1
                     }
                   ).start(); // Start the animation
+                // this.props.startScroll()
             },
 
             onPanResponderRelease: (e, gestureState) => {
-                this.setState({
-                    isFocus : false
-                })
+                console.log("E", e.nativeEvent.target);
+                console.log("Target", ReactNative.findNodeHandle(e.nativeEvent.target));
+                console.log("Total movement", gestureState.dx, gestureState.dy);
+                // console.log("Event state", e.nativeEvent);
+                // console.log("Release state", gestureState);
                 this.state.pan.flattenOffset();
                 Animated.spring(
                     // Animate value over time
@@ -73,20 +67,19 @@ export default class TravelingCard extends React.Component{
                       toValue: {x:0, y:0}, bounciness: 12, speed: 20 // Animate to final value of 1
                     }
                   ).start(); // Start the animation
-            } 
-        });
+                // this.props.startScroll()
+            }
+            
+          });
     }
-
     render(){
-        let imageStyle = { transform: this.state.pan.getTranslateTransform()};
-        let focusStyle = {zIndex : this.state.isFocus ? 200 : 0, backgroundColor:"red"}
-
-        return <Animated.View style={[imageStyle, focusStyle ]} {...this._panResponder.panHandlers}>
-            <Card >
-                <CardItem header bordered>
-                    <Text> {this.props.title} </Text>
-                </CardItem>
-            </Card>
-        </Animated.View>
+      
+        // Calculate the transform property and set it as a value for our style which we add below to the Animated.View component
+        let imageStyle = {backgroundColor: "purple", transform: this.state.pan.getTranslateTransform()};
+        return (
+            <Animated.View style={[imageStyle, {margin: 10, padding: 10}]} {...this._panResponder.panHandlers}>
+                <Text> Move please</Text>
+                {this.props.children}
+            </Animated.View> )
     }
 }

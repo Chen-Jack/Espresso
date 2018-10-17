@@ -47,14 +47,12 @@ export default class TaskDrawer extends React.Component{
                 hideModalContentWhileAnimating = {true}
                 style={{padding: 0, margin: 0}}>
                 
-                <View style={{padding:0, margin:0, position: "absolute", top: 0, left:0, backgroundColor: "#efefef", width: Dimensions.get('window').width, height:Dimensions.get('window').height*0.75}}>
-                  <Text> Tasks </Text>
+                <View style={{padding:10, margin:0, position: "absolute", zIndex:0, backgroundColor: "orange", width: Dimensions.get('window').width, }}>
+                  {/* <Text style={{padding:0, margin:0}}> Tasks </Text> */}
 
                   <TravelableList 
-                    data = {this.task_data}
-                    renderItem = {({item: task, index})=>{
-                        return <TravelingCard title={task.title} created_at={task.created_at} details={task.details}/>
-                    }}/>
+                    data = {this.props.task_data}
+                    travelingComponent = {TravelingCard}/>
 
                 </View>
             

@@ -1,16 +1,51 @@
 import React from 'react'
-import {FlatList, Text} from 'react-native'
+import {FlatList, Text, Dimensions, View} from 'react-native'
 import TravelingCard from './TravelingCard'
+import Draggable from './Draggable'
 
 
-export class TravelabeList extends React.Component{
+export default class TravelabeList extends React.Component{
+    constructor(props) {
+        super(props)
+
+        this.state= {
+            allowScroll: false
+        }
+    }
+
+    _disableScroll = ()=>{
+        this.setState({
+            allowScroll : false
+        })
+    }
+
+    _startScroll = ()=>{
+        this.setState({
+            allowScroll: true
+        })
+    }
+
     
     render(){
-        return <Text> ok</Text>
-        // return <FlatList
-        //     style = {{margin: 10}}
-        //     data = {this.props.data}
-        //     renderItem = {this.props.renderItem}/>
+        const TravelingComponent = this.props.travelingComponent //Ideally TravelingCard
+        return <FlatList
+            scrollEnabled = {this.state.allowScroll}
+            style = {{padding:10, margin: 0, backgroundColor:"green", overflow:'visible'}}
+            data = {this.props.data}
+            renderItem = {({item: task, index})=>{
+                // return <TravelingComponent 
+                //     key = {index}
+                //     title={task.title} 
+                //     created_at={task.created_at} 
+                //     details={task.details}
+                    
+                //     onStartMove = {this._disableScroll}
+                //     onStopMove = {this._startScroll}
+                //     />
+                return <Draggable/>
+
+                
+            }}/>
     }
 }
 

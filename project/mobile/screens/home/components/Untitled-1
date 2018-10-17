@@ -1,0 +1,15 @@
+<View 
+    style={{padding:10, margin:0, backgroundColor: "orange", width: Dimensions.get('window').width}>
+    
+    <Flatlist
+        style = {{padding:10, margin: 0, backgroundColor:"green"}}
+        data = {[1,2,3]}
+        renderItem = {()=>{
+            return <View style={{backgroundColor:"white", height:20, width: Dimensions.get('window').width}}>
+                        <Text> Test </Text>
+                    </View>
+        }}>
+</View>
+
+
+

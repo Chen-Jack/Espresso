@@ -21,10 +21,15 @@ class Task{
             })
     }
 
-    static getTasksCreatedBy(creator_id, callback){
+    static getTasksCreatedBy(creator_id, callback=()=>{}){
         const sql_query = `SELECT * FROM task WHERE creator_id = (?)`
 
         db.query(sql_query, creator_id, (err, results, fields)=>{
+            if(err){
+                console.log("getTasksCreatedBy() error", err);
+                return callback(err,null)
+
+            }
             
             let cleaned_results = [];
             if(results){
@@ -40,7 +45,7 @@ class Task{
                 })
             }
             else{
-                console.log("There were no results returned for getTasksCreatedBy()");
+                console.log(`There were no results returned for getTasksCreatedBy() for ${creator_id}`);
             }
 
             if(callback)
