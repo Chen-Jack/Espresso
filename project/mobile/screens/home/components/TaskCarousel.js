@@ -3,6 +3,7 @@ import Carousel from 'react-native-snap-carousel'
 import {View,Button, Text, Card, CardItem, Body} from 'native-base'
 import {Dimensions} from 'react-native'
 import TravelingCard from './TravelingCard'
+import TravelableList from './TravelableList'
 
 class TaskCard extends React.Component{
     //Every task includes a title (required), detail (optional), and date (optional)
@@ -34,7 +35,10 @@ export default class TaskCarousel extends React.Component{
         super(props)
         
         this.carousel = React.createRef()
-
+        this.state = {
+            canScroll: true,
+            scrollAmountToScroll : 20 // Default for carousel
+        }
     }
 
  
@@ -51,31 +55,46 @@ export default class TaskCarousel extends React.Component{
             this.carousel.current.snapToItem(index)
     }
 
-    _renderTaskCard = ({item: task, index})=>{
-        //By default in React Native/JS, every item in the data array is called item.
-        return <TaskCard index={index} title={task.title} detail={task.detail} date={task.date}/>
-    }
-
     _handleCardSelection = (data_index)=>{
         const iso_date = this.props.task_data[data_index].date;
         this.props.handleDateSelection(iso_date)
+    }
+
+    _renderTaskList = ({item: task, index})=>{
+        mockdata = index === 0 ? [1,2,3,4,5] : [1,2,3]
+        return <TravelableList key={index} onStartScroll={this._disableScroll} onStopScroll={this._enableScroll} data = {mockdata}/>
+    }
+
+    _disableScroll = ()=>{
+        console.log("idk");
+        this.setState({
+            canScroll: false
+        })
+    }
+    _enableScroll = ()=>{
+        this.setState({
+            canScroll: true
+        })
     }
 
     
     render(){
     
         return (
-            <Carousel
-                ref = {this.carousel}
-                firstItem = {0}
-                // firstItem = {30}
-                onSnapToItem = {this._handleCardSelection}
-                layout={'default'} 
-                data={this.props.task_data}
-                renderItem={this._renderTaskCard}
-                sliderWidth={Dimensions.get('window').width}
-                itemWidth={Dimensions.get('window').width*3/4}
-            />
+            <View style={{padding: 10, backgroundColor:"papayawhip"}}>
+                <Carousel
+                    ref = {this.carousel}
+                    firstItem = {20}
+                    onSnapToItem = {this._handleCardSelection}
+                    layout={'default'} 
+                    data={this.props.task_data}
+                    renderItem={this._renderTaskList}
+                    sliderWidth={Dimensions.get('window').width}
+                    itemWidth={Dimensions.get('window').width*3/4}
+                    scrollEnabled = {this.state.canScroll}
+                    useScrollView = {true}
+                />
+            </View>
         )
     }
 }

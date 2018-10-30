@@ -47,7 +47,7 @@ export default class TaskDrawer extends React.Component{
                 hideModalContentWhileAnimating = {true}
                 style={{padding: 0, margin: 0}}>
                 
-                <View style={{padding:10, margin:0, position: "absolute", zIndex:0, backgroundColor: "orange", width: Dimensions.get('window').width, }}>
+                <View style={{padding:10, margin:0, position: "absolute", zIndex:0, backgroundColor: "orange", height: Dimensions.get('window').height * 0.7, width: Dimensions.get('window').width, }}>
                   {/* <Text style={{padding:0, margin:0}}> Tasks </Text> */}
 
                   <TravelableList 

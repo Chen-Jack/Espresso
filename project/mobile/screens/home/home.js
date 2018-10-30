@@ -131,8 +131,6 @@ class HomeScreen extends React.Component{
         console.log("Current date is", this.state.selected_date);
         this.carousel = React.createRef()
         this.calendar = React.createRef()
-
-
      
     }
 
@@ -145,7 +143,9 @@ class HomeScreen extends React.Component{
         },
         headerTitleStyle: {
             alignSelf: 'center'
-        }
+        },
+        gesturesEnabled: false, // Prevent swipe back
+        
     };
 
     _onDateSelection=(isodate)=>{
@@ -166,7 +166,7 @@ class HomeScreen extends React.Component{
     }
 
    _generateEmptyTaskSet = ()=>{
-        const day_variance = 30; //How many days of tasks you will show.
+        const day_variance = 100; //How many days of tasks you will show.
         const seconds_per_day = 86400;
         let task_set = [];
 
@@ -258,42 +258,38 @@ class HomeScreen extends React.Component{
     render(){
         return <Container>
             <Content>
-                <Calendar
-                    // dayComponent={({date, state}) => {
-                    //     return (<View onStartShouldSetResponder = {()=>true} onResponderGrant={({nativeEvent})=>console.log(nativeEvent.target)} onLayout={({nativeEvent})=>{console.log("LAYOUT", nativeEvent);}} style={{flex: 1}}><Text style={{textAlign: 'center', color: state === 'disabled' ? 'gray' : 'black'}}>{date.day}</Text></View>);
-                    // }}
+            <Calendar
+                    
                     onDayPress={(day)=>{
                         this._onDateSelection(day.dateString)}}
                     markedDates={{
                         [this.state.selected_date]: {selected: true, selectedColor: 'lightblue'},
                       }}/>
 
-                <TaskCarousel
+            <TaskCarousel
                     ref = {this.carousel}
                     selected_date = {this.state.selected_date}
                     handleDateSelection={this._onDateSelection} 
                     task_data={this.state.allocated_task_data} />
 
+               
+
+             
             
                 
 
                 {/* <Button onPress={()=>console.log(this.state.task_data)}>
                     <Text> Test Tasks</Text>
                 </Button> */}
-
-
-                {/* <Button onPress= {()=>this.props.navigation.navigate("sandbox")}>
-                      <Text> SandBox </Text>
-                </Button> */}
-
-    
-            
-             
+         
             </Content>
             <Footer >
                 <FooterTab>
                     <Button>
                         <TaskCreationModalPrompt />
+                    </Button>
+                    <Button onPress= {()=>this.props.navigation.navigate("sandbox")}>
+                        <Text> SandBox </Text>
                     </Button>
                     <Button style={{flex: 1}}>
                         <TaskDrawer task_data = {this.state.task_data}/>

@@ -8,12 +8,12 @@ import LoginScreen from './screens/login';
 import SandBox from './screens/sandbox'
 
 const StackNavigation = createStackNavigator({
+    sandbox : SandBox,
     landing: LandingScreen,
     test: TestScreen,
     home: HomeScreen,
     login: LoginScreen,
     registration: RegistrationScreen,
-    sandbox : SandBox
 })
 
 export default ()=>{

@@ -10,40 +10,52 @@ export default class TravelingCard extends React.Component{
 
         this.state = {
             pan: new Animated.ValueXY(),
-            isFocus: false    //Used for zIndexing purposes. When true, we make the card on top
+            isFocus: false,    //Used for zIndexing purposes. When true, we make the card on top
+            timeout: null,
         }
         
     }
 
-    _onStartMove = this.props.onStartMove ? this.props.onStartMove : ()=>{}
+    _onStartMove = this.props.onStartMove ? this.props.onStartMove :  ()=>{}
     _onMove = this.props.onMove ? this.props.onMove : ()=>{}
     _onStopMove = this.props.onStopMove ? this.props.onStopMove : ()=>{}
 
+    startLongPressTimer = (cb)=>{
+        this.setState({
+            timeout: setTimeout(()=>{cb()}, 1)
+        })
+    }
+
     componentWillMount(){
         this._panResponder = PanResponder.create({
-            onStartShouldSetResponder: (evt, gesture) => true,
-            onStartShouldSetResponderCapture: (evt, gestureState) => true,
+            onPanResponderTerminationRequest: () => false,
+ 
+            // onStartShouldSetResponderCapture: (evt, gestureState) => true,
+            onStartShouldSetResponder: (evt, gesture) => {console.log("A"); return true},
+            onStartShouldSetPanResponder: (evt, gestureState) => {console.log("B");return true},
+            onMoveShouldSetResponder: ()=> {console.log("C") ; return true},
+            onMoveShouldSetPanResponder: ()=>{console.log("D"); return true},
+            // onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
 
-            onStartShouldSetPanResponder: (evt, gestureState) => true,
-            onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
-
-            onMoveShouldSetResponderCapture: () => true,
-            onMoveShouldSetPanResponderCapture: () => true,
+            // onMoveShouldSetResponderCapture: () => true,
+            // onMoveShouldSetPanResponderCapture: () => true,
         
             onPanResponderGrant: (e, gestureState) => {
-                this.setState({
-                    isFocus : true
-                })
-                this.forceUpdate();
-
+                // this.setState({
+                //     isFocus : true
+                // })
+                
+                // e.preventDefault()
+                // e.stopPropagation()
+              
                 //Set offset to x,y and set x,y to 0. (Make start position the origin)
+                console.log("started");
                 this.state.pan.setOffset({x: this.state.pan.x._value, y: this.state.pan.y._value})
                 this.state.pan.setValue({x: 0, y: 0});
             },
 
-            onPanResponderMove : ({nativeEvent}, gestureState) => {
+            onPanResponderMove : (e, gestureState) => {
                 this.state.pan.setValue({x: gestureState.dx, y : gestureState.dy})
-                this._onMove()
             },
         
 
@@ -62,6 +74,7 @@ export default class TravelingCard extends React.Component{
             },
 
             onPanResponderRelease: (e, gestureState) => {
+                clearTimeout(this.state.timeout)
                 this.setState({
                     isFocus : false
                 })
@@ -78,10 +91,11 @@ export default class TravelingCard extends React.Component{
     }
 
     render(){
-        let imageStyle = { transform: this.state.pan.getTranslateTransform()};
-        let focusStyle = {zIndex : this.state.isFocus ? 200 : 0, backgroundColor:"red"}
+        let imageStyle = {transform: this.state.pan.getTranslateTransform(), backgroundColor:"purple"};
+        // let focusStyle = {position : this.state.isFocus ? "fixed" : "relative", backgroundColor:"red"}
 
-        return <Animated.View style={[imageStyle, focusStyle ]} {...this._panResponder.panHandlers}>
+
+        return <Animated.View style={[imageStyle]} {...this._panResponder.panHandlers}>
             <Card >
                 <CardItem header bordered>
                     <Text> {this.props.title} </Text>
