@@ -110,6 +110,8 @@ class Draggable extends React.Component{
     render(){
         // Calculate the transform property and set it as a value for our style which we add below to the Animated.View component
         let imageStyle = {backgroundColor: "purple", transform: this.state.pan.getTranslateTransform()};
+        const opacityStyle = this.state.focus ? {opacity: 0} : null
+        
         return ( 
             <View {...this._panResponder.panHandlers}>
                 {this.state.focus ? 
@@ -123,13 +125,15 @@ class Draggable extends React.Component{
                     {/* </Animated.View>  */}
                     </Animated.View>
                 </Modal>
-                :
-                <View style={{backgroundColor: "yellow"}} onLayout={this._onLayoutHandler}>
+                : null}
+
+                
+                <View style={[opacityStyle, {backgroundColor: "yellow"}]} onLayout={this._onLayoutHandler}>
                 {/* <Animated.View style={[imageStyle]} {...this._panResponder.panHandlers}> */}
                     <Text> Move please</Text>
                     {this.props.children}
                 {/* </Animated.View> ) */}
-                </View>}
+                </View>
             </View>)
     }
 }
@@ -159,7 +163,7 @@ class Landable extends React.Component{
                 width: width,
                 height: height
             }
-            
+
             this.setState({
                 layout : layout
             })
