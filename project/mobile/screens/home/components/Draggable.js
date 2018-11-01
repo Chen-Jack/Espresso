@@ -8,11 +8,25 @@ export default class Draggable extends React.Component{
         super(props)
 
         this.state = {
-            pan: new Animated.ValueXY()
+            pan: new Animated.ValueXY(),
+            spawn_animation: new Animated.Value(0) //Start initial scale as 0
         }
     }
 
     componentWillMount(){
+        // Animated.spring(
+        //     this.state.spawn_animation({
+        //       toValue: 1, bounciness: 12, speed: 5 // Animate to final value of 1
+        //     })
+        // ).start()
+        // Animated.timing(                  // Animate over time
+        //     this.state.spawn_animation,            // The animated value to drive
+        //     {
+        //       toValue: 1,                   // Animate to opacity: 1 (opaque)
+        //       duration: 10000,              // Make it take a while
+        //     }
+        //   ).start();  
+
         this._panResponder = PanResponder.create({
             onStartShouldSetResponder: (evt, gesture)=> true,
             onStartShouldSetResponderCapture: (evt, gestureState) => true,
@@ -76,8 +90,9 @@ export default class Draggable extends React.Component{
       
         // Calculate the transform property and set it as a value for our style which we add below to the Animated.View component
         let imageStyle = {backgroundColor: "purple", transform: this.state.pan.getTranslateTransform()};
+        let scaleStyle = {transform:[{scaleX: this.state.spawn_animation}, {scaleY: this.state.spawn_animation}]}
         return (
-            <Animated.View style={[imageStyle, {margin: 10, padding: 10}]} {...this._panResponder.panHandlers}>
+            <Animated.View style={[scaleStyle, imageStyle, {margin: 10, padding: 10}]} {...this._panResponder.panHandlers}>
                 <Text> Move please</Text>
                 {this.props.children}
             </Animated.View> )

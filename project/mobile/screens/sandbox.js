@@ -2,6 +2,70 @@ import React from 'react'
 import ReactNative, { Modal, View, Text, TouchableHighlight, PanResponder, Animated, FlatList} from 'react-native'
 import {Button} from 'native-base'
 
+class Embassy{
+    /*
+    A class to act as a middleman between all the landables. Not intended to be 
+    instantiated. Every instantiated landable should let the Embassy know.
+    */
+    static registeredLandables = []
+
+    static registerLandable = (ref)=>{
+        Embassy.registeredLandables.push(ref)
+    }
+
+    static unregisterLandable = (ref)=>{
+        /*
+        This function takes a react reference
+        Returns true on successful deletion. False when item is not in the array
+        */
+        for(let i in Embassy.registeredLandables){
+            if(Embassy.registeredLandables[i] === ref){
+                Embassy.registeredLandables.splice(i, 1)
+                return true
+            }
+        }
+        
+        return false
+    }
+
+    static isOnTopAnyLandable = (coordinates)=>{
+        /*
+        Given screen coordinates, checks if the coordinates are on top of any of the
+        registered landables. Returns the reference when true, returns null otherwise
+        */
+       for(let landable of Embassy.registeredLandables){
+           if(landable.current.props.isOnTop(coordinates)){
+               return landable
+           }
+       }
+
+       return null
+    }
+
+    static onMoveHandler = (coordinates)=>{
+        // const coordinates = {
+        //     x: nativeEvent.pageX,
+        //     y: nativeEvent.pageY
+        // }
+
+        Embassy.checkAndExecuteActions(coordinates)
+    }
+
+    static checkAndExecuteActions = (coordinates)=>{
+        /*
+        Checks if the coordinates are on top of any landable. If yes,
+        execute it's onTop() event handler
+        */
+
+        const landable = Embassy.isOnTopAnyLandable(coordinates)
+        if(landable){
+            landable.current.props.onTop()
+        }
+        else{
+            console.log("Not ontop of any landables")
+        }
+    }
+}
 
 class Draggable extends React.Component{
     constructor(props) {
@@ -10,6 +74,7 @@ class Draggable extends React.Component{
         this.state = {
             pan: new Animated.ValueXY(),
             focus : false ,
+            spawn_animation: new Animated.Value(0) //Start initial scale as 0
         }
 
         this.default_size = {width:0, height:0}
@@ -23,6 +88,14 @@ class Draggable extends React.Component{
     }
 
     componentWillMount(){
+        Animated.timing(                  // Animate over time
+            this.state.spawn_animation,            // The animated value to drive
+            {
+              toValue: 1,                   // Animate to opacity: 1 (opaque)
+              duration: 500,              // Make it take a while
+            }
+          ).start();  
+
         this._panResponder = PanResponder.create({
             onStartShouldSetResponder: (evt, gesture) => true,
             onStartShouldSetPanResponder : (evt, gesture) => true,
@@ -107,11 +180,21 @@ class Draggable extends React.Component{
           });
     }
 
+    componentWillUnmount(){
+        Animated.timing(                  // Animate over time
+            this.state.spawn_animation,            // The animated value to drive
+            {
+              toValue: 0,                   // Animate to opacity: 1 (opaque)
+              duration: 500,              // Make it take a while
+            }
+          ).start();  
+    }
+
     render(){
         // Calculate the transform property and set it as a value for our style which we add below to the Animated.View component
         let imageStyle = {backgroundColor: "purple", transform: this.state.pan.getTranslateTransform()};
         const opacityStyle = this.state.focus ? {opacity: 0} : null
-        
+        let scaleStyle = {transform:[{scaleX: this.state.spawn_animation}, {scaleY: this.state.spawn_animation}]}
         return ( 
             <View {...this._panResponder.panHandlers}>
                 {this.state.focus ? 
@@ -128,12 +211,12 @@ class Draggable extends React.Component{
                 : null}
 
                 
-                <View style={[opacityStyle, {backgroundColor: "yellow"}]} onLayout={this._onLayoutHandler}>
+                <Animated.View style={[scaleStyle, opacityStyle, {backgroundColor: "yellow"}]} onLayout={this._onLayoutHandler}>
                 {/* <Animated.View style={[imageStyle]} {...this._panResponder.panHandlers}> */}
                     <Text> Move please</Text>
                     {this.props.children}
                 {/* </Animated.View> ) */}
-                </View>
+                </Animated.View>
             </View>)
     }
 }
@@ -143,14 +226,35 @@ class Landable extends React.Component{
         super(props)
 
         this.list = React.createRef()
+        Embassy.registerLandable(this.list)
         this.state = {
+            data : [],
             layout : {
                 x: 0,
                 y: 0,
                 width: 0,
                 height: 0
-            }
+            },
+            test_data : [1,2,3,4,5]
         }
+    }
+
+
+    addItem = ()=>{
+        const new_data = this.state.test_data
+        new_data.push(10)
+            
+        this.setState({
+            data: new_data
+        })
+    }
+
+    removeItem = ()=>{
+        const new_data = this.state.test_data
+        new_data.shift()
+        this.setState({
+            data: new_data
+        })
     }
 
     _onLayoutHandler = ({nativeEvent})=>{
@@ -192,11 +296,11 @@ class Landable extends React.Component{
     
        
        if( isWithinX && isWithinY ){
-           console.log("yep");
+        //    console.log("yep");
            return true
        }
        else{
-           console.log("Nope");
+        //    console.log("Nope");
            return false
        }
     }
@@ -208,31 +312,31 @@ class Landable extends React.Component{
        console.log("onTop Event");
     }
 
-  
-
     render(){
         return (
-                <View 
-                    ref = {this.list} style={{width: "40%"}}>
+            <View 
+                ref = {this.list} style={{width: "40%"}}
+                onTop = {this._onTop}
+                isOnTop = {this._isOnTop}>
 
-                    <FlatList
-                    onLayout = {this._onLayoutHandler}
-                    scrollEnabled = {false}
-                    style={{  backgroundColor: "#aaa"}}
-                    data = {[1,2,3,4,5]}
-                    renderItem = {({item,index})=>{
-                        return (
-                            <Draggable
-                                onMove = {this._isOnTop}>
-                                <Text>
-                                    {item}
-                                </Text>
-                            </Draggable>
-                        )  
-                    }}
-                    />
+                <FlatList
+                onLayout = {this._onLayoutHandler}
+                scrollEnabled = {false}
+                style={{  backgroundColor: "#aaa"}}
+                data = {this.state.test_data}
+                renderItem = {({item,index})=>{
+                    return (
+                        <Draggable
+                            onMove = {Embassy.onMoveHandler}>
+                            <Text>
+                                {item}
+                            </Text>
+                        </Draggable>
+                    )  
+                }}
+                />
 
-                </View>
+            </View>
         )
     }
 }
@@ -240,11 +344,35 @@ class Landable extends React.Component{
 export default class SandBox extends React.Component{
     constructor(props) {
         super(props)
+
+        this.test = React.createRef()
     }
     render(){
-        return <View style={{flexDirection: "row"}}>
-            <Landable/>
-            <Landable/>
+        return <View>
+            <Button onPress={()=>{
+                console.log(Embassy.registeredLandables.length)
+                console.log(Embassy.registeredLandables)
+                }}>
+                <Text>
+                    Check Embassy
+                </Text>
+            </Button>
+            <Button onPress={()=>{this.test.current.addItem()}}>
+                <Text>
+                    Add Item
+                </Text>
+            </Button>
+            <Button onPress={()=>{this.test.current.removeItem()}}>
+                <Text>
+                    Remove Item
+                </Text>
+            </Button>
+            <Landable ref={this.test}/>
+            <View>
+                <Text> Idk </Text>
+                <Landable/>
+            </View>
+            
         </View>
     }
 }
