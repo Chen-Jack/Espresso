@@ -28,41 +28,27 @@ class Embassy{
         return false
     }
 
-    static isOnTopAnyLandable = (coordinates)=>{
-        /*
-        Given screen coordinates, checks if the coordinates are on top of any of the
-        registered landables. Returns the reference when true, returns null otherwise
-        */
-       for(let landable of Embassy.registeredLandables){
-           if(landable.current.props.isOnTop(coordinates)){
-               return landable
-           }
-       }
-
-       return null
-    }
-
     static onMoveHandler = (coordinates)=>{
-        // const coordinates = {
-        //     x: nativeEvent.pageX,
-        //     y: nativeEvent.pageY
-        // }
-
         Embassy.checkAndExecuteActions(coordinates)
     }
 
     static checkAndExecuteActions = (coordinates)=>{
-        /*
-        Checks if the coordinates are on top of any landable. If yes,
-        execute it's onTop() event handler
+        /* 
+            Iterates through all the registered landables.
+            Executes all onTop event handler in the list.
+            The first landable with matching coordinates call onTop(true),
+            everything else calls false
         */
 
-        const landable = Embassy.isOnTopAnyLandable(coordinates)
-        if(landable){
-            landable.current.props.onTop()
-        }
-        else{
-            console.log("Not ontop of any landables")
+        let first_instance = true
+        for( let landable of Embassy.registeredLandables){
+            if(landable.current.props.isOnTop(coordinates) && first_instance){
+                landable.current.props.onTop(true)
+                first_instance = false
+            }
+            else{
+                landable.current.props.onTop(false)
+            }
         }
     }
 }
@@ -235,7 +221,8 @@ class Landable extends React.Component{
                 width: 0,
                 height: 0
             },
-            test_data : [1,2,3,4,5]
+            test_data : [1,2,3,4,5],
+            active: false
         }
     }
 
@@ -257,9 +244,7 @@ class Landable extends React.Component{
         })
     }
 
-    _onLayoutHandler = ({nativeEvent})=>{
-        //Note that .measure doesn't seem to work on flatlist directly.
-        //So we measure the containing view instead
+    _updateLayout = ()=>{
         this.list.current.measure((x,y,width,height,pageX,pageY)=>{
             const layout = {
                 x: pageX,
@@ -272,8 +257,28 @@ class Landable extends React.Component{
                 layout : layout
             })
         })
+    }
+
+   
+
+    _onLayoutHandler = ({nativeEvent})=>{
+        //Note that .measure doesn't seem to work on flatlist directly.
+        //So we measure the containing view instead
+        console.log("ONLAYOUT");
+        this._updateLayout()
      
 
+    }
+    _onEnter = ()=>{
+        this.setState({
+            active: true
+        })
+    }
+
+    _onLeave = ()=>{
+        this.setState({
+            active: false
+        })
     }
 
     _isOnTop = (location)=>{
@@ -293,8 +298,6 @@ class Landable extends React.Component{
        const isWithinX = (x0 < location.x ) && (location.x < x1)
        const isWithinY = (y0 < location.y) && (location.y < y1)
 
-    
-       
        if( isWithinX && isWithinY ){
         //    console.log("yep");
            return true
@@ -305,11 +308,33 @@ class Landable extends React.Component{
        }
     }
 
-    _onTop = ()=>{
+    _onTop = (isOnTop)=>{
         /*
         Event handler called when a gesture is above the landable
         */
-       console.log("onTop Event");
+        if(isOnTop && this.state.active){
+            //Active, staying active
+            console.log("on stay");
+        }
+        else if(isOnTop && !this.state.active){
+            //inactive, becoming active
+            this.setState({
+                active: true
+            }, ()=>{console.log("on enter");})
+        }
+        else if(!isOnTop && this.state.active){
+            //active, becoming inactive
+            this.setState({
+                active: false
+            }, ()=>{console.log("On Leave")})
+        }
+        else if(!isOnTop && !this.state.active){
+            //inactive, staying inactive
+        }
+        else{
+            console.log("Error for _onTop()");
+        }
+
     }
 
     render(){
@@ -317,7 +342,9 @@ class Landable extends React.Component{
             <View 
                 ref = {this.list} style={{width: "40%"}}
                 onTop = {this._onTop}
-                isOnTop = {this._isOnTop}>
+                isOnTop = {this._isOnTop}
+                onEnter = {this._onEnter}
+                onLeave = {this.onLeave}>
 
                 <FlatList
                 onLayout = {this._onLayoutHandler}
