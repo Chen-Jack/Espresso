@@ -10,6 +10,7 @@ class Embassy{
     instantiated. Every instantiated landable should let the Embassy know.
     */
     static registeredLandables = []
+    static origin_target = null //React reference to the source of the original Landable
     static active_target = null; //React reference to the active Landable
 
     static registerLandable = (ref)=>{
@@ -74,7 +75,13 @@ class Embassy{
     }
 
     static onStartHandler = (coordinates)=>{
-        Embassy.findAndUpdateTarget(coordinates)
+        /*
+        The starting handler and active handler are always the same.
+        Cause you havent moved away from the origin yet
+        */
+        const target = Embassy.findTarget(coordinates)
+        Embassy.origin_target = target
+        Embassy.updateTarget(target)
     }
 
     static onMoveHandler = (coordinates)=>{
@@ -97,27 +104,9 @@ class Embassy{
             Embassy.active_target.current.props.onLoseFocus()
             Embassy.active_target = null
         }
+        
+        Embassy.origin_target = null
     }
-
-    // static checkAndExecuteActions = (coordinates)=>{
-    //     /* 
-    //         Iterates through all the registered landables.
-    //         Executes all onTop event handler in the list.
-    //         The first landable with matching coordinates call onTop(true),
-    //         everything else calls false
-    //     */
-
-    //     let first_instance = true
-    //     for( let landable of Embassy.registeredLandables){
-    //         if(landable.current.props.isGestureOnTop(coordinates) && first_instance){
-    //             landable.current.props.onTop(true)
-    //             first_instance = false
-    //         }
-    //         else{
-    //             landable.current.props.onTop(false)
-    //         }
-    //     }
-    // }
 }
 
 class Draggable extends React.Component{
@@ -371,26 +360,6 @@ class Landable extends React.Component{
         console.log(this.props.name, "Handling release");
     }
 
-    // _onEnter = ()=>{
-    //     this.setState({
-    //         active: true
-    //     })
-    // }
-
-    // _onLeave = ()=>{
-    //     this.setState({
-    //         active: false
-    //     })
-    // }
-
-    // _onReleaseOnTop = (isOnTop)=>{
-    //     /*
-    //     An event handler when a gesture is released ontop of this landable
-    //     */
-    //    if(isOnTop){
-    //     console.log("Released ontop, adding");
-    //    }
-    // }
 
     _isGestureOnTop = (location)=>{
         /*
@@ -410,43 +379,12 @@ class Landable extends React.Component{
        const isWithinY = (y0 < location.y) && (location.y < y1)
 
        if( isWithinX && isWithinY ){
-        //    console.log("yep");
            return true
        }
        else{
-        //    console.log("Nope");
            return false
        }
     }
-
-    // _onTop = (isOnTop)=>{
-    //     /*
-    //     Event handler called when a gesture is above the landable
-    //     */
-    //     if(isOnTop && this.state.active){
-    //         //Active, staying active
-    //         console.log("on stay");
-    //     }
-    //     else if(isOnTop && !this.state.active){
-    //         //inactive, becoming active
-    //         this.setState({
-    //             active: true
-    //         }, ()=>{console.log("on enter");})
-    //     }
-    //     else if(!isOnTop && this.state.active){
-    //         //active, becoming inactive
-    //         this.setState({
-    //             active: false
-    //         }, ()=>{console.log("On Leave")})
-    //     }
-    //     else if(!isOnTop && !this.state.active){
-    //         //inactive, staying inactive
-    //     }
-    //     else{
-    //         console.log("Error for _onTop()");
-    //     }
-
-    // }
 
 
     
@@ -473,12 +411,7 @@ class Landable extends React.Component{
                 onFocus = {this._onFocus}
                 onLoseFocus = {this._onLoseFocus}
                 onStay = {this._onStay}
-                onHandleRelease = {this._onHandleRelease}
-
-                // onTop = {this._onTop}
-                // onEnter = {this._onEnter}
-                // onLeave = {this.onLeave}
-                >
+                onHandleRelease = {this._onHandleRelease}>
 
                 <FlatList
                     onLayout = {this._updateLayout}
