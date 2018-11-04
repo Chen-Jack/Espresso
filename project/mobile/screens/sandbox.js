@@ -4,10 +4,13 @@ import {Button} from 'native-base'
 
 class Embassy{
     /*
+    I love shelly <3 doki doki :3 xD xP :T :p :P x3 83 ^__^ >__> >__< >x< owo o3o o-o O_O o.o o-O O-O Q_Q T-T T_T *_* ^-^ x_x @_@ 
+    -_- n_n .___. (> ^^ )> .-. ~_~ 8D 8-D >:D :^) ^o^ u_u :) :o 8===D 
     A class to act as a middleman between all the landables. Not intended to be 
     instantiated. Every instantiated landable should let the Embassy know.
     */
     static registeredLandables = []
+    static active_target = null; //React reference to the active Landable
 
     static registerLandable = (ref)=>{
         Embassy.registeredLandables.push(ref)
@@ -24,33 +27,97 @@ class Embassy{
                 return true
             }
         }
-        
         return false
     }
 
-    static onMoveHandler = (coordinates)=>{
-        Embassy.checkAndExecuteActions(coordinates)
-    }
-
-    static checkAndExecuteActions = (coordinates)=>{
-        /* 
-            Iterates through all the registered landables.
-            Executes all onTop event handler in the list.
-            The first landable with matching coordinates call onTop(true),
-            everything else calls false
-        */
-
-        let first_instance = true
+    static findTarget = (coordinates) => {
         for( let landable of Embassy.registeredLandables){
-            if(landable.current.props.isOnTop(coordinates) && first_instance){
-                landable.current.props.onTop(true)
-                first_instance = false
-            }
-            else{
-                landable.current.props.onTop(false)
+            if(landable.current.props.isGestureOnTop(coordinates)){
+                return landable
             }
         }
+        return null
     }
+
+    static updateTarget = (new_target) => {
+        /*
+        Updates the active target. The prev target then should lose focus, while
+        the new target gains focus
+        */
+        const prev_target = Embassy.active_target
+        if((prev_target === null) && (new_target === null)){
+            //If nothing happened. No prev target, no new target
+            return null
+        }
+
+        if(prev_target === new_target){
+            // Target is still the same landable
+            Embassy.active_target.current.props.onStay()
+        }
+        else{
+            // There is a target switch
+            if(prev_target){
+                prev_target.current.props.onLoseFocus()
+            }
+            if(new_target){
+                new_target.current.props.onFocus()
+            }
+        }
+
+        Embassy.active_target = new_target
+        return Embassy.active_target
+    }
+
+    static findAndUpdateTarget = (coordinates) => {
+        const new_target = Embassy.findTarget(coordinates)
+        Embassy.updateTarget(new_target)
+    }
+
+    static onStartHandler = (coordinates)=>{
+        Embassy.findAndUpdateTarget(coordinates)
+    }
+
+    static onMoveHandler = (coordinates)=>{
+        /*
+        const landable_target = findTarget(coordinates)
+        */
+        // Embassy.checkAndExecuteActions(coordinates)
+
+        const target = Embassy.findAndUpdateTarget(coordinates)
+    }
+
+    static onReleaseHandler = (coordinates)=>{
+ 
+        const capturing_landable = Embassy.findTarget(coordinates)
+        if(capturing_landable){
+            capturing_landable.current.props.onHandleRelease()
+        }
+
+        if(Embassy.active_target){
+            Embassy.active_target.current.props.onLoseFocus()
+            Embassy.active_target = null
+        }
+    }
+
+    // static checkAndExecuteActions = (coordinates)=>{
+    //     /* 
+    //         Iterates through all the registered landables.
+    //         Executes all onTop event handler in the list.
+    //         The first landable with matching coordinates call onTop(true),
+    //         everything else calls false
+    //     */
+
+    //     let first_instance = true
+    //     for( let landable of Embassy.registeredLandables){
+    //         if(landable.current.props.isGestureOnTop(coordinates) && first_instance){
+    //             landable.current.props.onTop(true)
+    //             first_instance = false
+    //         }
+    //         else{
+    //             landable.current.props.onTop(false)
+    //         }
+    //     }
+    // }
 }
 
 class Draggable extends React.Component{
@@ -108,6 +175,15 @@ class Draggable extends React.Component{
                     x: gestureState.x0 - center_offset.x,
                     y: gestureState.y0 - center_offset.y
                 });
+
+             
+                if(this.props.onStart){
+                    const coordinates = {
+                        x : e.nativeEvent.pageX,
+                        y: e.nativeEvent.pageY
+                    }
+                    this.props.onStart(coordinates)
+                }
             },
 
             onPanResponderMove : ({nativeEvent}, gestureState) => {
@@ -120,11 +196,13 @@ class Draggable extends React.Component{
                     y: gestureState.moveY - center_offset.y
                 })
 
+                
                 if(this.props.onMove){
-                    this.props.onMove({
-                        x: nativeEvent.pageX,
+                    const coordinates = {
+                        x : nativeEvent.pageX,
                         y: nativeEvent.pageY
-                    })
+                    }
+                    this.props.onMove(coordinates)
                 }
             },
         
@@ -162,6 +240,14 @@ class Draggable extends React.Component{
                 //   ).start(()=>{
                   
                 //   }); // Start the animation
+
+                if(this.props.onRelease){
+                    const coordinates = {
+                        x : e.nativeEvent.pageX,
+                        y: e.nativeEvent.pageY
+                    }
+                    this.props.onRelease(coordinates)
+                }
             }
           });
     }
@@ -261,27 +347,52 @@ class Landable extends React.Component{
 
    
 
-    _onLayoutHandler = ({nativeEvent})=>{
-        //Note that .measure doesn't seem to work on flatlist directly.
-        //So we measure the containing view instead
-        console.log("ONLAYOUT");
-        this._updateLayout()
-     
-
-    }
-    _onEnter = ()=>{
+    _onFocus = ()=>{
+        console.log(this.props.name, "Gained Focus");
         this.setState({
             active: true
         })
     }
-
-    _onLeave = ()=>{
+    _onLoseFocus = ()=>{
+        console.log(this.props.name, "Lost Focus");
         this.setState({
             active: false
         })
     }
 
-    _isOnTop = (location)=>{
+    _onStay = ()=>{
+        console.log(this.props.name, "Stayed");
+    }
+
+    _onHandleRelease = ()=>{
+        /*
+        Event handler for handling the event of a landable handling a gesture release
+        */
+        console.log(this.props.name, "Handling release");
+    }
+
+    // _onEnter = ()=>{
+    //     this.setState({
+    //         active: true
+    //     })
+    // }
+
+    // _onLeave = ()=>{
+    //     this.setState({
+    //         active: false
+    //     })
+    // }
+
+    // _onReleaseOnTop = (isOnTop)=>{
+    //     /*
+    //     An event handler when a gesture is released ontop of this landable
+    //     */
+    //    if(isOnTop){
+    //     console.log("Released ontop, adding");
+    //    }
+    // }
+
+    _isGestureOnTop = (location)=>{
         /*
         Checks if the given coordinates are ontop of the landable
         */
@@ -308,60 +419,73 @@ class Landable extends React.Component{
        }
     }
 
-    _onTop = (isOnTop)=>{
-        /*
-        Event handler called when a gesture is above the landable
-        */
-        if(isOnTop && this.state.active){
-            //Active, staying active
-            console.log("on stay");
-        }
-        else if(isOnTop && !this.state.active){
-            //inactive, becoming active
-            this.setState({
-                active: true
-            }, ()=>{console.log("on enter");})
-        }
-        else if(!isOnTop && this.state.active){
-            //active, becoming inactive
-            this.setState({
-                active: false
-            }, ()=>{console.log("On Leave")})
-        }
-        else if(!isOnTop && !this.state.active){
-            //inactive, staying inactive
-        }
-        else{
-            console.log("Error for _onTop()");
-        }
+    // _onTop = (isOnTop)=>{
+    //     /*
+    //     Event handler called when a gesture is above the landable
+    //     */
+    //     if(isOnTop && this.state.active){
+    //         //Active, staying active
+    //         console.log("on stay");
+    //     }
+    //     else if(isOnTop && !this.state.active){
+    //         //inactive, becoming active
+    //         this.setState({
+    //             active: true
+    //         }, ()=>{console.log("on enter");})
+    //     }
+    //     else if(!isOnTop && this.state.active){
+    //         //active, becoming inactive
+    //         this.setState({
+    //             active: false
+    //         }, ()=>{console.log("On Leave")})
+    //     }
+    //     else if(!isOnTop && !this.state.active){
+    //         //inactive, staying inactive
+    //     }
+    //     else{
+    //         console.log("Error for _onTop()");
+    //     }
 
+    // }
+
+
+    
+    _renderListItem = ({item,index})=>{
+        return (
+            <Draggable
+                onStart = {Embassy.onStartHandler}
+                onMove = {Embassy.onMoveHandler}
+                onRelease = {Embassy.onReleaseHandler}>
+                <Text>
+                    {item}
+                </Text>
+            </Draggable>
+        )  
     }
 
     render(){
         return (
             <View 
-                ref = {this.list} style={{width: "40%"}}
-                onTop = {this._onTop}
-                isOnTop = {this._isOnTop}
-                onEnter = {this._onEnter}
-                onLeave = {this.onLeave}>
+                ref = {this.list} 
+                style = {{width: "40%"}}
+                isGestureOnTop = {this._isGestureOnTop}
+
+                onFocus = {this._onFocus}
+                onLoseFocus = {this._onLoseFocus}
+                onStay = {this._onStay}
+                onHandleRelease = {this._onHandleRelease}
+
+                // onTop = {this._onTop}
+                // onEnter = {this._onEnter}
+                // onLeave = {this.onLeave}
+                >
 
                 <FlatList
-                onLayout = {this._onLayoutHandler}
-                scrollEnabled = {false}
-                style={{  backgroundColor: "#aaa"}}
-                data = {this.state.test_data}
-                renderItem = {({item,index})=>{
-                    return (
-                        <Draggable
-                            onMove = {Embassy.onMoveHandler}>
-                            <Text>
-                                {item}
-                            </Text>
-                        </Draggable>
-                    )  
-                }}
-                />
+                    onLayout = {this._updateLayout}
+                    scrollEnabled = {false}
+                    style={{ backgroundColor: "#aaa"}}
+                    data = {this.state.test_data}
+                    renderItem = {this._renderListItem}/>
 
             </View>
         )
@@ -378,7 +502,6 @@ export default class SandBox extends React.Component{
         return <View>
             <Button onPress={()=>{
                 console.log(Embassy.registeredLandables.length)
-                console.log(Embassy.registeredLandables)
                 }}>
                 <Text>
                     Check Embassy
@@ -394,10 +517,11 @@ export default class SandBox extends React.Component{
                     Remove Item
                 </Text>
             </Button>
-            <Landable ref={this.test}/>
+            
+            <Landable name="List A" ref={this.test}/>
             <View>
                 <Text> Idk </Text>
-                <Landable/>
+                <Landable name="List B"/>
             </View>
             
         </View>
