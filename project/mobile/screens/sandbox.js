@@ -9,8 +9,8 @@ class Embassy{
     A class to act as a middleman between all the landables. Not intended to be 
     instantiated. Every instantiated landable should let the Embassy know.
     */
-    static registeredLandables = []
-    static origin_target = null //React reference to the source of the original Landable
+    static registeredLandables = [];
+    static origin_target = null; //React reference to the source of the original Landable
     static active_target = null; //React reference to the active Landable
 
     static registerLandable = (ref)=>{
@@ -85,12 +85,32 @@ class Embassy{
     }
 
     static onMoveHandler = (coordinates)=>{
-        /*
-        const landable_target = findTarget(coordinates)
-        */
-        // Embassy.checkAndExecuteActions(coordinates)
+        const new_target = Embassy.findTarget(coordinates)
+        Embassy.updateTarget(new_target)
+    }
 
-        const target = Embassy.findAndUpdateTarget(coordinates)
+    static canPerformTransfer = (source, target)=>{
+        if( (source === null) || (target === null) || source === target){
+            return false
+        }
+        else if( source !== target ){
+            return true
+        }
+        else{
+            //Just incase im missing some logic, default returns false
+            return false
+        }
+    }
+
+    static performTransfer = (source, target)=>{
+        source.current.props.removeItem()
+        target.current.props.addItem()
+    }
+
+    static evaluteAndPerformTransferIfValid = (source ,target)=>{
+        if(Embassy.canPerformTransfer(source,target)){
+            Embassy.performTransfer(source,target)
+        }
     }
 
     static onReleaseHandler = (coordinates)=>{
@@ -98,6 +118,8 @@ class Embassy{
         const capturing_landable = Embassy.findTarget(coordinates)
         if(capturing_landable){
             capturing_landable.current.props.onHandleRelease()
+
+            Embassy.evaluteAndPerformTransferIfValid(Embassy.origin_target, capturing_landable)
         }
 
         if(Embassy.active_target){
@@ -411,7 +433,10 @@ class Landable extends React.Component{
                 onFocus = {this._onFocus}
                 onLoseFocus = {this._onLoseFocus}
                 onStay = {this._onStay}
-                onHandleRelease = {this._onHandleRelease}>
+                onHandleRelease = {this._onHandleRelease}
+
+                addItem = {this.addItem}
+                removeItem = {this.removeItem}>
 
                 <FlatList
                     onLayout = {this._updateLayout}
