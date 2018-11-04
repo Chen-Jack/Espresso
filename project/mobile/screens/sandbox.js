@@ -138,8 +138,12 @@ class Draggable extends React.Component{
         this.state = {
             pan: new Animated.ValueXY(),
             focus : false ,
-            spawn_animation: new Animated.Value(0) //Start initial scale as 0
+            spawn_animation: new Animated.Value(0), //Start initial scale as 0,
         }
+
+        this.ms_to_trigger_long_press = 1000; 
+        this.timer_ref = null   //Ref to keep track of long press
+        this.gesture_started = false //a variable to know allow/know if the gesture has officially started
 
         this.default_size = {width:0, height:0}
     }
@@ -173,47 +177,68 @@ class Draggable extends React.Component{
             // onMoveShouldSetPanResponderCapture: () => true,
         
             onPanResponderGrant: (e, gestureState) => {
-                console.log("Clicked on", gestureState.x0, gestureState.y0);
-                this.setState({
-                    focus: true
-                })
-                const center_offset = {
-                    x: this.default_size.width/2,
-                    y: this.default_size.height/2
-                }
-                this.state.pan.setOffset({x: this.state.pan.x._value, y: this.state.pan.y._value})
-                this.state.pan.setValue({
-                    x: gestureState.x0 - center_offset.x,
-                    y: gestureState.y0 - center_offset.y
-                });
+                e.persist() //Must persist event to access async
 
-             
-                if(this.props.onStart){
-                    const coordinates = {
-                        x : e.nativeEvent.pageX,
-                        y: e.nativeEvent.pageY
+                const long_press_callback = (e, gestureState)=>{
+                    this.gesture_started = true
+
+                    this.setState({
+                        focus: true
+                    })
+
+                    const center_offset = {
+                        x: this.default_size.width/2,
+                        y: this.default_size.height/2
                     }
-                    this.props.onStart(coordinates)
+                    
+                    this.state.pan.setOffset({x: this.state.pan.x._value, y: this.state.pan.y._value})
+                    this.state.pan.setValue({
+                        x: gestureState.x0 - center_offset.x,
+                        y: gestureState.y0 - center_offset.y
+                    });
+
+                
+                    if(this.props.onStart){
+                        const coordinates = {
+                            x : e.nativeEvent.pageX,
+                            y: e.nativeEvent.pageY
+                        }
+                        this.props.onStart(coordinates)
+                    }
                 }
+
+                this.timer_ref = setTimeout( 
+                    long_press_callback.bind(this, e, gestureState), 
+                    this.ms_to_trigger_long_press
+                )
+
             },
 
             onPanResponderMove : ({nativeEvent}, gestureState) => {
-                const center_offset = {
-                    x: this.default_size.width/2,
-                    y: this.default_size.height/2
+                if(!this.gesture_started){
+                    // If you move when you arent allowed to move yet, clear the timer
+                    console.log("Moved too early for longpress!!!");
+                    clearTimeout(this.timer_ref)
+                    this.timer_ref = null
                 }
-                this.state.pan.setValue({
-                    x: gestureState.moveX - center_offset.x, 
-                    y: gestureState.moveY - center_offset.y
-                })
-
-                
-                if(this.props.onMove){
-                    const coordinates = {
-                        x : nativeEvent.pageX,
-                        y: nativeEvent.pageY
+                else{
+                    const center_offset = {
+                        x: this.default_size.width/2,
+                        y: this.default_size.height/2
                     }
-                    this.props.onMove(coordinates)
+                    this.state.pan.setValue({
+                        x: gestureState.moveX - center_offset.x, 
+                        y: gestureState.moveY - center_offset.y
+                    })
+
+                    
+                    if(this.props.onMove){
+                        const coordinates = {
+                            x : nativeEvent.pageX,
+                            y: nativeEvent.pageY
+                        }
+                        this.props.onMove(coordinates)
+                    }
                 }
             },
         
@@ -236,28 +261,36 @@ class Draggable extends React.Component{
             onResponderTerminationRequest: (e,gesturestate) => false,
 
             onPanResponderRelease: (e, gestureState) => {
-                this.setState({
-                    focus: false
-                }, ()=>{
-                
-                    this.state.pan.setValue({x: 0, y: 0});
-                    this.state.pan.flattenOffset();
-                })
-                // Animated.spring(
-                //     this.state.pan, // The value to drive
-                //     {
-                //       toValue: {x:0, y:0}, bounciness: 12, speed: 20 // Animate to final value of 1
-                //     }
-                //   ).start(()=>{
-                  
-                //   }); // Start the animation
+                if(!this.gesture_started){
+                    //Released too early before actuall starting gesture
+                    console.log("released too early for longpress!!!");
+                    clearTimeout(this.timer_ref)
+                    this.timer_ref = null
+                }
+                else{
+                    this.setState({
+                        focus: false
+                    }, ()=>{
+                    
+                        this.state.pan.setValue({x: 0, y: 0});
+                        this.state.pan.flattenOffset();
+                    })
+                    // Animated.spring(
+                    //     this.state.pan, // The value to drive
+                    //     {
+                    //       toValue: {x:0, y:0}, bounciness: 12, speed: 20 // Animate to final value of 1
+                    //     }
+                    //   ).start(()=>{
+                    
+                    //   }); // Start the animation
 
-                if(this.props.onRelease){
-                    const coordinates = {
-                        x : e.nativeEvent.pageX,
-                        y: e.nativeEvent.pageY
+                    if(this.props.onRelease){
+                        const coordinates = {
+                            x : e.nativeEvent.pageX,
+                            y: e.nativeEvent.pageY
+                        }
+                        this.props.onRelease(coordinates)
                     }
-                    this.props.onRelease(coordinates)
                 }
             }
           });
@@ -458,6 +491,12 @@ export default class SandBox extends React.Component{
     }
     render(){
         return <View>
+            <Button onLongPress={()=>console.log("YEP")}>
+                <Text>
+                    Test
+                </Text>
+            </Button>
+
             <Button onPress={()=>{
                 console.log(Embassy.registeredLandables.length)
                 }}>
