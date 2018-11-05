@@ -79,6 +79,12 @@ class Embassy{
         The starting handler and active handler are always the same.
         Cause you havent moved away from the origin yet
         */
+
+        //Disable scrolling on all landables while gesturing
+        for(let landable of Embassy.registeredLandables){
+            landable.current.props.toggleScroll(false)
+        }
+
         const target = Embassy.findTarget(coordinates)
         Embassy.origin_target = target
         Embassy.updateTarget(target)
@@ -128,6 +134,11 @@ class Embassy{
         }
         
         Embassy.origin_target = null
+
+        //Return scrolling capabilities to all landables
+        for(let landable of Embassy.registeredLandables){
+            landable.current.props.toggleScroll(false)
+        }
     }
 }
 
@@ -138,10 +149,12 @@ class Draggable extends React.Component{
         this.state = {
             pan: new Animated.ValueXY(),
             focus : false ,
-            spawn_animation: new Animated.Value(0), //Start initial scale as 0,
+            scale: new Animated.Value(0), //Start initial scale as 0,
+            modal_scale: new Animated.Value(1)
         }
-
-        this.ms_to_trigger_long_press = 1000; 
+        
+        this.animation_speed = 300;
+        this.ms_to_trigger_long_press = 500; 
         this.timer_ref = null   //Ref to keep track of long press
         this.gesture_started = false //a variable to know allow/know if the gesture has officially started
 
@@ -157,7 +170,7 @@ class Draggable extends React.Component{
 
     componentWillMount(){
         Animated.timing(                  // Animate over time
-            this.state.spawn_animation,            // The animated value to drive
+            this.state.scale,            // The animated value to drive
             {
               toValue: 1,                   // Animate to opacity: 1 (opaque)
               duration: 500,              // Make it take a while
@@ -180,17 +193,35 @@ class Draggable extends React.Component{
                 e.persist() //Must persist event to access async
 
                 const long_press_callback = (e, gestureState)=>{
+            
                     this.gesture_started = true
 
                     this.setState({
                         focus: true
+                    }, ()=>{
+                        Animated.parallel([
+                            Animated.timing(                  // Animate over time
+                                this.state.modal_scale,            // The animated value to drive
+                                {
+                                    toValue: 1.25,                   // Animate to opacity: 1 (opaque)
+                                    duration: this.animation_speed,              // Make it take a while
+                                }
+                            ),
+                            Animated.timing(
+                                this.state.scale,
+                                {
+                                    toValue: 0,
+                                    duration: this.animation_speed
+                                }
+                            )
+                        ]).start()
                     })
 
                     const center_offset = {
                         x: this.default_size.width/2,
                         y: this.default_size.height/2
                     }
-                    
+
                     this.state.pan.setOffset({x: this.state.pan.x._value, y: this.state.pan.y._value})
                     this.state.pan.setValue({
                         x: gestureState.x0 - center_offset.x,
@@ -217,7 +248,6 @@ class Draggable extends React.Component{
             onPanResponderMove : ({nativeEvent}, gestureState) => {
                 if(!this.gesture_started){
                     // If you move when you arent allowed to move yet, clear the timer
-                    console.log("Moved too early for longpress!!!");
                     clearTimeout(this.timer_ref)
                     this.timer_ref = null
                 }
@@ -263,26 +293,34 @@ class Draggable extends React.Component{
             onPanResponderRelease: (e, gestureState) => {
                 if(!this.gesture_started){
                     //Released too early before actuall starting gesture
-                    console.log("released too early for longpress!!!");
                     clearTimeout(this.timer_ref)
                     this.timer_ref = null
                 }
                 else{
-                    this.setState({
-                        focus: false
-                    }, ()=>{
-                    
-                        this.state.pan.setValue({x: 0, y: 0});
-                        this.state.pan.flattenOffset();
+                    Animated.parallel([
+                        Animated.timing(                  // Animate over time
+                            this.state.modal_scale,            // The animated value to drive
+                            {
+                                toValue: 0,                   // Animate to opacity: 1 (opaque)
+                                duration: this.animation_speed,              // Make it take a while
+                            }
+                        ),
+                        Animated.timing(
+                            this.state.scale,
+                            {
+                                toValue: 1,
+                                duration: this.animation_speed
+                            }
+                        )
+                    ]).start(()=>{  
+                        this.setState({
+                            focus: false
+                        }, ()=>{
+                            this.state.pan.setValue({x: 0, y: 0});
+                            this.state.pan.flattenOffset();
+                        })
                     })
-                    // Animated.spring(
-                    //     this.state.pan, // The value to drive
-                    //     {
-                    //       toValue: {x:0, y:0}, bounciness: 12, speed: 20 // Animate to final value of 1
-                    //     }
-                    //   ).start(()=>{
-                    
-                    //   }); // Start the animation
+                
 
                     if(this.props.onRelease){
                         const coordinates = {
@@ -298,40 +336,42 @@ class Draggable extends React.Component{
 
     componentWillUnmount(){
         Animated.timing(                  // Animate over time
-            this.state.spawn_animation,            // The animated value to drive
+            this.state.scale,            // The animated value to drive
             {
               toValue: 0,                   // Animate to opacity: 1 (opaque)
-              duration: 500,              // Make it take a while
+              duration: 1000,              // Make it take a while
             }
           ).start();  
+
+        
     }
 
     render(){
         // Calculate the transform property and set it as a value for our style which we add below to the Animated.View component
-        let imageStyle = {backgroundColor: "purple", transform: this.state.pan.getTranslateTransform()};
-        const opacityStyle = this.state.focus ? {opacity: 0} : null
-        let scaleStyle = {transform:[{scaleX: this.state.spawn_animation}, {scaleY: this.state.spawn_animation}]}
+        let defaultSizeStyle =  {width: this.default_size.width, height: this.default_size.height}
+        // let translateStyle = {transform: this.state.pan.getTranslateTransform()}
+
+        let translateStyle = {transform: [{translateX: this.state.pan.x}, {translateY: this.state.pan.y}]}
+        let modalScaleStyle = {transform:[{scaleX: this.state.modal_scale}, {scaleY: this.state.modal_scale}]}
+        let modalStyle = {transform: translateStyle.transform.concat(modalScaleStyle.transform)}
+
+        let imageStyle = {backgroundColor: "purple"};
+        let scaleStyle = {transform:[{scaleX: this.state.scale}, {scaleY: this.state.scale}]}
         return ( 
-            <View {...this._panResponder.panHandlers}>
-                {this.state.focus ? 
+            <View {...this._panResponder.panHandlers} onLayout={this._onLayoutHandler}>
                 <Modal
-                    visible = {true}
+                    visible = {this.state.focus}
                     transparent = {true}>
-                    <Animated.View style={[imageStyle, {width: this.default_size.width, height: this.default_size.height}]} >
-                    {/* <Animated.View style={[imageStyle]} {...this._panResponder.panHandlers}> */}
+                    <Animated.View style={[modalStyle, imageStyle, defaultSizeStyle]} >
                         <Text> Move please</Text>
                         <Text> TEST </Text>
-                    {/* </Animated.View>  */}
                     </Animated.View>
                 </Modal>
-                : null}
 
                 
-                <Animated.View style={[scaleStyle, opacityStyle, {backgroundColor: "yellow"}]} onLayout={this._onLayoutHandler}>
-                {/* <Animated.View style={[imageStyle]} {...this._panResponder.panHandlers}> */}
+                <Animated.View style={[scaleStyle, {borderStyle: "solid", borderColor: "black", borderWidth: 1, backgroundColor: "yellow"}]}>\
                     <Text> Move please</Text>
                     {this.props.children}
-                {/* </Animated.View> ) */}
                 </Animated.View>
             </View>)
     }
@@ -343,6 +383,7 @@ class Landable extends React.Component{
 
         this.list = React.createRef()
         Embassy.registerLandable(this.list)
+
         this.state = {
             data : [],
             layout : {
@@ -352,7 +393,8 @@ class Landable extends React.Component{
                 height: 0
             },
             test_data : [1,2,3,4,5],
-            active: false
+            active: false,
+            canScroll : true
         }
     }
 
@@ -371,6 +413,12 @@ class Landable extends React.Component{
         new_data.shift()
         this.setState({
             data: new_data
+        })
+    }
+
+    _toggleScroll = (specifiedScrollStatus = null)=>{
+        this.setState({
+            canScroll: specifiedScrollStatus? specifiedScrollStatus: !this.state.canScroll
         })
     }
 
@@ -459,9 +507,9 @@ class Landable extends React.Component{
     render(){
         return (
             <View 
-                ref = {this.list} 
-                style = {{width: "40%"}}
+                ref = {this.list}
                 isGestureOnTop = {this._isGestureOnTop}
+                toggleScroll = {this._toggleScroll}
 
                 onFocus = {this._onFocus}
                 onLoseFocus = {this._onLoseFocus}
@@ -469,12 +517,14 @@ class Landable extends React.Component{
                 onHandleRelease = {this._onHandleRelease}
 
                 addItem = {this.addItem}
-                removeItem = {this.removeItem}>
+                removeItem = {this.removeItem}
+                
+                style={this.props.style ? this.props.style : {height:"100%", width: "100%", backgroundColor: "#aaa"}}>
 
                 <FlatList
                     onLayout = {this._updateLayout}
-                    scrollEnabled = {false}
-                    style={{ backgroundColor: "#aaa"}}
+                    scrollEnabled = {this.state.canScroll}
+                    style={{height: "100%", width: "100%"}}
                     data = {this.state.test_data}
                     renderItem = {this._renderListItem}/>
 
@@ -490,7 +540,7 @@ export default class SandBox extends React.Component{
         this.test = React.createRef()
     }
     render(){
-        return <View>
+        return <View >
             <Button onLongPress={()=>console.log("YEP")}>
                 <Text>
                     Test
@@ -515,7 +565,7 @@ export default class SandBox extends React.Component{
                 </Text>
             </Button>
             
-            <Landable name="List A" ref={this.test}/>
+            <Landable name="List A" ref={this.test} style={{height: 110, width: "70%"}}/>
             <View>
                 <Text> Idk </Text>
                 <Landable name="List B"/>
