@@ -1,6 +1,6 @@
 import React from 'react'
 import {FlatList, Text, Dimensions, View, Modal as ModalFocus} from 'react-native'
-import TravelingCard from './TravelingCard'
+import TaskCard from './TaskCard'
 import { Button } from 'native-base';
 
 
@@ -49,9 +49,6 @@ export default class LandableList extends React.Component{
     
     render(){
         return <View>
-            <Button onLongPress={this._showFocus} onPress={()=>{console.log("hm")}}>
-                <Text> Show modal </Text>
-            </Button>
 
             <ModalFocus style={{height:"50%"}} visible={this.state.card_focus} transparent = {true}>
                 <TravelingCard title="?"/>

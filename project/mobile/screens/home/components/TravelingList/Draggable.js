@@ -64,7 +64,7 @@ export default class Draggable extends React.Component{
                             Animated.timing(                  // Animate over time
                                 this.state.modal_scale,            // The animated value to drive
                                 {
-                                    toValue: 1.25,                   // Animate to opacity: 1 (opaque)
+                                    toValue: 1.10,                   // Animate to opacity: 1 (opaque)
                                     duration: this.animation_speed,              // Make it take a while
                                 }
                             ),
@@ -214,22 +214,19 @@ export default class Draggable extends React.Component{
         let modalScaleStyle = {transform:[{scaleX: this.state.modal_scale}, {scaleY: this.state.modal_scale}]}
         let modalStyle = {transform: translateStyle.transform.concat(modalScaleStyle.transform)}
 
-        let imageStyle = {backgroundColor: "purple"};
         let scaleStyle = {transform:[{scaleX: this.state.scale}, {scaleY: this.state.scale}]}
         return ( 
             <View {...this._panResponder.panHandlers} onLayout={this._onLayoutHandler}>
                 <Modal
                     visible = {this.state.focus}
                     transparent = {true}>
-                    <Animated.View style={[modalStyle, imageStyle, defaultSizeStyle]} >
-                        <Text> Move please</Text>
-                        <Text> TEST </Text>
+                    <Animated.View style={[modalStyle, defaultSizeStyle]} >
+                        {this.props.children}
                     </Animated.View>
                 </Modal>
 
                 
-                <Animated.View style={[scaleStyle, {borderStyle: "solid", borderColor: "black", borderWidth: 1, backgroundColor: "yellow"}]}>\
-                    <Text> Move please</Text>
+                <Animated.View style={[scaleStyle]}>
                     {this.props.children}
                 </Animated.View>
             </View>)

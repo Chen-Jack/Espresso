@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactNative, { Modal, View, Text, TouchableHighlight, PanResponder, Animated, FlatList} from 'react-native'
-import {Button} from 'native-base'
+import {Button, Card, CardItem, Body, Item} from 'native-base'
 import {Draggable, Landable} from './home/components/TravelingList'
 
 // class Embassy{
@@ -542,14 +542,22 @@ export default class SandBox extends React.Component{
     }
     _renderListItem = ({item,index})=>{
         return (
-            <Draggable
-                // onStart = {Embassy.onStartHandler}
-                // onMove = {Embassy.onMoveHandler}
-                // onRelease = {Embassy.onReleaseHandler}
-                >
-                <Text>
-                    {item}
-                </Text>
+            <Draggable>
+                <Card>
+                    <CardItem header bordered>
+                        <Text>
+                            Title
+                        </Text>
+                    </CardItem>
+                    <CardItem>
+                        <Body>
+                            <Text>
+                                {item}
+                                Body
+                            </Text>
+                        </Body>
+                    </CardItem>
+                </Card>
             </Draggable>
         )  
     }
@@ -566,11 +574,14 @@ export default class SandBox extends React.Component{
                     Remove Item
                 </Text>
             </Button>
+            <Button onPress= {()=>this.props.navigation.navigate("home")}>
+                <Text> Home </Text>
+            </Button>
             
             <Landable 
                 name="List A" 
                 ref={this.test} 
-                style={{height: 110, width: "70%"}}
+                style={{height: 300, width: "70%"}}
                 renderItem = {this._renderListItem}
                 />
 
@@ -578,6 +589,7 @@ export default class SandBox extends React.Component{
                 <Text> Idk </Text>
                 <Landable 
                     name="List B"
+                    style={{height: 200, width: "100%"}}
                     renderItem = {this._renderListItem}
                     />
             </View>

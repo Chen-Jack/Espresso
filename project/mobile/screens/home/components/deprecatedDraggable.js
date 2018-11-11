@@ -1,7 +1,5 @@
 import React from 'react'
 import ReactNative, { View, Text, TouchableHighlight, PanResponder, Animated, FlatList} from 'react-native'
-import {Button} from 'native-base'
-
 
 export default class Draggable extends React.Component{
     constructor(props) {
@@ -14,18 +12,6 @@ export default class Draggable extends React.Component{
     }
 
     componentWillMount(){
-        // Animated.spring(
-        //     this.state.spawn_animation({
-        //       toValue: 1, bounciness: 12, speed: 5 // Animate to final value of 1
-        //     })
-        // ).start()
-        // Animated.timing(                  // Animate over time
-        //     this.state.spawn_animation,            // The animated value to drive
-        //     {
-        //       toValue: 1,                   // Animate to opacity: 1 (opaque)
-        //       duration: 10000,              // Make it take a while
-        //     }
-        //   ).start();  
 
         this._panResponder = PanResponder.create({
             onStartShouldSetResponder: (evt, gesture)=> true,
@@ -89,10 +75,10 @@ export default class Draggable extends React.Component{
     render(){
       
         // Calculate the transform property and set it as a value for our style which we add below to the Animated.View component
-        let imageStyle = {backgroundColor: "purple", transform: this.state.pan.getTranslateTransform()};
+        let imageStyle = {transform: this.state.pan.getTranslateTransform()};
         let scaleStyle = {transform:[{scaleX: this.state.spawn_animation}, {scaleY: this.state.spawn_animation}]}
         return (
-            <Animated.View style={[scaleStyle, imageStyle, {margin: 10, padding: 10}]} {...this._panResponder.panHandlers}>
+            <Animated.View style={[scaleStyle, imageStyle]} {...this._panResponder.panHandlers}>
                 <Text> Move please</Text>
                 {this.props.children}
             </Animated.View> )

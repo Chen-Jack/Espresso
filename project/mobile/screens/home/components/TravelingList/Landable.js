@@ -18,6 +18,7 @@ export default class Landable extends React.Component{
                 width: 0,
                 height: 0
             },
+            isHover: false,
             test_data : [1,2,3,4,5],
             active: false,
             canScroll : true
@@ -74,13 +75,15 @@ export default class Landable extends React.Component{
     _onFocus = ()=>{
         console.log(this.props.name, "Gained Focus");
         this.setState({
-            active: true
+            active: true,
+            isFocus: true
         })
     }
     _onLoseFocus = ()=>{
         console.log(this.props.name, "Lost Focus");
         this.setState({
-            active: false
+            active: false,
+            isFocus: false
         })
     }
 
@@ -159,13 +162,13 @@ export default class Landable extends React.Component{
                 addItem = {this.addItem}
                 removeItem = {this.removeItem}
                 
-                style={this.props.style ? this.props.style : {height:"100%", width: "100%", backgroundColor: "#aaa"}}>
+                style={this.props.style || {height:"100%", width: "100%"}}>
 
                 <FlatList
                     onLayout = {this._updateLayout}
                     scrollEnabled = {this.state.canScroll}
                     style={{height: "100%", width: "100%"}}
-                    data = {this.state.test_data}
+                    data = {this.props.data || this.state.test_data}
                     renderItem = {this.props.renderItem || this._renderListItem}/>
 
             </View>
