@@ -12,16 +12,17 @@ export default class Landable extends React.Component{
 
         this.state = {
             data : [],
-            layout : {
-                x: 0,
-                y: 0,
-                width: 0,
-                height: 0
-            },
             isHover: false,
             test_data : [1,2,3,4,5],
             active: false,
             canScroll : true
+        }
+
+        this.layout = {
+            x: 0,
+            y: 0,
+            width: 0,
+            height: 0
         }
     }
 
@@ -29,6 +30,8 @@ export default class Landable extends React.Component{
         this.setState({
             data: this.props.data
         })
+
+        
     }
 
 
@@ -55,7 +58,7 @@ export default class Landable extends React.Component{
         })
     }
 
-    _updateLayout = ()=>{
+    _updateLayout = ({nativeEvent})=>{
         this.list.current.measure((x,y,width,height,pageX,pageY)=>{
             const layout = {
                 x: pageX,
@@ -63,11 +66,10 @@ export default class Landable extends React.Component{
                 width: width,
                 height: height
             }
-
-            this.setState({
-                layout : layout
-            })
+            console.log("measured to be", layout);
+            this.layout = layout;
         })
+        
     }
 
    
@@ -108,20 +110,20 @@ export default class Landable extends React.Component{
            return false
        }
 
-       const x0 = this.state.layout.x
-       const y0 = this.state.layout.y
-       const x1 = this.state.layout.x + this.state.layout.width 
-       const y1 = this.state.layout.y + this.state.layout.height
+       const x0 = this.layout.x
+       const y0 = this.layout.y
+       const x1 = this.layout.x + this.layout.width 
+       const y1 = this.layout.y + this.layout.height
 
        const isWithinX = (x0 < location.x ) && (location.x < x1)
        const isWithinY = (y0 < location.y) && (location.y < y1)
 
-       if( isWithinX && isWithinY ){
-           return true
-       }
-       else{
-           return false
-       }
+        if( isWithinX && isWithinY ){
+            return true
+        }
+        else{
+            return false
+        }
     }
 
 
@@ -150,6 +152,7 @@ export default class Landable extends React.Component{
         return (
 
             <View 
+                onLayout = {this._updateLayout}
                 ref = {this.list}
                 isGestureOnTop = {this._isGestureOnTop}
                 toggleScroll = {this._toggleScroll}
@@ -164,8 +167,23 @@ export default class Landable extends React.Component{
                 
                 style={this.props.style || {height:"100%", width: "100%"}}>
 
+                <Button onPress={()=>{
+                    this.list.current.measure((x,y,width,height,pageX,pageY)=>{
+                        const layout = {
+                            x: pageX,
+                            y: pageY,
+                            width: width,
+                            height: height
+                        }
+                        console.log("x, y is", layout.x, layout.y);
+                        console.log("wid, height is", layout.width, layout.height);
+                    })
+                }}>
+                    <Text>Check Dimensions</Text>
+                </Button>
+
+
                 <FlatList
-                    onLayout = {this._updateLayout}
                     scrollEnabled = {this.state.canScroll}
                     style={{height: "100%", width: "100%"}}
                     data = {this.props.data || this.state.test_data}

@@ -1,6 +1,7 @@
 import React from 'react'
 import {Draggable, Landable} from './TravelingList'
 import TaskCard from './TaskCard'
+import {Dimensions} from 'react-native'
 
 export default class TaskList extends React.Component{
 
@@ -16,7 +17,7 @@ export default class TaskList extends React.Component{
         return <Landable
             data = {this.props.data}
             renderItem = {this._renderListItem}
-            style={{height: 300, width: "100%"}}
+            style={{height: 300, width: 500}}
         />
     }
 }

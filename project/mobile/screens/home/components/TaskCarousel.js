@@ -13,13 +13,9 @@ export default class TaskCarousel extends React.Component{
     }
 
     updateToDate = (date)=>{
-        console.log("CALLED!!!")
         const index = this.props.task_data.findIndex((task)=>{
-            console.log("TEST", task.date, "===?", date);
             return task.date === date ? true : false
         })
-
-        console.log("INDEX IS", index);
         if(index)
             this.carousel.current.snapToItem(index)
     }
@@ -30,9 +26,9 @@ export default class TaskCarousel extends React.Component{
     }
 
     _renderTaskList = ({item: task, index})=>{
-        mockdata = index === 0 ? [1,2,3,4,5] : [1,2,3]
+        mockdata = index === 0 ? [1,2,3,4,5] : [1,2,3,4,5,6]
         return <View>
-            <Text> Date </Text>
+            <Text style={{backgroundColor: "#222"}}> Date </Text>
             <TaskList data = {mockdata}/>
         </View>
     }
@@ -42,6 +38,7 @@ export default class TaskCarousel extends React.Component{
         return (
             <View>
                 <Carousel
+                    // scrollEnabled = {false}
                     ref = {this.carousel}
                     firstItem = {20}
                     onSnapToItem = {this._handleCardSelection}
@@ -50,7 +47,6 @@ export default class TaskCarousel extends React.Component{
                     renderItem={this._renderTaskList}
                     sliderWidth={Dimensions.get('window').width}
                     itemWidth={Dimensions.get('window').width}
-                    useScrollView = {true}
                 />
             </View>
         )

@@ -2,7 +2,7 @@
 
 import React from 'react'
 import {View, Drawer, Footer, FooterTab, InputGroup , Input, Textarea,Container, Content, Text, Button} from 'native-base'
-import {AsyncStorage, TouchableHighlight} from 'react-native'
+import {Dimensions,AsyncStorage, TouchableHighlight} from 'react-native'
 import Modal from 'react-native-modal'
 import { Calendar } from 'react-native-calendars';
 import TaskCarousel from './components/TaskCarousel'
@@ -163,7 +163,7 @@ class HomeScreen extends React.Component{
     }
 
    _generateEmptyTaskSet = ()=>{
-        const day_variance = 30; //How many days of tasks you will show.
+        const day_variance = 1; //How many days of tasks you will show.
         const seconds_per_day = 86400;
         let task_set = [];
 
@@ -210,6 +210,7 @@ class HomeScreen extends React.Component{
 
 
     componentDidMount(){
+        console.log("DIMensions", Dimensions.get("window").width, Dimensions.get("window").height)
         AsyncStorage.getItem("session_token", (err, session_token)=>{
             fetch("http://localhost:3000/get-user-data", {
                 headers: {
