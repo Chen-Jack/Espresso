@@ -18,8 +18,8 @@ class HomeScreen extends React.Component{
             user : {
                 username: ""
             },
-            task_data : [],
-            allocated_task_data : this._generateEmptyTaskSet(),
+            unallocated_tasks : [],
+            allocated_tasks : this._generateEmptyTaskSet(),
             selected_date: new Date().toISOString().substring(0,10),
             promptTaskCreation: false
         }   
@@ -102,8 +102,29 @@ class HomeScreen extends React.Component{
                     if(res.ok){
                         res.json().then((tasks)=>{
                             console.log("TASKS ARE", tasks);
+                            const unallocated_tasks = []
+                            const allocated_tasks = this.state.allocated_tasks
+                            for(let task of tasks){
+                                let wasTaskAllocated = false;
+                                for(let date_entry of allocated_tasks){
+                                    if(date_entry.date === task.allocated_date){
+                                        date_entry.tasks.push(task)
+                                        wasTaskAllocated = true
+                                        break;
+                                    }
+                                }
+
+                                if(!wasTaskAllocated){
+                                    unallocated_tasks.push(task)
+                                }
+                            }
+
+                            console.log("Unallocated", unallocated_tasks);
+                            console.log("Allocated", allocated_tasks);
+
                             this.setState({
-                                task_data: tasks
+                                unallocated_tasks: unallocated_tasks,
+                                allocated_tasks: allocated_tasks
                             })
                         })
                     }
@@ -174,7 +195,7 @@ class HomeScreen extends React.Component{
                         ref = {this.carousel}
                         selected_date = {this.state.selected_date}
                         handleDateSelection={this._onDateSelection} 
-                        task_data={this.state.allocated_task_data} />
+                        task_data={this.state.allocated_tasks} />
 
     
         
