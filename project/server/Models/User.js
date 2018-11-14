@@ -4,12 +4,6 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const config = require('./../config')
 
-/*
-user Schema
-  id VARCHAR(36) NOT NULL PRIMARY KEY,
-  username TEXT NOT NULL,
-  password TEXT NOT NULL
-*/
 class User{
 
   //Callback should take in errors and a jwt if successful

@@ -24,7 +24,6 @@ class HomeScreen extends React.Component{
             promptTaskCreation: false
         }   
 
-        console.log("Current date is", this.state.selected_date);
         this.carousel = React.createRef()
         this.calendar = React.createRef()
      
@@ -62,23 +61,29 @@ class HomeScreen extends React.Component{
     }
 
    _generateEmptyTaskSet = ()=>{
-        const day_variance = 1; //How many days of tasks you will show.
+       /*
+        Generates an array of objects. Each object has the following form
+        {
+            date: String
+            tasks : Array
+        }
+       */
+        const day_variance = 7; //How many days of tasks you will show.
         const seconds_per_day = 86400;
         let task_set = [];
 
         const past_days_allowed = 15; //How far back in time do you want to see
 
-        //Get starting date in seconds
         let starting_date_in_epoch = Math.floor(Date.now()/1000 - (seconds_per_day * past_days_allowed))
 
-        //Generate an array of task data ranging from +/- day_variance from now
         for(let i = 0; i < day_variance; i++){
+
             //Convert from seconds back into miliseconds for date constructor
             const date = new Date((starting_date_in_epoch + (i * seconds_per_day)) * 1000) 
             task_set.push({
-                title: "",
-                detail: "",
-                date: date.toISOString().substring(0,10)}) //Only select the date part of ISO date
+                date: date.toISOString().substring(0,10), //Only select the date part of ISO date
+                tasks: []
+            })
         }
         console.log("Task set is", task_set);
         return task_set
@@ -103,13 +108,15 @@ class HomeScreen extends React.Component{
                         })
                     }
                 }
-            )
+            ).catch((err)=>{
+                console.log("Error when populatingTaskSet", err)
+                alert("Error")
+            })
         })
     }
 
 
     componentDidMount(){
-        console.log("DIMensions", Dimensions.get("window").width, Dimensions.get("window").height)
         AsyncStorage.getItem("session_token", (err, session_token)=>{
             fetch("http://localhost:3000/get-user-data", {
                 headers: {

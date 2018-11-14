@@ -66,7 +66,6 @@ export default class Landable extends React.Component{
                 width: width,
                 height: height
             }
-            console.log("measured to be", layout);
             this.layout = layout;
         })   
     }

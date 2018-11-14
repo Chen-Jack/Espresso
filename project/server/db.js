@@ -37,6 +37,7 @@ connection.query(`CREATE TABLE IF NOT EXISTS
         details TEXT, 
         completed BOOLEAN NOT NULL DEFAULT false,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        allocated_date TIMESTAMP,
         FOREIGN KEY (creator_id) REFERENCES user(id)
     )`, (err, results, fields)=>{
         if(err)

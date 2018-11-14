@@ -1,16 +1,6 @@
 const db = require('./../db');
 const uuid = require('uuid/v4');
 
-/*
-task Schema
-    id VARCHAR(36) NOT NULL PRIMARY KEY,
-    creator_id VARCHAR(36) NOT NULL,
-    title TEXT NOT NULL,
-    details TEXT,
-    completed BOOLEAN NOT NULL DEFAULT false,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-*/
-
 class Task{
 
     static create(creator_id, title="", details="", callback){
@@ -40,7 +30,8 @@ class Task{
                         title: result.title,
                         details: result.title,
                         completed: result.completed,
-                        created_at: result.created_at
+                        created_at: result.created_at,
+                        allocated_date: result.allocated_date
                     }
                 })
             }
