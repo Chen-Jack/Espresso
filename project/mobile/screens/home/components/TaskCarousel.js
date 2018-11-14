@@ -27,8 +27,8 @@ export default class TaskCarousel extends React.Component{
 
     _renderTaskList = ({item: task, index})=>{
         mockdata = index === 0 ? [1,2,3,4,5] : [1,2,3,4,5,6]
-        return <View>
-            <Text style={{backgroundColor: "#222"}}> Date </Text>
+        return <View >
+            <Text > Date </Text>
             <TaskList data = {mockdata}/>
         </View>
     }

@@ -68,8 +68,7 @@ export default class Landable extends React.Component{
             }
             console.log("measured to be", layout);
             this.layout = layout;
-        })
-        
+        })   
     }
 
    
@@ -167,7 +166,7 @@ export default class Landable extends React.Component{
                 
                 style={this.props.style || {height:"100%", width: "100%"}}>
 
-                <Button onPress={()=>{
+                {/* <Button onPress={()=>{
                     this.list.current.measure((x,y,width,height,pageX,pageY)=>{
                         const layout = {
                             x: pageX,
@@ -180,7 +179,7 @@ export default class Landable extends React.Component{
                     })
                 }}>
                     <Text>Check Dimensions</Text>
-                </Button>
+                </Button> */}
 
 
                 <FlatList

@@ -92,7 +92,7 @@ class TaskCreationModalPrompt extends React.Component{
 
     render(){
         return <View>
-            <Button onPress={this.togglePrompt}>
+            <Button style={{padding:0, margin:0}} onPress={this.togglePrompt}>
                 <Text>Create Task</Text>
             </Button>
 
@@ -136,7 +136,7 @@ class HomeScreen extends React.Component{
         headerLeft: null,
         headerTintColor: 'white',
         headerStyle: {
-            backgroundColor: 'papayawhip'
+            backgroundColor: '#222'
         },
         headerTitleStyle: {
             alignSelf: 'center'
@@ -254,7 +254,7 @@ class HomeScreen extends React.Component{
 
     render(){
         return <Container >
-            <Content scrollEnabled = {false}>
+            <Content style={{backgroundColor: "#333"}} scrollEnabled = {false}>
                 <Calendar
                         
                         onDayPress={(day)=>{
@@ -273,20 +273,21 @@ class HomeScreen extends React.Component{
     
         
             </Content>
-            <Footer >
+            <Footer style={{backgroundColor: "#222", padding:0, margin: 0}} >
                 <FooterTab>
-                    <Button>
-                        <TaskCreationModalPrompt />
+                    <TaskCreationModalPrompt />
+
+                    <Button onPress = {this._logout}> 
+                        <Text style={{color:"white"}}> Logout</Text>
                     </Button>
+                    
                     <Button onPress= {()=>this.props.navigation.navigate("sandbox")}>
-                        <Text> SandBox </Text>
+                        <Text style={{color: "white"}}> SandBox </Text>
                     </Button>
                     {/* <Button style={{flex: 1}}>
                         <TaskDrawer task_data = {this.state.task_data}/>
                     </Button> */}
-                    <Button onPress = {this._logout}> 
-                        <Text> Logout</Text>
-                    </Button>
+                    
                 </FooterTab>
             </Footer>
         </Container>
