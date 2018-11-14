@@ -4,9 +4,9 @@ import React from 'react'
 import {Footer, FooterTab, Container, Content, Text, Button} from 'native-base'
 import {Dimensions, AsyncStorage } from 'react-native'
 import { Calendar } from 'react-native-calendars';
-import TaskCarousel from './components/TaskCarousel'
+import {TaskCarousel} from './components/TaskCarousel'
 import {TaskCreationPrompt} from './components/TaskForm'
-// import TaskDrawer from './components/TaskDrawer'
+// import {TaskDrawer} from './components/TaskDrawer'
 
 
 class HomeScreen extends React.Component{

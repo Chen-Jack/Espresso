@@ -1,6 +1,6 @@
 import React from 'react'
 import Carousel from 'react-native-snap-carousel'
-import {View,Button, Text, Card, CardItem, Body} from 'native-base'
+import {View, Text} from 'native-base'
 import {Dimensions} from 'react-native'
 import TaskList from './TaskList'
 
@@ -37,6 +37,7 @@ export default class TaskCarousel extends React.Component{
     
         return (
             <View>
+                
                 <Carousel
                     // scrollEnabled = {false}
                     ref = {this.carousel}

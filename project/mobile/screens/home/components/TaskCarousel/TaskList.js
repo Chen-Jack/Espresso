@@ -1,7 +1,6 @@
 import React from 'react'
-import {Draggable, Landable} from './TravelingList'
+import {Draggable, Landable} from './../TravelingList'
 import TaskCard from './TaskCard'
-import {Dimensions} from 'react-native'
 
 export default class TaskList extends React.Component{
 

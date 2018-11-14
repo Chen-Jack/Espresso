@@ -1,5 +1,5 @@
 import React from 'react'
-import {Badge, Item, Card, CardItem,Text, View, Body} from 'native-base'
+import {Card, CardItem, Text, Body} from 'native-base'
 
 export default function TaskCard(props){
     return <Card>
