@@ -6,7 +6,7 @@ import {Dimensions, AsyncStorage } from 'react-native'
 import { Calendar } from 'react-native-calendars';
 import {TaskCarousel} from './components/TaskCarousel'
 import {TaskCreationPrompt} from './components/TaskForm'
-// import {TaskDrawer} from './components/TaskDrawer'
+import {TaskDrawer} from './components/TaskDrawer'
 
 
 class HomeScreen extends React.Component{
@@ -19,13 +19,14 @@ class HomeScreen extends React.Component{
                 username: ""
             },
             unallocated_tasks : [],
-            allocated_tasks : this._generateEmptyTaskSet(),
+            allocated_tasks : [],
             selected_date: new Date().toISOString().substring(0,10),
             promptTaskCreation: false
         }   
 
         this.carousel = React.createRef()
         this.calendar = React.createRef()
+        this.drawer = React.createRef()
      
     }
 
@@ -60,9 +61,6 @@ class HomeScreen extends React.Component{
         
     }
 
-    componentDidUpdate(){
-        console.log("Homescreen was updated");
-    }
 
    _generateEmptyTaskSet = ()=>{
        /*
@@ -108,7 +106,8 @@ class HomeScreen extends React.Component{
                             // console.log("TASKS ARE", tasks);
                             const unallocated_tasks = []
 
-                            // Generate a new object copy.
+                            // Generate a new object copy. React will not
+                            // properly call updates on objects due to references.
                             const allocated_tasks = this._generateEmptyTaskSet()
 
                             for(let task of tasks){
@@ -125,15 +124,9 @@ class HomeScreen extends React.Component{
                                     unallocated_tasks.push(task)
                                 }
                             }
-
-                            console.log("Unallocated", unallocated_tasks);
-                            console.log("Allocated", allocated_tasks);
-
                             this.setState({
                                 unallocated_tasks: unallocated_tasks,
                                 allocated_tasks: allocated_tasks
-                            }, ()=>{
-                                console.log("Task states were updated", Date.now());
                             })
                         })
                     }
@@ -187,10 +180,16 @@ class HomeScreen extends React.Component{
         this.setState({promptTaskCreation: true})
     }
 
+    _openDrawer = ()=>{
+        this.drawer.current.toggleDrawer(true)
+    }
 
     render(){
         return <Container >
             <Content style={{backgroundColor: "#333"}} scrollEnabled = {false}>
+
+                <TaskDrawer ref={this.drawer} task_data = {this.state.unallocated_tasks}/>
+
                 <Calendar
                         
                         onDayPress={(day)=>{
@@ -219,9 +218,9 @@ class HomeScreen extends React.Component{
                     <Button onPress= {()=>this.props.navigation.navigate("sandbox")}>
                         <Text style={{color: "white"}}> SandBox </Text>
                     </Button>
-                    {/* <Button style={{flex: 1}}>
-                        <TaskDrawer task_data = {this.state.task_data}/>
-                    </Button> */}
+                    <Button onPress={this._openDrawer}>
+                        <Text> Toggle Drawer</Text>
+                    </Button>
                     
                 </FooterTab>
             </Footer>

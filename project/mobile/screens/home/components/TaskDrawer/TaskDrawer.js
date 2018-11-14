@@ -1,9 +1,8 @@
 import React from 'react'
 import {View, Text, Dimensions, TouchableHighlight} from 'react-native'
-import {Badge} from 'native-base'
 import Modal from 'react-native-modal'
-// import TravelingCard from './TravelingCard'
-// import TravelableList from './TravelableList'
+import {Landable, Draggable} from './../TravelingList'
+import TaskList from '../TaskCarousel/TaskList'
 
 export default class TaskDrawer extends React.Component{
     constructor(props) {
@@ -15,60 +14,46 @@ export default class TaskDrawer extends React.Component{
 
     }
 
-    toggleDrawer = ()=>{
-        const next_state = !this.state.visible
+    toggleDrawer = (toggleState)=>{
+        const next_state = toggleState || !this.state.visible
         this.setState({
             visible: next_state
         })
     }
 
+    _renderListItem = ({item,index})=>{
+        return (
+            <Draggable>
+                <TaskCard title={item.title} details={item.details} isCompleted={item.completed}/>
+            </Draggable>
+        )  
+    }
 
     render(){
-        return(
-            <View>
-                <Text>
-                    Test
-                </Text>
-            </View>
-        )
-    //     return (
-    //        
+        return (
 
-    //     <View>  
-    //         {/* The component responsible for calling the drawer */}
-    //         <TouchableHighlight
-    //             onPress={this.toggleDrawer}>     
-    //             <Badge info>
-    //                 {/* style={{position: "absolute", top: 0}}  */}
-    //                 <Text>
-    //                     S
-    //                 </Text>
-    //             </Badge>
-    //         </TouchableHighlight> 
-
-    //         <Modal
-    //             animationInTiming = {800}
-    //             animationOutTiming = {800}
-    //             animationIn = {"slideInDown"}
-    //             animationOut = {"slideOutUp"}
-    //             isVisible = {this.state.visible}
-    //             onBackdropPress = {()=>this.toggleDrawer()}
-    //             hideModalContentWhileAnimating = {true}
-    //             style={{padding: 0, margin: 0}}>
+            <Modal
+                animationInTiming = {800}
+                animationOutTiming = {800}
+                animationIn = {"slideInLeft"}
+                animationOut = {"slideOutLeft"}
+                isVisible = {this.state.visible}
+                onBackdropPress = {()=>this.toggleDrawer(false)}
+                hideModalContentWhileAnimating = {true}
+                style={{height:"80%", padding: 0, margin: 0}}>
                 
-    //             <View style={{padding:10, margin:0, position: "absolute", zIndex:0, backgroundColor: "orange", height: Dimensions.get('window').height * 0.7, width: Dimensions.get('window').width, }}>
-    //               {/* <Text style={{padding:0, margin:0}}> Tasks </Text> */}
-
-    //               <TravelableList 
-    //                 data = {this.props.task_data}
-    //                 travelingComponent = {TravelingCard}/>
-
-    //             </View>
+                <View style={{top: 0, left: 0, padding: 0, margin:0, position: "absolute", backgroundColor: "orange", height: Dimensions.get('window').height, width: Dimensions.get('window').width*0.7 }}>
+                    <View style={{alignItems: "center", justifyContent:"center", backgroundColor:"#222", height: "25%", width:"100%"}}>
+                        <Text style={{fontSize:20, color:"white"}}> Unallocated Tasks </Text>
+                    </View>
+                    <View style={{padding:10, width:"100%", height:"100%"}}>
+                    <TaskList
+                        data = {this.props.task_data}
+                    />
+                    </View>
+                </View>
             
-    //         </Modal>
-
-    //     </View>
-
-    // )}
+            </Modal>
+        )
     }
 }

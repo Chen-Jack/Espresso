@@ -29,7 +29,7 @@ export default class TaskList extends React.Component{
             return <Landable
                 data = {this.props.data}
                 renderItem = {this._renderListItem}
-                style={{height: 300, width: "100%"}}/>
+                style={{height: "100%", width: "100%"}}/>
         }
     }
 }
