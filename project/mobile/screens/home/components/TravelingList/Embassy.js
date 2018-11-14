@@ -7,6 +7,9 @@ export default class Embassy{
     instantiated. Every instantiated landable should let the Embassy know.
     */
     static registeredLandables = [];
+    static onStartEvents = [];
+    static onMoveEvents = [];
+    static onReleaseEvents = [];
     static origin_target = null; //React reference to the source of the original Landable
     static active_target = null; //React reference to the active Landable
 
@@ -71,11 +74,27 @@ export default class Embassy{
         Embassy.updateTarget(new_target)
     }
 
+    static addOnStartHandler = (handler) => {
+        Embassy.onStartEvents.push(handler)
+    }
+
+    static addOnMoveHandler = (handler) => {
+        Embassy.onMoveEvents.push(handler)
+    }
+
+    static addOnReleaseHandler = (handler) => {
+        Embassy.onReleaseEvents.push(handler)
+    }
+
     static onStartHandler = (coordinates)=>{
         /*
         The starting handler and active handler are always the same.
         Cause you havent moved away from the origin yet
         */
+
+        for(let event of Embassy.onStartEvents){
+            event()
+        }
 
         //Disable scrolling on all landables while gesturing
         for(let landable of Embassy.registeredLandables){
@@ -90,6 +109,11 @@ export default class Embassy{
     static onMoveHandler = (coordinates)=>{
         const new_target = Embassy.findTarget(coordinates)
         Embassy.updateTarget(new_target)
+
+
+        for(let event of Embassy.onMoveEvents){
+            event()
+        }
     }
 
     static canPerformTransfer = (source, target)=>{
@@ -131,6 +155,11 @@ export default class Embassy{
         }
         
         Embassy.origin_target = null
+
+
+        for(let event of Embassy.onReleaseEvents){
+            event()
+        }
 
         //Return scrolling capabilities to all landables
         for(let landable of Embassy.registeredLandables){

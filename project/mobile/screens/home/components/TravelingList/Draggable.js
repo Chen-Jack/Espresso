@@ -14,7 +14,7 @@ export default class Draggable extends React.Component{
             modal_scale: new Animated.Value(1)
         }
         
-        this.animation_speed = 300;
+        this.animation_speed = 200;
         this.ms_to_trigger_long_press = 500; 
         this.timer_ref = null   //Ref to keep track of long press
         this.gesture_started = false //a variable to know allow/know if the gesture has officially started
@@ -51,12 +51,11 @@ export default class Draggable extends React.Component{
             // onMoveShouldSetPanResponderCapture: () => true,
         
             onPanResponderGrant: (e, gestureState) => {
+                console.log("Scales are", this.state.scale, this.state.modal_scale);
                 e.persist() //Must persist event to access async
 
                 const long_press_callback = (e, gestureState)=>{
             
-                    this.gesture_started = true
-
                     this.setState({
                         focus: true
                     }, ()=>{
@@ -96,6 +95,8 @@ export default class Draggable extends React.Component{
                     }
                     Embassy.onStartHandler(coordinates)
                     
+                    this.gesture_started = true
+                    console.log("gesture started");
                 }
 
                 this.timer_ref = setTimeout( 
@@ -106,12 +107,15 @@ export default class Draggable extends React.Component{
             },
 
             onPanResponderMove : ({nativeEvent}, gestureState) => {
+                console.log("moving");
                 if(!this.gesture_started){
                     // If you move when you arent allowed to move yet, clear the timer
+                    console.log("MOVED TOO EARLY");
                     clearTimeout(this.timer_ref)
                     this.timer_ref = null
                 }
                 else{
+                    console.log("on move gesture");
                     const center_offset = {
                         x: this.default_size.width/2,
                         y: this.default_size.height/2
@@ -132,21 +136,6 @@ export default class Draggable extends React.Component{
                 }
             },
         
-
-            // onPanResponderEnd: (e, gestureState) => {
-            //     this.setState({
-            //         focus: false
-            //     })
-
-            //      this.state.pan.setValue({x: 0, y: 0});
-            //     this.state.pan.flattenOffset();
-            //     Animated.spring(
-            //         this.state.pan, // The value to drive
-            //         {
-            //           toValue: {x:0, y:0}, bounciness: 12, speed: 20 // Animate to final value of 1
-            //         }
-            //       ).start(); // Start the animation
-            // },
 
             onResponderTerminationRequest: (e,gesturestate) => false,
 
@@ -187,9 +176,10 @@ export default class Draggable extends React.Component{
                         y: e.nativeEvent.pageY
                     }
                     Embassy.onReleaseHandler(coordinates)
-                    
+                    this.gesture_started = false
                 }
             }
+
           });
     }
 
@@ -208,12 +198,10 @@ export default class Draggable extends React.Component{
     render(){
         // Calculate the transform property and set it as a value for our style which we add below to the Animated.View component
         let defaultSizeStyle =  {width: this.default_size.width, height: this.default_size.height}
-        // let translateStyle = {transform: this.state.pan.getTranslateTransform()}
-
         let translateStyle = {transform: [{translateX: this.state.pan.x}, {translateY: this.state.pan.y}]}
         let modalScaleStyle = {transform:[{scaleX: this.state.modal_scale}, {scaleY: this.state.modal_scale}]}
-        let modalStyle = {transform: translateStyle.transform.concat(modalScaleStyle.transform)}
 
+        let modalStyle = {transform: translateStyle.transform.concat(modalScaleStyle.transform)}
         let scaleStyle = {transform:[{scaleX: this.state.scale}, {scaleY: this.state.scale}]}
         return ( 
             <View {...this._panResponder.panHandlers} onLayout={this._onLayoutHandler}>

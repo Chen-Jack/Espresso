@@ -3,15 +3,29 @@ import Carousel from 'react-native-snap-carousel'
 import {View, Text} from 'native-base'
 import {Dimensions} from 'react-native'
 import TaskList from './TaskList'
+import {Embassy} from '../TravelingList'
 
 
 export default class TaskCarousel extends React.Component{
     constructor(props) {
         super(props)
         
+        this.state={
+            canScroll : true
+        }
         this.carousel = React.createRef()
     }
 
+    componentDidMount(){
+        // Embassy.addOnStartHandler(this.setCarouselScrollStatus.bind(this, false))
+        // Embassy.addOnReleaseHandler(this.setCarouselScrollStatus.bind(this,true))
+    }
+
+    setCarouselScrollStatus = (status)=>{
+        this.setState({
+            canScroll : status
+        })
+    }
 
     updateToDate = (date)=>{
         const index = this.props.task_data.findIndex((task)=>{
@@ -36,9 +50,11 @@ export default class TaskCarousel extends React.Component{
     render(){
 
         return (
-            <View style={{marginTop: 20}}>
+            <View style={{marginTop: 20, height:"100%"}}>
                 
                 <Carousel
+                    scrollEnabled = {false}
+                    // scrollEnabled = {this.state.canScroll}
                     ref = {this.carousel}
                     firstItem = {20}
                     onSnapToItem = {this._handleCardSelection}
