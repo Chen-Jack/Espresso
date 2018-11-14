@@ -1,7 +1,7 @@
 var mysql = require('mysql');
 var config = require('./config')
 
-var connection = mysql.createConnection(config.db_credentials);
+const connection = mysql.createConnection(config.db_credentials);
  
 connection.connect((err)=>{
     if(err){
@@ -37,7 +37,7 @@ connection.query(`CREATE TABLE IF NOT EXISTS
         details TEXT, 
         completed BOOLEAN NOT NULL DEFAULT false,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        allocated_date TIMESTAMP,
+        allocated_date DATE,
         FOREIGN KEY (creator_id) REFERENCES user(id)
     )`, (err, results, fields)=>{
         if(err)

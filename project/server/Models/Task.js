@@ -11,6 +11,20 @@ class Task{
             })
     }
 
+    static allocateTask(creator_id, task_id, date, callback=()=>{}){
+        //Date format should be yyyy-mm-dd
+        const sql_query = `UPDATE task SET allocated_date = (?) WHERE creator_id = (?) AND id = (?)`
+
+        db.query(sql_query, [date, creator_id, task_id], (err, results, fields)=>{
+            if(err){
+                console.log("allocateTask() error", err);
+                return callback(err)
+            }
+            console.log("RESULTS OF allocateTask was", results);
+            callback()
+        })
+    }
+
     static getTasksCreatedBy(creator_id, callback=()=>{}){
         const sql_query = `SELECT * FROM task WHERE creator_id = (?)`
 

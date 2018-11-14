@@ -60,6 +60,10 @@ class HomeScreen extends React.Component{
         
     }
 
+    componentDidUpdate(){
+        console.log("Homescreen was updated");
+    }
+
    _generateEmptyTaskSet = ()=>{
        /*
         Generates an array of objects. Each object has the following form
@@ -72,7 +76,7 @@ class HomeScreen extends React.Component{
         const seconds_per_day = 86400;
         let task_set = [];
 
-        const past_days_allowed = 15; //How far back in time do you want to see
+        const past_days_allowed = Math.floor(day_variance*0.5); //How far back in time do you want to see
 
         let starting_date_in_epoch = Math.floor(Date.now()/1000 - (seconds_per_day * past_days_allowed))
 
@@ -85,7 +89,7 @@ class HomeScreen extends React.Component{
                 tasks: []
             })
         }
-        console.log("Task set is", task_set);
+
         return task_set
     }
 
@@ -98,12 +102,15 @@ class HomeScreen extends React.Component{
                 }
             }).then(
                 (res)=>{
-                    console.log("STATUS IS", res.status);
+                    // console.log("STATUS IS", res.status);
                     if(res.ok){
                         res.json().then((tasks)=>{
-                            console.log("TASKS ARE", tasks);
+                            // console.log("TASKS ARE", tasks);
                             const unallocated_tasks = []
-                            const allocated_tasks = this.state.allocated_tasks
+
+                            // Generate a new object copy.
+                            const allocated_tasks = this._generateEmptyTaskSet()
+
                             for(let task of tasks){
                                 let wasTaskAllocated = false;
                                 for(let date_entry of allocated_tasks){
@@ -125,6 +132,8 @@ class HomeScreen extends React.Component{
                             this.setState({
                                 unallocated_tasks: unallocated_tasks,
                                 allocated_tasks: allocated_tasks
+                            }, ()=>{
+                                console.log("Task states were updated", Date.now());
                             })
                         })
                     }
@@ -190,12 +199,11 @@ class HomeScreen extends React.Component{
                             [this.state.selected_date]: {selected: true, selectedColor: 'lightblue'},
                         }}/>
 
-                <Text> ASSIGNED TASKS </Text>
                 <TaskCarousel
-                        ref = {this.carousel}
-                        selected_date = {this.state.selected_date}
-                        handleDateSelection={this._onDateSelection} 
-                        task_data={this.state.allocated_tasks} />
+                    ref = {this.carousel}
+                    selected_date = {this.state.selected_date}
+                    handleDateSelection={this._onDateSelection} 
+                    task_data={this.state.allocated_tasks} />
 
     
         

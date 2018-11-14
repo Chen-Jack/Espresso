@@ -12,6 +12,7 @@ export default class TaskCarousel extends React.Component{
         this.carousel = React.createRef()
     }
 
+
     updateToDate = (date)=>{
         const index = this.props.task_data.findIndex((task)=>{
             return task.date === date ? true : false
@@ -25,21 +26,19 @@ export default class TaskCarousel extends React.Component{
         this.props.handleDateSelection(iso_date)
     }
 
-    _renderTaskList = ({item: task, index})=>{
-        mockdata = index === 0 ? [1,2,3,4,5] : [1,2,3,4,5,6]
+    _renderTaskList = ({item: tasks_of_the_day, index})=>{
         return <View >
-            <Text > Date </Text>
-            <TaskList data = {mockdata}/>
+            <Text style={{fontSize: 16, backgroundColor:"white", padding: 10}}> {"Date: " + tasks_of_the_day.date || "Date"} </Text>
+            <TaskList data = {tasks_of_the_day.tasks}/>
         </View>
     }
 
     render(){
-    
+
         return (
-            <View>
+            <View style={{marginTop: 20}}>
                 
                 <Carousel
-                    // scrollEnabled = {false}
                     ref = {this.carousel}
                     firstItem = {20}
                     onSnapToItem = {this._handleCardSelection}

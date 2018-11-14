@@ -8,9 +8,13 @@ export default function TaskCard(props){
         </CardItem>
 
         <CardItem>
+            <Text>{props.isCompleted ? "Done" : "Unfinished"}</Text>
+        </CardItem>
+
+        <CardItem>
             <Body>
                 <Text>
-                    {props.detail || ""}
+                    {props.details || ""}
                 </Text>
             </Body>
         </CardItem>

@@ -77,6 +77,9 @@ app.get('/test', (req,res)=>{
 // ]
 
 extractPayloadFromHeader = function(headers){
+    /*
+    Extracts the id of the user from the JWT
+    */
     try{
         const token = headers.authorization.split(' ')[1]
         const payload = jwt.verify(token, config.jwt.secret)
@@ -100,6 +103,26 @@ app.post('/create-account', (req,res)=>{
     })
 })
 
+app.post('/allocate-task', (req,res)=>{
+
+    // const payload = extractPayloadFromHeader(req.headers)
+    // if(!payload)
+    //     return res.status(401).end() 
+
+    const task_id = req.body.task_id
+    const new_date = req.body.new_date
+    const creator_id = req.body.creator_id
+    // const creator_id = payload
+
+    Task.allocateTask(creator_id, task_id, new_date , (err)=>{
+        if(err)
+            res.status(400).end()
+        else{
+            res.status(200).end()
+        }
+    })
+})
+
 app.post('/login-account', (req,res)=>{
     const username = req.body.username
     const raw_password = req.body.password
@@ -116,6 +139,7 @@ app.post('/login-account', (req,res)=>{
             res.status(200).json(token)
     })   
 })
+
 
 app.get('/get-user-data', (req,res)=>{
 
