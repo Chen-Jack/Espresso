@@ -1,113 +1,12 @@
 //The home page for an account
 
 import React from 'react'
-import {View, Drawer, Footer, FooterTab, InputGroup , Input, Textarea,Container, Content, Text, Button} from 'native-base'
-import {Dimensions,AsyncStorage, TouchableHighlight} from 'react-native'
-import Modal from 'react-native-modal'
+import {Footer, FooterTab, Container, Content, Text, Button} from 'native-base'
+import {Dimensions, AsyncStorage } from 'react-native'
 import { Calendar } from 'react-native-calendars';
 import TaskCarousel from './components/TaskCarousel'
+import {TaskCreationPrompt} from './components/TaskForm'
 // import TaskDrawer from './components/TaskDrawer'
-
-class TaskCreationForm extends React.Component{
-    constructor(props) {
-        super(props)
-        this.state = {
-            form_errors : [],
-            task_title: "",
-            task_detail: ""
-        }
-    }
-
-    _submitForm = ()=>{
-        AsyncStorage.getItem('session_token', (err, token)=>{
-            if(err || !token)
-                return this.props.navigation.navigate('landing')
-
-            const task = {
-                title: this.state.task_title,
-                detail: this.state.task_detail
-            }
-            fetch('http://localhost:3000/create-task',{
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(task)
-            }).then((res)=>{
-                console.log("status", res.status);
-                if(res.ok){
-                    this.props.onFormSubmission()
-                }
-                else if(res.status === 401){
-
-                }
-                else if(res.status === 400){
-                    res.json().then(()=>{
-                        this.setState({
-                            form_errors : errors_txt
-                        })
-                    })
-                }
-            })
-        })
-    }
-
-    render(){
-        return <View style={{padding: 20 , backgroundColor: "white"}}>
-            {this.state.form_errors.map((err)=>{
-                return <View>
-                        <Text> {err} </Text>
-                    </View>
-            })}
-            <Text> Create Task</Text>
-            <Textarea placeholder="Title" onChangeText={(txt)=>this.setState({task_title: txt})}/>
-            <Textarea placeholder="Details" onChangeText={(txt)=>this.setState({task_detail: txt})}/>
-            <Button onPress={this._submitForm}>
-                <Text>Submit</Text>
-            </Button>
-
-           
-            
-        </View>
-    }
-}
-
-class TaskCreationModalPrompt extends React.Component{
-    constructor(props) {
-        super(props)
-
-        this.state = {
-            visible: false
-        }
-    }
-
-    togglePrompt = ()=>{
-        const next_state = !this.state.visible
-        this.setState({
-            visible: next_state
-        })
-    }
-
-    render(){
-        return <View>
-            <Button style={{padding:0, margin:0}} onPress={this.togglePrompt}>
-                <Text>Create Task</Text>
-            </Button>
-
-            <Modal
-                onBackdropPress= {()=>this.togglePrompt()}
-                isVisible={this.state.visible}>
-                <View>
-                    
-                    <TaskCreationForm onFormSubmission={this.togglePrompt}/>
-
-                </View>
-            </Modal>
-        </View>
-    }
-}
 
 
 class HomeScreen extends React.Component{
@@ -275,7 +174,7 @@ class HomeScreen extends React.Component{
             </Content>
             <Footer style={{backgroundColor: "#222", padding:0, margin: 0}} >
                 <FooterTab>
-                    <TaskCreationModalPrompt />
+                    <TaskCreationPrompt />
 
                     <Button onPress = {this._logout}> 
                         <Text style={{color:"white"}}> Logout</Text>
