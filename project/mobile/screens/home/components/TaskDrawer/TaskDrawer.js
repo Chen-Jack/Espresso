@@ -1,7 +1,7 @@
 import React from 'react'
 import {View, Text, Dimensions, TouchableHighlight} from 'react-native'
 import Modal from 'react-native-modal'
-import {Landable, Draggable} from './../TravelingList'
+import {Landable, Draggable, Embassy} from './../TravelingList'
 import TaskList from '../TaskCarousel/TaskList'
 
 export default class TaskDrawer extends React.Component{
@@ -12,13 +12,24 @@ export default class TaskDrawer extends React.Component{
             visible: false
         }
 
+        // Embassy.addOnStartHandler(this.closeDrawer)
+
     }
 
-    toggleDrawer = (toggleState)=>{
+    closeDrawer = (coordinates,cb)=>{
+        this.toggleDrawer(false, (err)=>{
+            if(err)
+                cb(err)
+            else
+                cb()
+        })
+    }
+
+    toggleDrawer = (toggleState, cb)=>{
         const next_state = toggleState || !this.state.visible
         this.setState({
             visible: next_state
-        })
+        }, cb)
     }
 
     _renderListItem = ({item,index})=>{
@@ -28,6 +39,7 @@ export default class TaskDrawer extends React.Component{
             </Draggable>
         )  
     }
+
 
     render(){
         return (

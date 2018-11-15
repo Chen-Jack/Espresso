@@ -1,6 +1,6 @@
 import React from 'react'
 import Carousel from 'react-native-snap-carousel'
-import {View, Text} from 'native-base'
+import {View, Text, Button} from 'native-base'
 import {Dimensions} from 'react-native'
 import TaskList from './TaskList'
 import {Embassy} from '../TravelingList'
@@ -11,19 +11,30 @@ export default class TaskCarousel extends React.Component{
         super(props)
         
         this.state={
-            canScroll : true
+            canScroll : true,
+            thresh: 30
         }
         this.carousel = React.createRef()
     }
 
     componentDidMount(){
-        // Embassy.addOnStartHandler(this.setCarouselScrollStatus.bind(this, false))
-        // Embassy.addOnReleaseHandler(this.setCarouselScrollStatus.bind(this,true))
+        Embassy.addOnStartHandler(this.disableCarouselScroll)
+        Embassy.addOnReleaseHandler(this.enableCarouselScroll)
     }
 
-    setCarouselScrollStatus = (status)=>{
+    disableCarouselScroll = (coordinates, cb=()=>{})=>{
         this.setState({
-            canScroll : status
+            canScroll: false
+        },()=>{
+            cb()
+        })
+    }
+    
+    enableCarouselScroll = (coordinates, cb=()=>{})=>{
+        this.setState({
+            canScroll: true
+        }, ()=>{
+            cb()
         })
     }
 
@@ -50,15 +61,13 @@ export default class TaskCarousel extends React.Component{
     render(){
 
         return (
-            <View style={{marginTop: 20, height:"100%"}}>
-                
+            <View style={{marginTop: 20, height:300}}>
                 <Carousel
-                    scrollEnabled = {false}
-                    // scrollEnabled = {this.state.canScroll}
+                    showsHorizontalScrollIndicator = {true}
+                    swipeThreshold = {20}
+                    scrollEnabled = {this.state.canScroll}
                     ref = {this.carousel}
-                    firstItem = {20}
                     onSnapToItem = {this._handleCardSelection}
-                    layout={'default'} 
                     data={this.props.task_data}
                     renderItem={this._renderTaskList}
                     sliderWidth={Dimensions.get('window').width}

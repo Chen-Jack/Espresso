@@ -75,6 +75,7 @@ export default class Embassy{
     }
 
     static addOnStartHandler = (handler) => {
+        // All handlers must have two params, coordinates and a callback
         Embassy.onStartEvents.push(handler)
     }
 
@@ -92,18 +93,32 @@ export default class Embassy{
         Cause you havent moved away from the origin yet
         */
 
-        for(let event of Embassy.onStartEvents){
-            event()
-        }
+      
+        const promises = Embassy.onStartEvents.map((evt)=>{
+            return new Promise((resolve, reject) => {
+                evt(coordinates, (err)=>{
+                    if(err)
+                        reject(err)
+                    else
+                        resolve()
+                })
+            });
+        })
+        console.log("Starting promise all");
+        Promise.all(promises).then(()=>{
+            //Disable scrolling on all landables while gesturing
+            for(let landable of Embassy.registeredLandables){
+                landable.current.props.toggleScroll(false)
+            }
 
-        //Disable scrolling on all landables while gesturing
-        for(let landable of Embassy.registeredLandables){
-            landable.current.props.toggleScroll(false)
-        }
+            const target = Embassy.findTarget(coordinates)
+            Embassy.origin_target = target
+            Embassy.updateTarget(target)
+        }).catch((err)=>{
+            console.log("ERROR WHEN USING EMBASSY's ONSTARTHANDLER", err);
+        })
 
-        const target = Embassy.findTarget(coordinates)
-        Embassy.origin_target = target
-        Embassy.updateTarget(target)
+        
     }
 
     static onMoveHandler = (coordinates)=>{
@@ -158,7 +173,7 @@ export default class Embassy{
 
 
         for(let event of Embassy.onReleaseEvents){
-            event()
+            event(coordinates)
         }
 
         //Return scrolling capabilities to all landables

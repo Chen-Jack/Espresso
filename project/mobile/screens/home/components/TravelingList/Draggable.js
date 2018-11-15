@@ -1,7 +1,6 @@
 import Embassy from './Embassy'
 import React from 'react'
 import ReactNative, { Modal, View, Text, TouchableHighlight, PanResponder, Animated, FlatList} from 'react-native'
-import {Button} from 'native-base'
 
 export default class Draggable extends React.Component{
     constructor(props) {
@@ -14,7 +13,7 @@ export default class Draggable extends React.Component{
             modal_scale: new Animated.Value(1)
         }
         
-        this.animation_speed = 200;
+        this.animation_speed = 250;
         this.ms_to_trigger_long_press = 500; 
         this.timer_ref = null   //Ref to keep track of long press
         this.gesture_started = false //a variable to know allow/know if the gesture has officially started
@@ -41,17 +40,11 @@ export default class Draggable extends React.Component{
         this._panResponder = PanResponder.create({
             onStartShouldSetResponder: (evt, gesture) => true,
             onStartShouldSetPanResponder : (evt, gesture) => true,
-            // onStartShouldSetResponderCapture: (evt, gestureState) => true,
 
-            onMoveShouldSetPanResponder: (evt, gestureState) => true,
-            // onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
-            // onMoveShouldSetResponderCapture: () => true,
+            onMoveShouldSetResponder: (evt, gestureState) => true,
             onMoveShouldSetPanResponder: (evt,gestureState) => true,
 
-            // onMoveShouldSetPanResponderCapture: () => true,
-        
             onPanResponderGrant: (e, gestureState) => {
-                console.log("Scales are", this.state.scale, this.state.modal_scale);
                 e.persist() //Must persist event to access async
 
                 const long_press_callback = (e, gestureState)=>{
@@ -63,7 +56,7 @@ export default class Draggable extends React.Component{
                             Animated.timing(                  // Animate over time
                                 this.state.modal_scale,            // The animated value to drive
                                 {
-                                    toValue: 1.10,                   // Animate to opacity: 1 (opaque)
+                                    toValue: 0.8,                   // Animate to opacity: 1 (opaque)
                                     duration: this.animation_speed,              // Make it take a while
                                 }
                             ),
@@ -141,7 +134,7 @@ export default class Draggable extends React.Component{
 
             onPanResponderRelease: (e, gestureState) => {
                 if(!this.gesture_started){
-                    //Released too early before actuall starting gesture
+                    //Released too early before actually starting gesture
                     clearTimeout(this.timer_ref)
                     this.timer_ref = null
                 }
