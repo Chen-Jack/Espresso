@@ -1,6 +1,7 @@
 import Embassy from './Embassy'
 import React from 'react'
 import ReactNative, { Modal, View, Text, TouchableHighlight, PanResponder, Animated, FlatList} from 'react-native'
+import PropTypes from 'prop-types'
 
 export default class Draggable extends React.Component{
     constructor(props) {
@@ -12,8 +13,13 @@ export default class Draggable extends React.Component{
             scale: new Animated.Value(0), //Start initial scale as 0,
             modal_scale: new Animated.Value(1)
         }
-        
+
         this.animation_speed = 250;
+        
+        this.time_of_last_press = Date.now();
+        this.waiting_for_second_tap = false;
+        this.ms_to_trigger_double_tap = 500;
+
         this.ms_to_trigger_long_press = 500; 
         this.timer_ref = null   //Ref to keep track of long press
         this.gesture_started = false //a variable to know allow/know if the gesture has officially started
@@ -26,6 +32,51 @@ export default class Draggable extends React.Component{
             width: e.nativeEvent.layout.width,
             height: e.nativeEvent.layout.height
         }
+    }
+
+    long_press_callback = (e, gestureState)=>{
+            
+        this.setState({
+            focus: true
+        }, ()=>{
+            Animated.parallel([
+                Animated.timing(                  // Animate over time
+                    this.state.modal_scale,            // The animated value to drive
+                    {
+                        toValue: 0.8,                   // Animate to opacity: 1 (opaque)
+                        duration: this.animation_speed,              // Make it take a while
+                    }
+                ),
+                Animated.timing(
+                    this.state.scale,
+                    {
+                        toValue: 0,
+                        duration: this.animation_speed
+                    }
+                )
+            ]).start()
+        })
+
+        const center_offset = {
+            x: this.default_size.width/2,
+            y: this.default_size.height/2
+        }
+
+        this.state.pan.setOffset({x: this.state.pan.x._value, y: this.state.pan.y._value})
+        this.state.pan.setValue({
+            x: gestureState.x0 - center_offset.x,
+            y: gestureState.y0 - center_offset.y
+        });
+
+    
+        const coordinates = {
+            x : e.nativeEvent.pageX,
+            y: e.nativeEvent.pageY
+        }
+        Embassy.onStartHandler(coordinates)
+        
+        this.gesture_started = true
+        console.log("gesture started");
     }
 
     componentWillMount(){
@@ -46,61 +97,32 @@ export default class Draggable extends React.Component{
 
             onPanResponderGrant: (e, gestureState) => {
                 e.persist() //Must persist event to access async
+                const time_of_press = Date.now();
 
-                const long_press_callback = (e, gestureState)=>{
-            
-                    this.setState({
-                        focus: true
-                    }, ()=>{
-                        Animated.parallel([
-                            Animated.timing(                  // Animate over time
-                                this.state.modal_scale,            // The animated value to drive
-                                {
-                                    toValue: 0.8,                   // Animate to opacity: 1 (opaque)
-                                    duration: this.animation_speed,              // Make it take a while
-                                }
-                            ),
-                            Animated.timing(
-                                this.state.scale,
-                                {
-                                    toValue: 0,
-                                    duration: this.animation_speed
-                                }
-                            )
-                        ]).start()
-                    })
-
-                    const center_offset = {
-                        x: this.default_size.width/2,
-                        y: this.default_size.height/2
+                if(this.waiting_for_second_tap){ 
+                    if(time_of_press - this.time_of_last_press < this.ms_to_trigger_double_tap){
+                        clearTimeout(this.timer_ref)
+                        this.timer_ref = null
+                       
+                        this.waiting_for_second_tap = false;
+                        this.props.doubleTapHandler()
                     }
 
-                    this.state.pan.setOffset({x: this.state.pan.x._value, y: this.state.pan.y._value})
-                    this.state.pan.setValue({
-                        x: gestureState.x0 - center_offset.x,
-                        y: gestureState.y0 - center_offset.y
-                    });
-
-                
-                    const coordinates = {
-                        x : e.nativeEvent.pageX,
-                        y: e.nativeEvent.pageY
-                    }
-                    Embassy.onStartHandler(coordinates)
-                    
-                    this.gesture_started = true
-                    console.log("gesture started");
+                    this.time_of_last_press = time_of_press
                 }
+                else{   // First Tap
+                    this.waiting_for_second_tap = true;
+                    this.time_of_last_press = time_of_press
 
-                this.timer_ref = setTimeout( 
-                    long_press_callback.bind(this, e, gestureState), 
-                    this.ms_to_trigger_long_press
-                )
-
+                    //Start timeout for long press
+                    this.timer_ref = setTimeout(  
+                        this.long_press_callback.bind(this, e, gestureState), 
+                        this.ms_to_trigger_long_press
+                    )
+                }
             },
 
             onPanResponderMove : ({nativeEvent}, gestureState) => {
-                console.log("moving");
                 if(!this.gesture_started){
                     // If you move when you arent allowed to move yet, clear the timer
                     console.log("MOVED TOO EARLY");
@@ -108,7 +130,6 @@ export default class Draggable extends React.Component{
                     this.timer_ref = null
                 }
                 else{
-                    console.log("on move gesture");
                     const center_offset = {
                         x: this.default_size.width/2,
                         y: this.default_size.height/2
@@ -140,11 +161,11 @@ export default class Draggable extends React.Component{
                 }
                 else{
                     Animated.parallel([
-                        Animated.timing(                  // Animate over time
-                            this.state.modal_scale,            // The animated value to drive
+                        Animated.timing(                
+                            this.state.modal_scale,         
                             {
-                                toValue: 0,                   // Animate to opacity: 1 (opaque)
-                                duration: this.animation_speed,              // Make it take a while
+                                toValue: 0,                 
+                                duration: this.animation_speed,              
                             }
                         ),
                         Animated.timing(
@@ -212,4 +233,10 @@ export default class Draggable extends React.Component{
                 </Animated.View>
             </View>)
     }
+}
+
+
+Draggable.propType = {
+    children : PropTypes.element.isRequired,
+    doubleTapHandler : PropTypes.func
 }
