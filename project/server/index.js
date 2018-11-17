@@ -40,27 +40,6 @@ app.get('/test', (req,res)=>{
 })
 
 
-// app.get('/test-update', (req,res)=>{
-//     User.update({username: "test", email:"test2@gmail.com"}, (err,user)=>{
-//         if(err)
-//             console.log(err);
-//         else
-//             console.log(`Updated to ${user.toString()} `);
-//         res.end()
-//     })
-// })
-
-
-// app.get('/test-delete', (req,res)=>{
-//     User.destroy("test", (err)=>{
-//         if(err)
-//             console.log(err);
-//         else
-//             console.log("Successfully destroyed");
-//         res.end()
-//     } )
-// })
-
 // const formValidationChain = [
 //     check('username', 'Please enter a username between 5-12 characters').exists({checkFalsy: true}),
 //     check('password', 'Please enter a password').exists({checkFalsy:true}),
@@ -89,6 +68,25 @@ extractPayloadFromHeader = function(headers){
         return null;
     }
 }
+
+app.post('/toggle-task-completion', (req,res)=>{
+    const payload = extractPayloadFromHeader(req.headers)
+    if(!payload)
+        return res.status(401).end() 
+
+    const task_id = req.body.task_id;
+    const creator_id = payload.id;
+    const completion_status = req.body.completion_status;
+    console.log(`Calling. Task Id: ${task_id} CREATORID: ${creator_id} STATUS: ${completion_status}`);
+
+    Task.updateStatus(creator_id, task_id, completion_status, (err)=>{
+        if(err){
+            return res.status(400).end()
+        }
+        
+        res.status(200).end()
+    })
+})
 
 app.post('/create-account', (req,res)=>{
     const username = req.body.username

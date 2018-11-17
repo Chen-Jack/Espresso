@@ -15,7 +15,7 @@ const EmptyList = (props)=>{
 export default class TaskList extends React.Component{
     _renderListItem = ({item,index})=>{
         return (
-            <TaskCard title={item.title} details={item.details} isCompleted={item.completed}/>
+            <TaskCard task_id={item.id} title={item.title} details={item.details} isCompleted={item.completed}/>
         )  
     }
 

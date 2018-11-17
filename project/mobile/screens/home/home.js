@@ -41,7 +41,6 @@ class HomeScreen extends React.Component{
             alignSelf: 'center'
         },
         gesturesEnabled: false, // Prevent swipe back
-        
     };
 
     _onDateSelection=(isodate)=>{

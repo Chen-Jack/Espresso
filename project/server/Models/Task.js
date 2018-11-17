@@ -3,6 +3,22 @@ const uuid = require('uuid/v4');
 
 class Task{
 
+    static updateStatus(creator_id, task_id, status, callback=()=>{}){
+        const sql_query = `UPDATE task SET completed = (?) WHERE creator_id = (?) AND id = (?)`
+        
+        status = (status ? 1 : 0) // Format it to 0,1 incase status is another falsy value
+
+        db.query(sql_query, [status, creator_id, task_id], (err, results, fields)=>{
+            if(err){
+                console.log("updateStatus() error", err);
+                return callback(err)
+            }
+
+            return callback()
+            
+        })
+    }
+
     static create(creator_id, title="", details="", callback){
         db.query(`INSERT INTO task(id, creator_id, title, details) VALUES (?,?,?,?)`, 
             [uuid(), creator_id, title, details],
