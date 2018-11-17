@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import Carousel from 'react-native-snap-carousel'
 import {View, Text, Button} from 'native-base'
 import {Dimensions} from 'react-native'
@@ -76,4 +77,9 @@ export default class TaskCarousel extends React.Component{
             </View>
         )
     }
+}
+
+TaskCarousel.propTypes = {
+    task_data : PropTypes.array.isRequired,
+    handleDateSelection : PropTypes.func
 }

@@ -1,5 +1,6 @@
 import React from 'react'
 import {Card, CardItem, Text, Body} from 'native-base'
+import PropTypes from 'prop-types'
 
 export default class TaskCard extends React.Component{
     constructor(props) {
@@ -26,4 +27,10 @@ export default class TaskCard extends React.Component{
             </CardItem>
         </Card>
     }
+}
+
+TaskCard.propTypes = {
+    title: PropTypes.string.isRequired,
+    details : PropTypes.string,
+    isCompleted: PropTypes.bool.isRequired
 }

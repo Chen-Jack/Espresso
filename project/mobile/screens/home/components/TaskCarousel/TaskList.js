@@ -2,6 +2,7 @@ import React from 'react'
 import {View, Text} from 'react-native'
 import {Draggable, Landable} from './../TravelingList'
 import TaskCard from './TaskCard'
+import PropTypes from 'prop-types'
 
 const EmptyList = (props)=>{
     return <View style={{width:"100%", height:"50%", backgroundColor: "white", alignSelf:"center", justifyContent:"center"}}>
@@ -32,4 +33,8 @@ export default class TaskList extends React.Component{
                 style={{height: "100%", width: "100%"}}/>
         }
     }
+}
+
+TaskList.propTypes = {
+    data: PropTypes.array.isRequired
 }
