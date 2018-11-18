@@ -261,6 +261,20 @@ class HomeScreen extends React.Component{
         this.drawer.current.toggleDrawer(true)
     }
 
+    _generateCalendarMarkers = ()=>{
+        const markers_list = {}
+        for(let day of this.state.allocated_tasks){
+            if(!markers_list[day.date])
+                markers_list[day.date] = {dots: []}
+
+            for(task of day.tasks){
+                markers_list[day.date]["dots"].push({key: task.id, color: "blue"})
+            }
+        }
+        console.log("returning", markers_list);
+        return markers_list
+    }
+
     render(){
         return <Container >
             <Content style={{backgroundColor: "#333"}} scrollEnabled = {false}>
@@ -272,12 +286,13 @@ class HomeScreen extends React.Component{
                     <TaskDrawer ref={this.drawer} task_data = {this.state.unallocated_tasks}/>
 
                     <Calendar
-                            
-                            onDayPress={(day)=>{
-                                this._onDateSelection(day.dateString)}}
-                            markedDates={{
-                                [this.state.selected_date]: {selected: true, selectedColor: 'lightblue'},
-                            }}/>
+                        markingType={'multi-dot'}
+                        onDayPress={(day)=>{
+                            this._onDateSelection(day.dateString)}}
+                        markedDates={{
+                            // [this.state.selected_date]: {selected: true, selectedColor: 'red'},
+                            ...this._generateCalendarMarkers()
+                        }}/>
 
                     <TaskCarousel
                         ref = {this.carousel}
