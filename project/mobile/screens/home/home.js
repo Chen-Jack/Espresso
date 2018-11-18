@@ -1,7 +1,7 @@
 //The home page for an account
 
 import React from 'react'
-import {Footer, FooterTab, Container, Content, Text, Button} from 'native-base'
+import {Title, Header, Body,Footer, FooterTab, Container, Content, Text, Button} from 'native-base'
 import {Dimensions, AsyncStorage } from 'react-native'
 import { Calendar } from 'react-native-calendars';
 import {TaskCarousel} from './components/TaskCarousel'
@@ -41,15 +41,16 @@ class HomeScreen extends React.Component{
     }
 
     static navigationOptions = {
-        headerTitle: "Home",
-        headerLeft: null,
-        headerTintColor: 'white',
-        headerStyle: {
-            backgroundColor: '#222'
-        },
-        headerTitleStyle: {
-            alignSelf: 'center'
-        },
+        header: null,
+        // headerTitle: "Home",
+        // headerLeft: null,
+        // headerTintColor: 'white',
+        // headerStyle: {
+        //     backgroundColor: '#222'
+        // },
+        // headerTitleStyle: {
+        //     alignSelf: 'center'
+        // },
         gesturesEnabled: false, // Prevent swipe back
     };
 
@@ -276,52 +277,61 @@ class HomeScreen extends React.Component{
     }
 
     render(){
-        return <Container >
-            <Content style={{backgroundColor: "#333"}} scrollEnabled = {false}>
-                <Button onPress={()=>console.log(this.state)}>
-                    <Text> State </Text>
-                </Button>
-                <UserTaskProvider value={this.task_management_context}>
+        return <TaskDrawer ref={this.drawer} task_data = {this.state.unallocated_tasks}>
+            <Container >
+                <Header style={{backgroundColor: '#222'}}>
+                    <Body>
+                        <Title style={{color:"white"}}>Header</Title>
+                    </Body>
+                </Header>
 
-                    <TaskDrawer ref={this.drawer} task_data = {this.state.unallocated_tasks}/>
+                <Content style={{backgroundColor: "#333"}} scrollEnabled = {false}>
+                    <UserTaskProvider value={this.task_management_context}>
 
-                    <Calendar
-                        markingType={'multi-dot'}
-                        onDayPress={(day)=>{
-                            this._onDateSelection(day.dateString)}}
-                        markedDates={{
-                            // [this.state.selected_date]: {selected: true, selectedColor: 'red'},
-                            ...this._generateCalendarMarkers()
-                        }}/>
+                        <Calendar
+                            markingType={'multi-dot'}
+                            onDayPress={(day)=>{
+                                this._onDateSelection(day.dateString)}}
+                            markedDates={{
+                                // [this.state.selected_date]: {selected: true, selectedColor: 'red'},
+                                ...this._generateCalendarMarkers()
+                            }}/>
 
-                    <TaskCarousel
-                        ref = {this.carousel}
-                        selected_date = {this.state.selected_date}
-                        handleDateSelection={this._onDateSelection} 
-                        task_data={this.state.allocated_tasks} />
+                        {/* <Button onPress={()=>console.log(this.state)}>
+                            <Text> State </Text>
+                        </Button> */}
 
-                </UserTaskProvider>
+                        <TaskCarousel
+                            ref = {this.carousel}
+                            selected_date = {this.state.selected_date}
+                            handleDateSelection={this._onDateSelection} 
+                            task_data={this.state.allocated_tasks} />
+
+                    </UserTaskProvider>
+            
+                </Content>
+
+                <Footer style={{backgroundColor: "#222", padding:0, margin: 0}} >
+                    <FooterTab>
+                        <TaskCreationPrompt />
+
+                        <Button onPress = {this._logout}> 
+                            <Text style={{color:"white"}}> Logout</Text>
+                        </Button>
+                        
+                        <Button onPress= {()=>this.props.navigation.navigate("sandbox")}>
+                            <Text style={{color: "white"}}> SandBox </Text>
+                        </Button>
+                        <Button onPress={this._openDrawer}>
+                            <Text> Toggle Drawer</Text>
+                        </Button>
+                        
+                    </FooterTab>
+                </Footer>
+
         
-            </Content>
-
-            <Footer style={{backgroundColor: "#222", padding:0, margin: 0}} >
-                <FooterTab>
-                    <TaskCreationPrompt />
-
-                    <Button onPress = {this._logout}> 
-                        <Text style={{color:"white"}}> Logout</Text>
-                    </Button>
-                    
-                    <Button onPress= {()=>this.props.navigation.navigate("sandbox")}>
-                        <Text style={{color: "white"}}> SandBox </Text>
-                    </Button>
-                    <Button onPress={this._openDrawer}>
-                        <Text> Toggle Drawer</Text>
-                    </Button>
-                    
-                </FooterTab>
-            </Footer>
         </Container>
+        </TaskDrawer>
     }
 }
 

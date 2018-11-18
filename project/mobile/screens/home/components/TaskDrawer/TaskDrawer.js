@@ -1,8 +1,31 @@
 import React from 'react'
-import {View, Text, Dimensions, TouchableHighlight} from 'react-native'
-import Modal from 'react-native-modal'
-import {Landable, Draggable, Embassy} from './../TravelingList'
+import {View, Text, Dimensions} from 'react-native'
+import {Drawer} from 'native-base'
+import {Draggable} from './../TravelingList'
 import TaskList from '../TaskCarousel/TaskList'
+import PropTypes from 'prop-types'
+import {Embassy} from './../TravelingList'
+
+class DrawerContent extends React.Component{
+    render(){
+        return (
+        <View style={{backgroundColor: "orange", height: Dimensions.get('window').height, width: Dimensions.get('window').width*0.7 }}>
+            <View style={{padding: 0, margin:0, alignItems: "center", justifyContent:"center", backgroundColor:"#222", height: "25%", width:Dimensions.get('window').width*0.7}}>
+                <Text style={{ fontSize:20, color:"white"}}> Unallocated Tasks </Text>
+            </View>
+            <View style={{padding:10, width:"100%", height:"100%"}}>
+                <TaskList
+                    data = {this.props.task_data}
+                />
+            </View>
+        </View>
+        )
+    }
+}
+
+DrawerContent.propTypes = {
+    task_data : PropTypes.array.isRequired
+}
 
 export default class TaskDrawer extends React.Component{
     constructor(props) {
@@ -12,11 +35,20 @@ export default class TaskDrawer extends React.Component{
             visible: false
         }
 
-        // Embassy.addOnStartHandler(this.closeDrawer)
+        this.drawer = React.createRef()
+
+        Embassy.addOnStartHandler(this.closeDrawer)
 
     }
 
-    closeDrawer = (coordinates,cb)=>{
+    componentDidMount(){
+        console.log("mounted");
+    }
+
+    componentWillUnmount(){
+        console.log("unmounted");
+    }
+    closeDrawer = (coordinates, cb=()=>{})=>{
         this.toggleDrawer(false, (err)=>{
             if(err)
                 cb(err)
@@ -34,38 +66,21 @@ export default class TaskDrawer extends React.Component{
 
     _renderListItem = ({item,index})=>{
         return (
-            <Draggable>
-                <TaskCard title={item.title} details={item.details} isCompleted={item.completed}/>
-            </Draggable>
+            <TaskCard task_id={item.id} allocated_date={item.allocated_date} title={item.title} details={item.details} isCompleted={item.completed}/>
         )  
     }
 
 
     render(){
         return (
-
-            <Modal
-                animationInTiming = {800}
-                animationOutTiming = {800}
-                animationIn = {"slideInLeft"}
-                animationOut = {"slideOutLeft"}
-                isVisible = {this.state.visible}
-                onBackdropPress = {()=>this.toggleDrawer(false)}
-                hideModalContentWhileAnimating = {true}
-                style={{height:"80%", padding: 0, margin: 0}}>
+            <Drawer 
                 
-                <View style={{top: 0, left: 0, padding: 0, margin:0, position: "absolute", backgroundColor: "orange", height: Dimensions.get('window').height, width: Dimensions.get('window').width*0.7 }}>
-                    <View style={{alignItems: "center", justifyContent:"center", backgroundColor:"#222", height: "25%", width:"100%"}}>
-                        <Text style={{fontSize:20, color:"white"}}> Unallocated Tasks </Text>
-                    </View>
-                    <View style={{padding:10, width:"100%", height:"100%"}}>
-                    <TaskList
-                        data = {this.props.task_data}
-                    />
-                    </View>
-                </View>
-            
-            </Modal>
+                ref={this.drawer}
+                open={this.state.visible}
+                content = {<DrawerContent task_data = {this.props.task_data}/>}>
+
+                {this.props.children}
+            </Drawer>
         )
     }
 }
