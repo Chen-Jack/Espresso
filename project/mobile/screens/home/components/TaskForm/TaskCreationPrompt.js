@@ -1,5 +1,5 @@
 import React from 'react'
-import {View, Text, Button} from 'native-base'
+import {View, Text, Button, Toast} from 'native-base'
 import Modal from 'react-native-modal'
 import TaskCreationForm from './TaskCreationForm'
 
@@ -19,6 +19,14 @@ export default class TaskCreationModalPrompt extends React.Component{
         })
     }
 
+    _finishFormSubmission = ()=>{
+        Toast.show({
+            text: 'Your task was added to your board!',
+            buttonText: 'Okay'
+          })
+        this.togglePrompt()
+    }
+
     render(){
         return <View>
             <Button style={{padding:0, margin:0}} onPress={this.togglePrompt}>
@@ -26,11 +34,11 @@ export default class TaskCreationModalPrompt extends React.Component{
             </Button>
 
             <Modal
-                onBackdropPress= {()=>this.togglePrompt()}
+                onBackdropPress= {this.togglePrompt}
                 isVisible={this.state.visible}>
                 <View>
                     
-                    <TaskCreationForm onFormSubmission={this.togglePrompt}/>
+                    <TaskCreationForm onFormFinishedSubmition={this._finishFormSubmission}/>
 
                 </View>
             </Modal>

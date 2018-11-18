@@ -1,6 +1,7 @@
 import React from 'react'
 import {View, Textarea, Text, Button} from 'native-base'
 import {AsyncStorage} from 'react-native'
+import PropTypes from 'prop-types'
 
 export default class TaskCreationForm extends React.Component{
     constructor(props) {
@@ -32,7 +33,7 @@ export default class TaskCreationForm extends React.Component{
             }).then((res)=>{
                 console.log("status", res.status);
                 if(res.ok){
-                    this.props.onFormSubmission()
+                    this.props.onFormFinishedSubmition()
                 }
                 else if(res.status === 401){
 
@@ -66,4 +67,9 @@ export default class TaskCreationForm extends React.Component{
             
         </View>
     }
+}
+
+
+TaskCreationForm.propTypes = {
+    onFormFinishedSubmition : PropTypes.func
 }
