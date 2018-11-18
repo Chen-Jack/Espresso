@@ -7,8 +7,9 @@ import { Calendar } from 'react-native-calendars';
 import {TaskCarousel} from './components/TaskCarousel'
 import {TaskCreationPrompt} from './components/TaskForm'
 import {TaskDrawer} from './components/TaskDrawer'
+import {UserTaskProvider} from './UserTaskContext'
+import update from 'immutability-helper'
 
-const TaskManagementContext = React.createContext("dsd");
 
 class HomeScreen extends React.Component{
     constructor(props) {
@@ -28,8 +29,15 @@ class HomeScreen extends React.Component{
         this.carousel = React.createRef()
         this.calendar = React.createRef()
         this.drawer = React.createRef()
+
+
+        this.task_management_context = {
+            add: this.addTaskToState,
+            remove: this.removeTaskFromState,
+            updateStatus: this.updateCompletionStatusOfState,
+            setDate : this.allocateTaskToDate
+        }
      
-    
     }
 
     static navigationOptions = {
@@ -45,12 +53,82 @@ class HomeScreen extends React.Component{
         gesturesEnabled: false, // Prevent swipe back
     };
 
-    _testContext = ()=>{
-        console.log("Context Check");
+    addTaskToState = ()=>{
+
+    }
+
+    removeTaskFromState = ()=>{
+
+    }
+
+    updateCompletionStatusOfState = (task_id, new_status, cb=()=>{})=>{
+        AsyncStorage.getItem("session_token", (err, session_token)=>{
+            const data = {
+                task_id: task_id,
+                completion_status: new_status
+            }
+            fetch("http://localhost:3000/toggle-task-completion", {
+                method: 'POST',
+                headers: {
+                    "Authorization": `Bearer ${session_token}`,
+                    "Content-Type": "application/json; charset=utf-8",
+                },
+                body : JSON.stringify(data)
+            }).then(
+                (res)=>{
+                    if(res.ok){
+                        console.log("Updating completion of task");
+                        let found = false;
+       
+                        
+                        //First Search Through Allocated Tasks
+                        for(let day_index in this.state.allocated_tasks){
+                            let day_tasks = this.state.allocated_tasks[day_index].tasks
+                            for(let task_index in day_tasks){
+                                if(day_tasks[task_index].id === task_id){
+                                    const new_state = update(this.state.allocated_tasks, {[day_index]: {tasks: {[task_index] : {completed: {$set : new_status}}}}});
+                                    found = true;
+                                    this.setState({
+                                        allocated_tasks : new_state
+                                    })
+                                }
+                            }
+                        }
+                    
+
+                        //Search through unallocated tasks if still haven't found
+                        if(!found){
+                            for(let i in this.state.unallocated_tasks){
+                                if(this.state.unallocated_tasks[i].id === task_id){
+                                    new_state = update(this.state.unallocated_tasks, {[i] : {isCompleted: {$set, new_status}}})
+                                    console.log("found unallocated");
+                                    this.setState({
+                                        unallocated_tasks : new_state
+                                    })
+                                }
+                            }
+                        }
+
+                        cb()
+                    }
+
+                    else{
+                        cb("Res not ok")
+                    }
+                }
+            ).catch((err)=>{
+                console.log("Error when toggling tasks", err)
+                cb(err)
+                alert("Error")
+            })
+        })
+    }
+
+    allocateTaskToDate = ()=>{
+
     }
 
     _onDateSelection=(isodate)=>{
-        console.log("Date Selection");
         this.setState({
             selected_date: isodate
         }, (err)=>{
@@ -60,8 +138,6 @@ class HomeScreen extends React.Component{
                 this.carousel.current.updateToDate(this.state.selected_date)
             }
         })
-
-        
     }
 
 
@@ -103,10 +179,8 @@ class HomeScreen extends React.Component{
                 }
             }).then(
                 (res)=>{
-                    // console.log("STATUS IS", res.status);
                     if(res.ok){
                         res.json().then((tasks)=>{
-                            // console.log("TASKS ARE", tasks);
                             const unallocated_tasks = []
 
                             // Generate a new object copy. React will not
@@ -190,7 +264,10 @@ class HomeScreen extends React.Component{
     render(){
         return <Container >
             <Content style={{backgroundColor: "#333"}} scrollEnabled = {false}>
-                <TaskManagementContext.Provider value={this._testContext}>
+                <Button onPress={()=>console.log(this.state)}>
+                    <Text> State </Text>
+                </Button>
+                <UserTaskProvider value={this.task_management_context}>
 
                     <TaskDrawer ref={this.drawer} task_data = {this.state.unallocated_tasks}/>
 
@@ -208,9 +285,10 @@ class HomeScreen extends React.Component{
                         handleDateSelection={this._onDateSelection} 
                         task_data={this.state.allocated_tasks} />
 
-                </TaskManagementContext.Provider>
+                </UserTaskProvider>
         
             </Content>
+
             <Footer style={{backgroundColor: "#222", padding:0, margin: 0}} >
                 <FooterTab>
                     <TaskCreationPrompt />
@@ -233,4 +311,3 @@ class HomeScreen extends React.Component{
 }
 
 export default HomeScreen
-export {TaskManagementContext}
