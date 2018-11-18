@@ -1,5 +1,5 @@
 import React from 'react'
-import {View, Text} from 'react-native'
+import {View, Text, Button} from 'react-native'
 import {Landable} from './../TravelingList'
 import TaskCard from './TaskCard'
 import PropTypes from 'prop-types'
@@ -18,8 +18,6 @@ export default class TaskList extends React.Component{
             <TaskCard task_id={item.id} title={item.title} details={item.details} isCompleted={item.completed}/>
         )  
     }
-
- 
 
     render(){
         if(this.props.data.length === 0)

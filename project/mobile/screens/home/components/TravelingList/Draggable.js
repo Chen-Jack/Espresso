@@ -113,13 +113,13 @@ export default class Draggable extends React.Component{
                 else{   // First Tap
                     this.waiting_for_second_tap = true;
                     this.time_of_last_press = time_of_press
-
-                    //Start timeout for long press
-                    this.timer_ref = setTimeout(  
-                        this.long_press_callback.bind(this, e, gestureState), 
-                        this.ms_to_trigger_long_press
-                    )
                 }
+                
+                //Start timeout for long press
+                this.timer_ref = setTimeout(  
+                    this.long_press_callback.bind(this, e, gestureState), 
+                    this.ms_to_trigger_long_press
+                )
             },
 
             onPanResponderMove : ({nativeEvent}, gestureState) => {

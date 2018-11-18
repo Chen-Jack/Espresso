@@ -77,7 +77,6 @@ app.post('/toggle-task-completion', (req,res)=>{
     const task_id = req.body.task_id;
     const creator_id = payload.id;
     const completion_status = req.body.completion_status;
-    console.log(`Calling. Task Id: ${task_id} CREATORID: ${creator_id} STATUS: ${completion_status}`);
 
     Task.updateStatus(creator_id, task_id, completion_status, (err)=>{
         if(err){

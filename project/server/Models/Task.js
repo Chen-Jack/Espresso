@@ -1,6 +1,7 @@
 const db = require('./../db');
 const uuid = require('uuid/v4');
 
+
 class Task{
 
     static updateStatus(creator_id, task_id, status, callback=()=>{}){

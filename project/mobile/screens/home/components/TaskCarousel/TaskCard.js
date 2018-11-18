@@ -43,15 +43,12 @@ export default class TaskCard extends React.Component{
     }
   
     render(){
+        let strike_through_style = {textDecorationLine: 'line-through', textDecorationStyle: 'solid'}
         return (
             <Draggable doubleTapHandler = {this._handleDoubleTap}>
                 <Card>
                     <CardItem bordered>
-                        <Text>{this.props.title || "Title"}</Text>
-                    </CardItem>
-
-                    <CardItem>
-                        <Text>{this.props.isCompleted ? "Done" : "Unfinished"}</Text>
+                        <Text style={this.props.isCompleted ? strike_through_style : {} }>{this.props.title || "Title"}</Text>
                     </CardItem>
 
                     <CardItem>

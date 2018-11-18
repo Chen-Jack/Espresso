@@ -8,6 +8,7 @@ import {TaskCarousel} from './components/TaskCarousel'
 import {TaskCreationPrompt} from './components/TaskForm'
 import {TaskDrawer} from './components/TaskDrawer'
 
+const TaskManagementContext = React.createContext("dsd");
 
 class HomeScreen extends React.Component{
     constructor(props) {
@@ -28,6 +29,7 @@ class HomeScreen extends React.Component{
         this.calendar = React.createRef()
         this.drawer = React.createRef()
      
+    
     }
 
     static navigationOptions = {
@@ -42,6 +44,10 @@ class HomeScreen extends React.Component{
         },
         gesturesEnabled: false, // Prevent swipe back
     };
+
+    _testContext = ()=>{
+        console.log("Context Check");
+    }
 
     _onDateSelection=(isodate)=>{
         console.log("Date Selection");
@@ -67,11 +73,11 @@ class HomeScreen extends React.Component{
             tasks : Array
         }
        */
-        const day_variance = 4; //How many days of tasks you will show.
+        const day_variance = 7; //How many days of tasks you will show.
         const seconds_per_day = 86400;
         let task_set = [];
 
-        const past_days_allowed = 3; //How far back in time do you want to see
+        const past_days_allowed = 4; //How far back in time do you want to see
 
         let starting_date_in_epoch = Math.floor(Date.now()/1000 - (seconds_per_day * past_days_allowed))
 
@@ -184,24 +190,25 @@ class HomeScreen extends React.Component{
     render(){
         return <Container >
             <Content style={{backgroundColor: "#333"}} scrollEnabled = {false}>
+                <TaskManagementContext.Provider value={this._testContext}>
 
-                <TaskDrawer ref={this.drawer} task_data = {this.state.unallocated_tasks}/>
+                    <TaskDrawer ref={this.drawer} task_data = {this.state.unallocated_tasks}/>
 
-                <Calendar
-                        
-                        onDayPress={(day)=>{
-                            this._onDateSelection(day.dateString)}}
-                        markedDates={{
-                            [this.state.selected_date]: {selected: true, selectedColor: 'lightblue'},
-                        }}/>
+                    <Calendar
+                            
+                            onDayPress={(day)=>{
+                                this._onDateSelection(day.dateString)}}
+                            markedDates={{
+                                [this.state.selected_date]: {selected: true, selectedColor: 'lightblue'},
+                            }}/>
 
-                <TaskCarousel
-                    ref = {this.carousel}
-                    selected_date = {this.state.selected_date}
-                    handleDateSelection={this._onDateSelection} 
-                    task_data={this.state.allocated_tasks} />
+                    <TaskCarousel
+                        ref = {this.carousel}
+                        selected_date = {this.state.selected_date}
+                        handleDateSelection={this._onDateSelection} 
+                        task_data={this.state.allocated_tasks} />
 
-    
+                </TaskManagementContext.Provider>
         
             </Content>
             <Footer style={{backgroundColor: "#222", padding:0, margin: 0}} >
@@ -226,3 +233,4 @@ class HomeScreen extends React.Component{
 }
 
 export default HomeScreen
+export {TaskManagementContext}
