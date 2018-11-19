@@ -1,6 +1,7 @@
 import React from 'react'
 import {View, Text, Dimensions} from 'react-native'
 import {Drawer} from 'native-base'
+import SideMenu from 'react-native-side-menu'
 import {Draggable} from './../TravelingList'
 import TaskList from '../TaskCarousel/TaskList'
 import PropTypes from 'prop-types'
@@ -9,8 +10,8 @@ import {Embassy} from './../TravelingList'
 class DrawerContent extends React.Component{
     render(){
         return (
-        <View style={{backgroundColor: "orange", height: Dimensions.get('window').height, width: Dimensions.get('window').width*0.7 }}>
-            <View style={{padding: 0, margin:0, alignItems: "center", justifyContent:"center", backgroundColor:"#222", height: "25%", width:Dimensions.get('window').width*0.7}}>
+        <View style={{backgroundColor: "orange", height: Dimensions.get('window').height, width: "100%"}}>
+            <View style={{padding: 0, margin:0, alignItems: "center", justifyContent:"center", backgroundColor:"#222", height: "25%", width:"100%"}}>
                 <Text style={{ fontSize:20, color:"white"}}> Unallocated Tasks </Text>
             </View>
             <View style={{padding:10, width:"100%", height:"100%"}}>
@@ -58,7 +59,7 @@ export default class TaskDrawer extends React.Component{
     }
 
     toggleDrawer = (toggleState, cb)=>{
-        const next_state = toggleState || !this.state.visible
+        const next_state = (toggleState !== null ? toggleState : !this.state.visible)
         this.setState({
             visible: next_state
         }, cb)
@@ -73,14 +74,15 @@ export default class TaskDrawer extends React.Component{
 
     render(){
         return (
-            <Drawer 
-                
+            <SideMenu 
+                onClose={this.closeDrawer}
                 ref={this.drawer}
-                open={this.state.visible}
-                content = {<DrawerContent task_data = {this.props.task_data}/>}>
+                isOpen={this.state.visible}
+                disableGestures = {true}
+                menu = {<DrawerContent task_data = {this.props.task_data}/>}>
 
                 {this.props.children}
-            </Drawer>
+            </SideMenu>
         )
     }
 }

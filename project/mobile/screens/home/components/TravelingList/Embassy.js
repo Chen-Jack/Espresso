@@ -57,6 +57,7 @@ export default class Embassy{
         }
         else{
             // There is a target switch
+            console.log("SWITCH");
             if(prev_target){
                 prev_target.current.props.onLoseFocus()
             }
@@ -70,6 +71,7 @@ export default class Embassy{
     }
 
     static findAndUpdateTarget = (coordinates) => {
+        console.log("called");
         const new_target = Embassy.findTarget(coordinates)
         Embassy.updateTarget(new_target)
     }

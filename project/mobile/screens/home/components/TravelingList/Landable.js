@@ -1,7 +1,8 @@
 import Embassy from './Embassy'
 import React from 'react'
-import ReactNative, { Modal, View, Text, TouchableHighlight, PanResponder, Animated, FlatList} from 'react-native'
 import {Button} from 'native-base'
+import {View, Text,FlatList} from 'react-native'
+import PropTypes from 'prop-types'
 
 export default class Landable extends React.Component{
     constructor(props){
@@ -13,7 +14,6 @@ export default class Landable extends React.Component{
         this.state = {
             data : [],
             isHover: false,
-            test_data : [1,2,3,4,5],
             active: false,
             canScroll : true
         }
@@ -29,27 +29,28 @@ export default class Landable extends React.Component{
     componentDidMount(){
         this.setState({
             data: this.props.data
-        })
-
-        
+        })  
     }
 
+    componentDidUpdate(){
+        this._updateLayout()
+    }
 
     addItem = ()=>{
-        const new_data = this.state.test_data
-        new_data.push(10)
+        // const new_data = this.state.test_data
+        // new_data.push(10)
             
-        this.setState({
-            data: new_data
-        })
+        // this.setState({
+        //     data: new_data
+        // })
     }
 
     removeItem = ()=>{
-        const new_data = this.state.test_data
-        new_data.shift()
-        this.setState({
-            data: new_data
-        })
+        // const new_data = this.state.test_data
+        // new_data.shift()
+        // this.setState({
+        //     data: new_data
+        // })
     }
 
     _toggleScroll = (specifiedScrollStatus = null)=>{
@@ -57,8 +58,10 @@ export default class Landable extends React.Component{
             canScroll: specifiedScrollStatus? specifiedScrollStatus: !this.state.canScroll
         })
     }
+    
 
-    _updateLayout = ({nativeEvent})=>{
+    _updateLayout = ()=>{
+        console.log("layout updated");
         this.list.current.measure((x,y,width,height,pageX,pageY)=>{
             const layout = {
                 x: pageX,
@@ -66,6 +69,7 @@ export default class Landable extends React.Component{
                 width: width,
                 height: height
             }
+            console.log(layout);
             this.layout = layout;
         })   
     }
@@ -77,14 +81,14 @@ export default class Landable extends React.Component{
         this.setState({
             active: true,
             isFocus: true
-        })
+        }, this.props.onEnter())
     }
     _onLoseFocus = ()=>{
         console.log(this.props.name, "Lost Focus");
         this.setState({
             active: false,
             isFocus: false
-        })
+        }, this.props.onLeave())
     }
 
     _onStay = ()=>{
@@ -150,7 +154,7 @@ export default class Landable extends React.Component{
         return (
 
             <View 
-                onLayout = {this._updateLayout}
+                
                 ref = {this.list}
                 isGestureOnTop = {this._isGestureOnTop}
                 toggleScroll = {this._toggleScroll}
@@ -166,22 +170,25 @@ export default class Landable extends React.Component{
                 style={this.props.style || {height:"100%", width: "100%"}}>
 
                 {/* <Button onPress={()=>{
-                    this.list.current.measure((x,y,width,height,pageX,pageY)=>{
-                        const layout = {
-                            x: pageX,
-                            y: pageY,
-                            width: width,
-                            height: height
-                        }
-                        console.log("x, y is", layout.x, layout.y);
-                        console.log("wid, height is", layout.width, layout.height);
-                    })
+                    // this.list.current.measure((x,y,width,height,pageX,pageY)=>{
+                    //     const layout = {
+                    //         x: pageX,
+                    //         y: pageY,
+                    //         width: width,
+                    //         height: height
+                    //     }
+                    //     console.log("x, y is", layout.x, layout.y);
+                    //     console.log("wid, height is", layout.width, layout.height);
+                    // })
+                    this._updateLayout()
                 }}>
                     <Text>Check Dimensions</Text>
                 </Button> */}
 
+                
 
                 <FlatList
+                    onLayout = {this._updateLayout}
                     scrollEnabled = {this.state.canScroll}
                     style={{height: "100%", width: "100%"}}
                     data = {this.props.data || this.state.test_data}
@@ -190,4 +197,9 @@ export default class Landable extends React.Component{
             </View>
         )
     }
+}
+
+Landable.propTypes = {
+    onEnter : PropTypes.func,
+    onLeave : PropTypes.func
 }
