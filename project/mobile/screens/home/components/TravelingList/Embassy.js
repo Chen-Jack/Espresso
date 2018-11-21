@@ -106,6 +106,7 @@ export default class Embassy{
                 })
             });
         })
+
         console.log("Starting promise all");
         Promise.all(promises).then(()=>{
             //Disable scrolling on all landables while gesturing
@@ -129,7 +130,7 @@ export default class Embassy{
 
 
         for(let event of Embassy.onMoveEvents){
-            event()
+            event(coordinates)
         }
     }
 

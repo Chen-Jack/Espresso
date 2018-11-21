@@ -29,12 +29,12 @@ export default class Landable extends React.Component{
     componentDidMount(){
         this.setState({
             data: this.props.data
-        })  
+        }) 
     }
 
-    componentDidUpdate(){
-        this._updateLayout()
-    }
+    // componentDidUpdate(){
+    //     this._updateLayout()
+    // }
 
     addItem = ()=>{
         // const new_data = this.state.test_data
@@ -61,7 +61,6 @@ export default class Landable extends React.Component{
     
 
     _updateLayout = ()=>{
-        console.log("layout updated");
         this.list.current.measure((x,y,width,height,pageX,pageY)=>{
             const layout = {
                 x: pageX,
@@ -69,12 +68,11 @@ export default class Landable extends React.Component{
                 width: width,
                 height: height
             }
-            console.log(layout);
+            console.log("Layout", layout);
             this.layout = layout;
-        })   
+        })       
     }
-
-   
+        
 
     _onFocus = ()=>{
         console.log(this.props.name, "Gained Focus");
@@ -129,32 +127,12 @@ export default class Landable extends React.Component{
     }
 
 
-    
-    _renderListItem = ({item,index})=>{
-        return (
-            <View>
-                <Text>
-                    Default Item
-                </Text>
-            </View>
-
-            // <Draggable
-            //     // onStart = {Embassy.onStartHandler}
-            //     // onMove = {Embassy.onMoveHandler}
-            //     // onRelease = {Embassy.onReleaseHandler}
-            //     >
-            //     <Text>
-            //         {item}
-            //     </Text>
-            // </Draggable>
-        )  
-    }
-
     render(){
         return (
 
             <View 
-                
+                onLayout={this._updateLayout}
+                updateLayout = {this._updateLayout}
                 ref = {this.list}
                 isGestureOnTop = {this._isGestureOnTop}
                 toggleScroll = {this._toggleScroll}
@@ -170,16 +148,16 @@ export default class Landable extends React.Component{
                 style={this.props.style || {height:"100%", width: "100%"}}>
 
                 {/* <Button onPress={()=>{
-                    // this.list.current.measure((x,y,width,height,pageX,pageY)=>{
-                    //     const layout = {
-                    //         x: pageX,
-                    //         y: pageY,
-                    //         width: width,
-                    //         height: height
-                    //     }
-                    //     console.log("x, y is", layout.x, layout.y);
-                    //     console.log("wid, height is", layout.width, layout.height);
-                    // })
+                    this.list.current.measure((x,y,width,height,pageX,pageY)=>{
+                        const layout = {
+                            x: pageX,
+                            y: pageY,
+                            width: width,
+                            height: height
+                        }
+                        console.log("x, y is", layout.x, layout.y);
+                        console.log("wid, height is", layout.width, layout.height);
+                    })
                     this._updateLayout()
                 }}>
                     <Text>Check Dimensions</Text>
@@ -188,11 +166,10 @@ export default class Landable extends React.Component{
                 
 
                 <FlatList
-                    onLayout = {this._updateLayout}
                     scrollEnabled = {this.state.canScroll}
                     style={{height: "100%", width: "100%"}}
                     data = {this.props.data || this.state.test_data}
-                    renderItem = {this.props.renderItem || this._renderListItem}/>
+                    renderItem = {this.props.renderItem}/>
 
             </View>
         )
@@ -200,6 +177,7 @@ export default class Landable extends React.Component{
 }
 
 Landable.propTypes = {
+    renderItem: PropTypes.func.isRequired,
     onEnter : PropTypes.func,
     onLeave : PropTypes.func
 }

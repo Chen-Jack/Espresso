@@ -42,15 +42,6 @@ class HomeScreen extends React.Component{
 
     static navigationOptions = {
         header: null,
-        // headerTitle: "Home",
-        // headerLeft: null,
-        // headerTintColor: 'white',
-        // headerStyle: {
-        //     backgroundColor: '#222'
-        // },
-        // headerTitleStyle: {
-        //     alignSelf: 'center'
-        // },
         gesturesEnabled: false, // Prevent swipe back
     };
 
@@ -277,8 +268,8 @@ class HomeScreen extends React.Component{
     }
 
     render(){
-        return <TaskDrawer ref={this.drawer} task_data = {this.state.unallocated_tasks}>
-            <Container >
+        // return <TaskDrawer ref={this.drawer} task_data = {this.state.unallocated_tasks}>
+            return <Container >
                 <Header style={{backgroundColor: '#222'}}>
                     <Body>
                         <Title style={{color:"white"}}>Header</Title>
@@ -331,7 +322,7 @@ class HomeScreen extends React.Component{
 
         
         </Container>
-        </TaskDrawer>
+        // </TaskDrawer>
     }
 }
 

@@ -10,7 +10,7 @@ import {Embassy} from './../TravelingList'
 class DrawerContent extends React.Component{
     render(){
         return (
-        <View style={{backgroundColor: "orange", height: Dimensions.get('window').height, width: "100%"}}>
+        <View style={{backgroundColor: "darkblue", height: Dimensions.get('window').height, width: "100%"}}>
             <View style={{padding: 0, margin:0, alignItems: "center", justifyContent:"center", backgroundColor:"#222", height: "25%", width:"100%"}}>
                 <Text style={{ fontSize:20, color:"white"}}> Unallocated Tasks </Text>
             </View>
@@ -79,6 +79,11 @@ export default class TaskDrawer extends React.Component{
                 ref={this.drawer}
                 isOpen={this.state.visible}
                 disableGestures = {true}
+                onChange = {(isOpen)=>{
+                    this.setState({
+                        visible: isOpen
+                    })
+                }}
                 menu = {<DrawerContent task_data = {this.props.task_data}/>}>
 
                 {this.props.children}

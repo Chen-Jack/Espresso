@@ -2,7 +2,7 @@ import React from 'react'
 import {Card, CardItem, Text, Body} from 'native-base'
 import {Draggable} from './../TravelingList'
 import PropTypes from 'prop-types'
-import UserTaskContext, {UserTaskConsumer, UserTaskProvider} from '../../UserTaskContext'
+import UserTaskContext from '../../UserTaskContext'
 
 export default class TaskCard extends React.Component{
     constructor(props) {

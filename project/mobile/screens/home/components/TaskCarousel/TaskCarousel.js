@@ -13,14 +13,42 @@ export default class TaskCarousel extends React.Component{
         
         this.state={
             canScroll : true,
-            thresh: 30
         }
         this.carousel = React.createRef()
+        this.wrapper = React.createRef()
+
+        this.layout = null;
+    }
+
+    _onGestureStart = (coordinates)=>{
+        
+    }
+    _onGestureMove = (coordinates)=>{
+       this.isOnScrollableEdge(coordinates)
+    }
+
+    _onGestureRelease = (coordinates)=>{
+
+    }
+
+    isOnScrollableEdge = (coordinates)=>{
+        const scroll_lax = this.layout.width * 0.1
+        console.log("coordinates", coordinates);
+        if(coordinates.x < scroll_lax){ 
+            //Left Edge
+            console.log("scroll left");
+        }
+        else if(coordinates.x > (this.layout.x + this.layout.width) - scroll_lax){
+            //Right Edge
+            console.log("scroll right");
+        }
     }
 
     componentDidMount(){
         Embassy.addOnStartHandler(this.disableCarouselScroll)
         Embassy.addOnReleaseHandler(this.enableCarouselScroll)
+
+        Embassy.addOnMoveHandler(this._onGestureMove)
     }
 
     disableCarouselScroll = (coordinates, cb=()=>{})=>{
@@ -31,6 +59,20 @@ export default class TaskCarousel extends React.Component{
         })
     }
     
+    _onLayout = ({nativeEvent: { layout: {x, y, width, height}}})=>{
+        console.log("carousel layedout");
+        this.wrapper.current._root.measure((x,y,width,height,pageX,pageY)=>{
+            const layout = {
+                x: pageX,
+                y: pageY,
+                width: width,
+                height: height
+            }
+            console.log("Carousel Layout", layout);
+            this.layout = layout;
+        })     
+    }
+
     enableCarouselScroll = (coordinates, cb=()=>{})=>{
         this.setState({
             canScroll: true
@@ -62,10 +104,12 @@ export default class TaskCarousel extends React.Component{
     render(){
 
         return (
-            <View style={{marginTop: 20, height:300}}>
+            <View 
+                ref = {this.wrapper}
+                onLayout = {this._onLayout}
+                style={{marginTop: 20, height:300}}>
                 <Carousel
                     showsHorizontalScrollIndicator = {true}
-                    swipeThreshold = {20}
                     scrollEnabled = {this.state.canScroll}
                     ref = {this.carousel}
                     onSnapToItem = {this._handleCardSelection}
