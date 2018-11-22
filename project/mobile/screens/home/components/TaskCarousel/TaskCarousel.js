@@ -13,6 +13,8 @@ export default class TaskCarousel extends React.Component{
         
         this.state={
             canScroll : true,
+            left_counter : 0,
+            right_counter : 0
         }
         this.carousel = React.createRef()
         this.wrapper = React.createRef()
@@ -23,8 +25,34 @@ export default class TaskCarousel extends React.Component{
     _onGestureStart = (coordinates)=>{
         
     }
+    
     _onGestureMove = (coordinates)=>{
-       this.isOnScrollableEdge(coordinates)
+       const direction = this.isOnScrollableEdge(coordinates)
+       if(direction === "LEFT"){
+        if(this.state.left_counter === 0){
+            this.setState({
+                left_counter: this.state.left_counter +=1
+            }, ()=>{
+                console.log("PREV");
+                this.carousel.current.snapToPrev()
+            })
+        }
+        
+       }
+       else if(direction === "RIGHT"){
+           if(this.state.right_counter === 0){
+                this.setState({
+                    right_counter: this.state.right_counter +=1
+                }, ()=>{
+                    console.log("NEXT");
+                    this.carousel.current.snapToNext(true, false)
+                })
+            }
+            
+       }
+       else{
+
+       }
     }
 
     _onGestureRelease = (coordinates)=>{
@@ -32,15 +60,21 @@ export default class TaskCarousel extends React.Component{
     }
 
     isOnScrollableEdge = (coordinates)=>{
+        /*
+        Checks to see if the given coordinates should trigger a carousel scroll
+        */
         const scroll_lax = this.layout.width * 0.1
-        console.log("coordinates", coordinates);
+        // console.log("coordinates", coordinates);
         if(coordinates.x < scroll_lax){ 
             //Left Edge
-            console.log("scroll left");
+            return "LEFT"
         }
         else if(coordinates.x > (this.layout.x + this.layout.width) - scroll_lax){
             //Right Edge
-            console.log("scroll right");
+            return "RIGHT"
+        }
+        else{
+            return false
         }
     }
 
@@ -97,7 +131,7 @@ export default class TaskCarousel extends React.Component{
     _renderTaskList = ({item: tasks_of_the_day, index})=>{
         return <View >
             <Text style={{fontSize: 16, backgroundColor:"white", padding: 10}}> {"Date: " + tasks_of_the_day.date || "Date"} </Text>
-            <TaskList data = {tasks_of_the_day.tasks}/>
+            <TaskList index = {index} data = {tasks_of_the_day.tasks}/>
         </View>
     }
 
@@ -109,6 +143,8 @@ export default class TaskCarousel extends React.Component{
                 onLayout = {this._onLayout}
                 style={{marginTop: 20, height:300}}>
                 <Carousel
+                    useScrollView = {true}
+                    lockScrollWhileSnapping = {true}
                     showsHorizontalScrollIndicator = {true}
                     scrollEnabled = {this.state.canScroll}
                     ref = {this.carousel}

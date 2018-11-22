@@ -9,11 +9,6 @@ export default class TaskCard extends React.Component{
         super(props)
 
     }
-    
-    componentDidUpdate(){
-        console.log("updated");
-    }
-  
     render(){
         let strike_through_style = {textDecorationLine: 'line-through', textDecorationStyle: 'solid'}
         return (

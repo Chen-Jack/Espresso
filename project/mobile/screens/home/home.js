@@ -141,11 +141,11 @@ class HomeScreen extends React.Component{
             tasks : Array
         }
        */
-        const day_variance = 7; //How many days of tasks you will show.
+        const day_variance = 14; //How many days of tasks you will show.
         const seconds_per_day = 86400;
         let task_set = [];
 
-        const past_days_allowed = 7; //How far back in time do you want to see
+        const past_days_allowed = 9; //How far back in time do you want to see
 
         let starting_date_in_epoch = Math.floor(Date.now()/1000 - (seconds_per_day * past_days_allowed))
 

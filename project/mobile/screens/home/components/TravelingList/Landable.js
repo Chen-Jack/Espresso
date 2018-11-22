@@ -68,7 +68,7 @@ export default class Landable extends React.Component{
                 width: width,
                 height: height
             }
-            console.log("Layout", layout);
+            console.log(`Landable Layout Updated for ${this.props.index}`, layout);
             this.layout = layout;
         })       
     }

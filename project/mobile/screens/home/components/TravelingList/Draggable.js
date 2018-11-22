@@ -90,10 +90,14 @@ export default class Draggable extends React.Component{
 
         this._panResponder = PanResponder.create({
             onStartShouldSetResponder: (evt, gesture) => true,
+            onStartShouldSetResponderCapture: (evt,gesture)=> true,
             onStartShouldSetPanResponder : (evt, gesture) => true,
+            onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
 
             onMoveShouldSetResponder: (evt, gestureState) => true,
+            onMoveShouldSetResponderCapture : (evt, gesture) => true,
             onMoveShouldSetPanResponder: (evt,gestureState) => true,
+            onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
 
             onPanResponderGrant: (e, gestureState) => {
                 e.persist() //Must persist event to access async
@@ -149,9 +153,18 @@ export default class Draggable extends React.Component{
  
                 }
             },
-        
 
-            onResponderTerminationRequest: (e,gesturestate) => false,
+
+            onResponderTerminationRequest: (e,gesturestate) => {
+                console.log("requseted to terminat");
+                return false
+            },
+
+            onPanResponderTerminationRequest: (evt, gestureState) => false,
+
+            onPanResponderTerminate : ()=>{
+                console.log("TERMINATED");
+            },
 
             onPanResponderRelease: (e, gestureState) => {
                 if(!this.gesture_started){
@@ -160,6 +173,7 @@ export default class Draggable extends React.Component{
                     this.timer_ref = null
                 }
                 else{
+                    console.log("RELEASED");
                     Animated.parallel([
                         Animated.timing(                
                             this.state.modal_scale,         

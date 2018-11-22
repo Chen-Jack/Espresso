@@ -32,6 +32,7 @@ export default class TaskList extends React.Component{
             isFocus: true
         })
     }
+    
 
     _onLeaveHandler = ()=>{
         console.log("unsetting");
@@ -47,6 +48,7 @@ export default class TaskList extends React.Component{
             return <EmptyList/>
         else {
             return <Landable
+                index = {this.props.index}
                 onEnter = {this._onEnterHandler}
                 onLeave = {this._onLeaveHandler}
                 data = {this.props.data}
