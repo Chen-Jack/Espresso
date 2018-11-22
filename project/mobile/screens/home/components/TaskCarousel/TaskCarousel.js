@@ -13,69 +13,14 @@ export default class TaskCarousel extends React.Component{
         
         this.state={
             canScroll : true,
-            left_counter : 0,
-            right_counter : 0
+            isScrolling : false
         }
         this.carousel = React.createRef()
         this.wrapper = React.createRef()
 
         this.layout = null;
-    }
-
-    _onGestureStart = (coordinates)=>{
-        
-    }
-    
-    _onGestureMove = (coordinates)=>{
-       const direction = this.isOnScrollableEdge(coordinates)
-       if(direction === "LEFT"){
-        if(this.state.left_counter === 0){
-            this.setState({
-                left_counter: this.state.left_counter +=1
-            }, ()=>{
-                console.log("PREV");
-                this.carousel.current.snapToPrev()
-            })
-        }
-        
-       }
-       else if(direction === "RIGHT"){
-           if(this.state.right_counter === 0){
-                this.setState({
-                    right_counter: this.state.right_counter +=1
-                }, ()=>{
-                    console.log("NEXT");
-                    this.carousel.current.snapToNext(true, false)
-                })
-            }
-            
-       }
-       else{
-
-       }
-    }
-
-    _onGestureRelease = (coordinates)=>{
-
-    }
-
-    isOnScrollableEdge = (coordinates)=>{
-        /*
-        Checks to see if the given coordinates should trigger a carousel scroll
-        */
-        const scroll_lax = this.layout.width * 0.1
-        // console.log("coordinates", coordinates);
-        if(coordinates.x < scroll_lax){ 
-            //Left Edge
-            return "LEFT"
-        }
-        else if(coordinates.x > (this.layout.x + this.layout.width) - scroll_lax){
-            //Right Edge
-            return "RIGHT"
-        }
-        else{
-            return false
-        }
+        //A setinterval timer for when the gesture is ontop of the edge
+        this.autoScrollingTimer = null; 
     }
 
     componentDidMount(){
@@ -83,7 +28,79 @@ export default class TaskCarousel extends React.Component{
         Embassy.addOnReleaseHandler(this.enableCarouselScroll)
 
         Embassy.addOnMoveHandler(this._onGestureMove)
+        Embassy.addOnReleaseHandler(this._onGestureRelease)
     }
+
+    onSnapHandler = ()=>{
+        this.setState({
+            isScrolling : false
+        })
+    }
+
+    _onGestureStart = (coordinates)=>{
+        
+    }
+    
+    _onGestureMove = (coordinates)=>{
+       const direction = this.whichEdgeIsGestureOn(coordinates)
+       if(this.autoScrollingTimer === null && (direction === "LEFT" || direction === "RIGHT")){
+           console.log("enabling auto scroller for", direction);
+            this.enableAutoScroller(direction)         
+       }
+       else if(this.autoScrollingTimer && direction === "NONE"){
+           console.log("eliseif called");
+            this.disableAutoScroller()
+       }
+    }
+
+
+    enableAutoScroller = (direction)=>{
+        const MS_PER_SCROLL = 750
+        // console.log("AUTO SCROLL ENABLED");
+
+        this.autoScrollingTimer = setInterval(() => {
+            if(direction === "RIGHT"){
+                this.carousel.current.snapToNext()
+            }
+            else if(direction === "LEFT"){
+                this.carousel.current.snapToPrev()
+            }
+            else if(direction === "NONE"){
+                
+            }
+            else{
+                console.log("Receieved invalid direction in enableAutoScroller");
+            }
+        }, MS_PER_SCROLL);
+    }
+
+    disableAutoScroller = ()=>{
+        // console.log("auto scroller DISABLED");
+        clearInterval(this.autoScrollingTimer)
+        this.autoScrollingTimer = null
+    }
+
+    _onGestureRelease = (coordinates)=>{
+        this.disableAutoScroller()
+    }
+
+    whichEdgeIsGestureOn = (coordinates)=>{
+        /*
+        Checks to see if the given coordinates should trigger a carousel scroll
+        */
+        const scroll_lax = this.layout.width * 0.2
+        if(coordinates.x < scroll_lax){ 
+            return "LEFT"
+        }
+        else if(coordinates.x > (this.layout.x + this.layout.width) - scroll_lax){
+            return "RIGHT"
+        }
+        else{
+            return "NONE"
+        }
+    }
+
+
 
     disableCarouselScroll = (coordinates, cb=()=>{})=>{
         this.setState({
@@ -143,6 +160,7 @@ export default class TaskCarousel extends React.Component{
                 onLayout = {this._onLayout}
                 style={{marginTop: 20, height:300}}>
                 <Carousel
+                    onSnapToItem = {this.onSnapHandler}
                     useScrollView = {true}
                     lockScrollWhileSnapping = {true}
                     showsHorizontalScrollIndicator = {true}
