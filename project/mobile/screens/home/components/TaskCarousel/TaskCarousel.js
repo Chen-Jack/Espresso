@@ -6,6 +6,8 @@ import {Dimensions} from 'react-native'
 import TaskList from './TaskList'
 import {Embassy} from '../TravelingList'
 
+import update from 'immutability-helper'
+
 
 export default class TaskCarousel extends React.Component{
     constructor(props) {
@@ -13,14 +15,20 @@ export default class TaskCarousel extends React.Component{
         
         this.state={
             canScroll : true,
-            isScrolling : false
+            isScrolling : false,
+            task_cards_references : []
         }
         this.carousel = React.createRef()
         this.wrapper = React.createRef()
 
         this.layout = null;
+        this.focused_card_layout = null;
+        
         //A setinterval timer for when the gesture is ontop of the edge
         this.autoScrollingTimer = null; 
+
+        //There will be a collection of references to each task_list.
+        //The references are assigned when the list is rendered.
     }
 
     componentDidMount(){
@@ -31,10 +39,21 @@ export default class TaskCarousel extends React.Component{
         Embassy.addOnReleaseHandler(this._onGestureRelease)
     }
 
-    onSnapHandler = ()=>{
+    onSnapHandler = (index)=>{
         this.setState({
             isScrolling : false
         })
+        console.log("SNAPPED");
+
+        this._handleCardSelection(index)
+
+        const task_list_ref = this._getReactReference(index)
+        if(task_list_ref){
+            task_list_ref.measureLayout((layout)=>{
+                console.log("the layout is now", layout);
+                this.focused_card_layout = layout
+            })
+        }
     }
 
     _onGestureStart = (coordinates)=>{
@@ -145,10 +164,14 @@ export default class TaskCarousel extends React.Component{
         this.props.handleDateSelection(iso_date)
     }
 
+    _getReactReference = (index)=>{
+        return this[`task_${index}`]
+    }
+
     _renderTaskList = ({item: tasks_of_the_day, index})=>{
-        return <View >
+        return <View>
             <Text style={{fontSize: 16, backgroundColor:"white", padding: 10}}> {"Date: " + tasks_of_the_day.date || "Date"} </Text>
-            <TaskList index = {index} data = {tasks_of_the_day.tasks}/>
+            <TaskList ref={(ref)=>{this[`task_${index}`] = ref}} index = {index} data = {tasks_of_the_day.tasks}/>
         </View>
     }
 
@@ -159,6 +182,11 @@ export default class TaskCarousel extends React.Component{
                 ref = {this.wrapper}
                 onLayout = {this._onLayout}
                 style={{marginTop: 20, height:300}}>
+                <Button onPress={()=>{
+                    console.log(this.focused_card_layout);
+                }}>
+                    <Text> Focused Layout Measurements</Text>
+                </Button>
                 <Carousel
                     onSnapToItem = {this.onSnapHandler}
                     useScrollView = {true}
@@ -166,7 +194,6 @@ export default class TaskCarousel extends React.Component{
                     showsHorizontalScrollIndicator = {true}
                     scrollEnabled = {this.state.canScroll}
                     ref = {this.carousel}
-                    onSnapToItem = {this._handleCardSelection}
                     data={this.props.task_data}
                     renderItem={this._renderTaskList}
                     sliderWidth={Dimensions.get('window').width}

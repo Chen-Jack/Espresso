@@ -4,6 +4,7 @@ import {Landable} from './../TravelingList'
 import TaskCard from './TaskCard'
 import PropTypes from 'prop-types'
 
+
 const EmptyList = (props)=>{
     return <View style={{width:"100%", height:"50%", backgroundColor: "white", alignSelf:"center", justifyContent:"center"}}>
         <Text>
@@ -15,6 +16,8 @@ const EmptyList = (props)=>{
 export default class TaskList extends React.Component{
     constructor(props) {
         super(props)
+
+        this.list = React.createRef()
 
         this.state = {
             isFocus: false
@@ -41,20 +44,38 @@ export default class TaskList extends React.Component{
         })
     }
 
+    measureLayout = (cb=()=>{})=>{
+        this.list.current.measure((x,y,width,height,pageX,pageY)=>{
+            const layout = {
+                x: pageX,
+                y: pageY,
+                width: width,
+                height: height
+            }
+            cb(layout)
+        })
+    }
+
     render(){
         let focus_style = {backgroundColor: (this.state.isFocus ? "yellow" : null)}
         let landable_style = {height: "100%", width: "100%", ...focus_style}
-        if(this.props.data.length === 0)
-            return <EmptyList/>
-        else {
-            return <Landable
-                index = {this.props.index}
-                onEnter = {this._onEnterHandler}
-                onLeave = {this._onLeaveHandler}
-                data = {this.props.data}
-                renderItem = {this._renderListItem}
-                style={landable_style}/>
-        }
+
+        return <View
+            ref={this.list}
+            measureLayout = {this.measureLayout}>
+
+            { this.props.data.length === 0 ? 
+                <EmptyList/> :
+                <Landable
+                    index = {this.props.index}
+                    onEnter = {this._onEnterHandler}
+                    onLeave = {this._onLeaveHandler}
+                    data = {this.props.data}
+                    renderItem = {this._renderListItem}
+                    style={landable_style}/>          
+            }
+
+        </View>
     }
 }
 
