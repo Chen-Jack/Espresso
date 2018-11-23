@@ -129,7 +129,6 @@ export default class Draggable extends React.Component{
             onPanResponderMove : ({nativeEvent}, gestureState) => {
                 if(!this.gesture_started){
                     // If you move when you arent allowed to move yet, clear the timer
-                    console.log("MOVED TOO EARLY");
                     clearTimeout(this.timer_ref)
                     this.timer_ref = null
                 }
@@ -162,9 +161,6 @@ export default class Draggable extends React.Component{
 
             onPanResponderTerminationRequest: (evt, gestureState) => false,
 
-            onPanResponderTerminate : ()=>{
-                console.log("TERMINATED");
-            },
 
             onPanResponderRelease: (e, gestureState) => {
                 if(!this.gesture_started){
@@ -173,7 +169,6 @@ export default class Draggable extends React.Component{
                     this.timer_ref = null
                 }
                 else{
-                    console.log("RELEASED");
                     Animated.parallel([
                         Animated.timing(                
                             this.state.modal_scale,         

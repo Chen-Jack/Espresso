@@ -6,7 +6,6 @@ import {Dimensions} from 'react-native'
 import TaskList from './TaskList'
 import {Embassy} from '../TravelingList'
 
-import update from 'immutability-helper'
 
 
 export default class TaskCarousel extends React.Component{
@@ -22,7 +21,8 @@ export default class TaskCarousel extends React.Component{
         this.wrapper = React.createRef()
 
         this.layout = null;
-        this.focused_card_layout = null;
+
+        this.focused_list = null;
         
         //A setinterval timer for when the gesture is ontop of the edge
         this.autoScrollingTimer = null; 
@@ -32,29 +32,36 @@ export default class TaskCarousel extends React.Component{
     }
 
     componentDidMount(){
+
         Embassy.addOnStartHandler(this.disableCarouselScroll)
         Embassy.addOnReleaseHandler(this.enableCarouselScroll)
 
         Embassy.addOnMoveHandler(this._onGestureMove)
         Embassy.addOnReleaseHandler(this._onGestureRelease)
+
     }
 
     onSnapHandler = (index)=>{
         this.setState({
             isScrolling : false
         })
-        console.log("SNAPPED");
 
         this._handleCardSelection(index)
 
-        const task_list_ref = this._getReactReference(index)
-        if(task_list_ref){
-            task_list_ref.measureLayout((layout)=>{
-                console.log("the layout is now", layout);
-                this.focused_card_layout = layout
-            })
+        const prev_ref = this.focused_list
+        const new_ref = this._getReference(index)
+        this.focused_list = new_ref
+        
+        if(prev_ref){
+            Embassy.unregisterLandable(prev_ref)
         }
+        if(new_ref){
+            Embassy.registerLandable(new_ref)
+        }
+        
+        
     }
+    
 
     _onGestureStart = (coordinates)=>{
         
@@ -63,11 +70,9 @@ export default class TaskCarousel extends React.Component{
     _onGestureMove = (coordinates)=>{
        const direction = this.whichEdgeIsGestureOn(coordinates)
        if(this.autoScrollingTimer === null && (direction === "LEFT" || direction === "RIGHT")){
-           console.log("enabling auto scroller for", direction);
             this.enableAutoScroller(direction)         
        }
        else if(this.autoScrollingTimer && direction === "NONE"){
-           console.log("eliseif called");
             this.disableAutoScroller()
        }
     }
@@ -75,7 +80,6 @@ export default class TaskCarousel extends React.Component{
 
     enableAutoScroller = (direction)=>{
         const MS_PER_SCROLL = 750
-        // console.log("AUTO SCROLL ENABLED");
 
         this.autoScrollingTimer = setInterval(() => {
             if(direction === "RIGHT"){
@@ -164,7 +168,8 @@ export default class TaskCarousel extends React.Component{
         this.props.handleDateSelection(iso_date)
     }
 
-    _getReactReference = (index)=>{
+    _getReference = (index)=>{
+        console.log(this[`task_${index}`]);
         return this[`task_${index}`]
     }
 
@@ -182,11 +187,11 @@ export default class TaskCarousel extends React.Component{
                 ref = {this.wrapper}
                 onLayout = {this._onLayout}
                 style={{marginTop: 20, height:300}}>
-                <Button onPress={()=>{
+                {/* <Button onPress={()=>{
                     console.log(this.focused_card_layout);
                 }}>
                     <Text> Focused Layout Measurements</Text>
-                </Button>
+                </Button> */}
                 <Carousel
                     onSnapToItem = {this.onSnapHandler}
                     useScrollView = {true}

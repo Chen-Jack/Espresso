@@ -9,13 +9,12 @@ export default class Landable extends React.Component{
         super(props)
 
         this.list = React.createRef()
-        Embassy.registerLandable(this.list)
 
         this.state = {
             data : [],
             isHover: false,
             active: false,
-            canScroll : true
+            // canScroll : true
         }
 
         this.layout = {
@@ -32,9 +31,6 @@ export default class Landable extends React.Component{
         }) 
     }
 
-    // componentDidUpdate(){
-    //     this._updateLayout()
-    // }
 
     addItem = ()=>{
         // const new_data = this.state.test_data
@@ -53,11 +49,11 @@ export default class Landable extends React.Component{
         // })
     }
 
-    _toggleScroll = (specifiedScrollStatus = null)=>{
-        this.setState({
-            canScroll: specifiedScrollStatus? specifiedScrollStatus: !this.state.canScroll
-        })
-    }
+    // _toggleScroll = (specifiedScrollStatus = null)=>{
+    //     this.setState({
+    //         canScroll: specifiedScrollStatus? specifiedScrollStatus: !this.state.canScroll
+    //     })
+    // }
     
 
     _updateLayout = ()=>{
@@ -68,63 +64,60 @@ export default class Landable extends React.Component{
                 width: width,
                 height: height
             }
-            console.log(`Landable Layout Updated for ${this.props.index}`, layout);
             this.layout = layout;
         })       
     }
         
 
-    _onFocus = ()=>{
-        console.log(this.props.name, "Gained Focus");
-        this.setState({
-            active: true,
-            isFocus: true
-        }, this.props.onEnter())
-    }
-    _onLoseFocus = ()=>{
-        console.log(this.props.name, "Lost Focus");
-        this.setState({
-            active: false,
-            isFocus: false
-        }, this.props.onLeave())
-    }
-
-    _onStay = ()=>{
-        console.log(this.props.name, "Stayed");
-    }
-
-    _onHandleRelease = ()=>{
-        /*
-        Event handler for handling the event of a landable handling a gesture release
-        */
-        console.log(this.props.name, "Handling release");
-    }
+    // _onGestureFocus = ()=>{
+    //     console.log(this.props.name, "Gained Focus");
+    //     this.setState({
+    //         active: true,
+    //         isFocus: true
+    //     }, this.props.onEnter())
+    // }
+    
+    // _onGestureLoseFocus = ()=>{
+    //     console.log(this.props.name, "Lost Focus");
+    //     this.setState({
+    //         active: false,
+    //         isFocus: false
+    //     }, this.props.onLeave())
+    // }
 
 
-    _isGestureOnTop = (location)=>{
-        /*
-        Checks if the given coordinates are ontop of the landable
-        */
-       if(!location.x || !location.y){
-           console.log("You forgot params");
-           return false
-       }
+    // _onHandleRelease = ()=>{
+    //     /*
+    //     Event handler for handling the event of a landable handling a gesture release
+    //     */
+    //     console.log(this.props.name, "Handling release");
+    // }
 
-       const x0 = this.layout.x
-       const y0 = this.layout.y
-       const x1 = this.layout.x + this.layout.width 
-       const y1 = this.layout.y + this.layout.height
 
-       const isWithinX = (x0 < location.x ) && (location.x < x1)
-       const isWithinY = (y0 < location.y) && (location.y < y1)
+    // _isGestureOnTop = (location)=>{
+    //     /*
+    //     Checks if the given coordinates are ontop of the landable
+    //     */
+    //    if(!location.x || !location.y){
+    //        console.log("You forgot params");
+    //        return false
+    //    }
 
-        if( isWithinX && isWithinY ){
-            return true
-        }
-        else{
-            return false
-        }
-    }
+    //    const x0 = this.layout.x
+    //    const y0 = this.layout.y
+    //    const x1 = this.layout.x + this.layout.width 
+    //    const y1 = this.layout.y + this.layout.height
+
+    //    const isWithinX = (x0 < location.x ) && (location.x < x1)
+    //    const isWithinY = (y0 < location.y) && (location.y < y1)
+
+    //     if( isWithinX && isWithinY ){
+    //         return true
+    //     }
+    //     else{
+    //         return false
+    //     }
+    // }
 
 
     render(){
@@ -137,8 +130,8 @@ export default class Landable extends React.Component{
                 isGestureOnTop = {this._isGestureOnTop}
                 toggleScroll = {this._toggleScroll}
 
-                onFocus = {this._onFocus}
-                onLoseFocus = {this._onLoseFocus}
+                onFocus = {this._onGestureFocus}
+                onLoseFocus = {this._onGestureLoseFocus}
                 onStay = {this._onStay}
                 onHandleRelease = {this._onHandleRelease}
 
@@ -166,7 +159,7 @@ export default class Landable extends React.Component{
                 
 
                 <FlatList
-                    scrollEnabled = {this.state.canScroll}
+                    scrollEnabled = {this.props.canScroll || true}
                     style={{height: "100%", width: "100%"}}
                     data = {this.props.data || this.state.test_data}
                     renderItem = {this.props.renderItem}/>
@@ -179,5 +172,6 @@ export default class Landable extends React.Component{
 Landable.propTypes = {
     renderItem: PropTypes.func.isRequired,
     onEnter : PropTypes.func,
-    onLeave : PropTypes.func
+    onLeave : PropTypes.func,
+    canScroll: PropTypes.bool
 }

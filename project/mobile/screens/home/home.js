@@ -9,6 +9,7 @@ import {TaskCreationPrompt} from './components/TaskForm'
 import {TaskDrawer} from './components/TaskDrawer'
 import {UserTaskProvider} from './UserTaskContext'
 import update from 'immutability-helper'
+import { Embassy } from './components/TravelingList';
 
 
 class HomeScreen extends React.Component{
@@ -263,7 +264,6 @@ class HomeScreen extends React.Component{
                 markers_list[day.date]["dots"].push({key: task.id, color: "blue"})
             }
         }
-        console.log("returning", markers_list);
         return markers_list
     }
 
@@ -277,6 +277,13 @@ class HomeScreen extends React.Component{
                 </Header>
 
                 <Content style={{backgroundColor: "#333"}} scrollEnabled = {false}>
+                    <Button onPress={()=>{
+                        console.log(Embassy.registeredLandables.length)
+                    }}>
+                        <Text>
+                            Embassy
+                        </Text>
+                    </Button>
                     <UserTaskProvider value={this.task_management_context}>
 
                         <Calendar

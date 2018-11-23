@@ -18,9 +18,11 @@ export default class TaskList extends React.Component{
         super(props)
 
         this.list = React.createRef()
+        this.layout = null
 
         this.state = {
-            isFocus: false
+            isGestureHovering: false,
+            canScroll : true
         }
     }
     _renderListItem = ({item,index})=>{
@@ -32,15 +34,14 @@ export default class TaskList extends React.Component{
     _onEnterHandler = ()=>{
         console.log("setting");
         this.setState({
-            isFocus: true
+            isGestureHovering: true
         })
     }
-    
 
     _onLeaveHandler = ()=>{
         console.log("unsetting");
         this.setState({
-            isFocus: false
+            isGestureHovering: false
         })
     }
 
@@ -52,24 +53,111 @@ export default class TaskList extends React.Component{
                 width: width,
                 height: height
             }
+            this.layout = layout
             cb(layout)
         })
     }
 
-    render(){
-        let focus_style = {backgroundColor: (this.state.isFocus ? "yellow" : null)}
-        let landable_style = {height: "100%", width: "100%", ...focus_style}
+    // updateLayout = ()=>{
+    //     this.list.current.measure((x,y,width,height,pageX,pageY)=>{
+    //         const layout = {
+    //             x: pageX,
+    //             y: pageY,
+    //             width: width,
+    //             height: height
+    //         }
+    //         this.layout = layout
+    //     })
+    // }
 
+
+    isGestureOnTop = (location)=>{
+        /*
+        Checks if the given coordinates are ontop of the landable
+        */
+
+        this.measureLayout((layout)=>{
+            if(!location.x || !location.y){
+                console.log("You forgot params");
+                return false
+            }
+
+            const x0 = layout.x
+            const y0 = layout.y
+            const x1 = layout.x + layout.width 
+            const y1 = layout.y + layout.height
+
+            const isWithinX = (x0 < location.x ) && (location.x < x1)
+            const isWithinY = (y0 < location.y) && (location.y < y1)
+
+            if( isWithinX && isWithinY ){
+                return true
+            }
+            else{
+                return false
+            }
+        })
+    }
+
+    toggleScroll = (status = null)=>{
+        this.setState({
+            canScroll : status || !this.state.canScroll
+        })
+    }
+
+    onGestureFocus = ()=>{
+        console.log("Gesture start");
+        this._onEnterHandler()
+    }
+
+    onGestureLoseFocus = ()=>{
+        this._onLeaveHandler()
+        console.log("Gesture leave");
+    }
+
+    // onFocusedList = ()=>{
+    //     this.updateLayout()
+    //     console.log("Now the focused List");
+    // }
+
+    // onLostFocusedList = ()=>{
+    //     // this.updateLayout()
+    //     console.log("No longer the focused list");
+    // }
+
+    onGestureStay = ()=>{
+        console.log("Gesture Stay");
+    }
+
+    onHandleReleasedGesture = ()=>{
+        console.log("Captured the released gesture");
+    }
+
+    // onLayoutHandler = ()=>{
+    //     this.measureLayout((layout)=>{
+            
+    //     })
+    // }
+
+    render(){
+        let focus_style = {backgroundColor: (this.state.isGestureHovering ? "yellow" : null)}
+        let landable_style = {height: "100%", width: "100%", ...focus_style}
         return <View
+            // onLayout={this.onLayoutHandler}
             ref={this.list}
-            measureLayout = {this.measureLayout}>
+            // isGestureOnTop = {this.isGestureOnTop}
+            // onFocusedList = {this._onFocusedList}
+            // onLostFocusedList = {this.onLostFocusedList}
+            // measureLayout = {this.measureLayout}
+            >
 
             { this.props.data.length === 0 ? 
                 <EmptyList/> :
                 <Landable
+                    canScroll = {this.state.canScroll}
                     index = {this.props.index}
-                    onEnter = {this._onEnterHandler}
-                    onLeave = {this._onLeaveHandler}
+                    // onEnter = {this._onEnterHandler}
+                    // onLeave = {this._onLeaveHandler}
                     data = {this.props.data}
                     renderItem = {this._renderListItem}
                     style={landable_style}/>          

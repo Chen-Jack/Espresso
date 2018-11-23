@@ -14,7 +14,8 @@ export default class Embassy{
     static active_target = null; //React reference to the active Landable
 
     static registerLandable = (ref)=>{
-        Embassy.registeredLandables.push(ref)
+        if(ref)
+            Embassy.registeredLandables.push(ref)
     }
 
     static unregisterLandable = (ref)=>{
@@ -22,6 +23,9 @@ export default class Embassy{
         This function takes a react reference
         Returns true on successful deletion. False when item is not in the array
         */
+        if(ref === null)
+            return true
+
         for(let i in Embassy.registeredLandables){
             if(Embassy.registeredLandables[i] === ref){
                 Embassy.registeredLandables.splice(i, 1)
@@ -33,7 +37,7 @@ export default class Embassy{
 
     static findTarget = (coordinates) => {
         for( let landable of Embassy.registeredLandables){
-            if(landable.current.props.isGestureOnTop(coordinates)){
+            if(landable.isGestureOnTop(coordinates)){
                 return landable
             }
         }
@@ -53,16 +57,17 @@ export default class Embassy{
 
         if(prev_target === new_target){
             // Target is still the same landable
-            Embassy.active_target.current.props.onStay()
+            Embassy.active_target.onGestureStay()
         }
         else{
             // There is a target switch
             console.log("SWITCH");
             if(prev_target){
-                prev_target.current.props.onLoseFocus()
+                prev_target.onGestureLoseFocus()
             }
             if(new_target){
-                new_target.current.props.onFocus()
+                console.log("new target", new_target);
+                new_target.onGestureFocus()
             }
         }
 
@@ -107,11 +112,10 @@ export default class Embassy{
             });
         })
 
-        console.log("Starting promise all");
         Promise.all(promises).then(()=>{
             //Disable scrolling on all landables while gesturing
             for(let landable of Embassy.registeredLandables){
-                landable.current.props.toggleScroll(false)
+                landable.toggleScroll(false)
             }
 
             const target = Embassy.findTarget(coordinates)
@@ -127,7 +131,6 @@ export default class Embassy{
     static onMoveHandler = (coordinates)=>{
         const new_target = Embassy.findTarget(coordinates)
         Embassy.updateTarget(new_target)
-
 
         for(let event of Embassy.onMoveEvents){
             event(coordinates)
@@ -148,8 +151,8 @@ export default class Embassy{
     }
 
     static performTransfer = (source, target)=>{
-        source.current.props.removeItem()
-        target.current.props.addItem()
+        // source.props.removeItem()
+        // target.props.addItem()
     }
 
     static evaluteAndPerformTransferIfValid = (source ,target)=>{
@@ -162,13 +165,13 @@ export default class Embassy{
  
         const capturing_landable = Embassy.findTarget(coordinates)
         if(capturing_landable){
-            capturing_landable.current.props.onHandleRelease()
+            capturing_landable.onHandleReleasedGesture()
 
             Embassy.evaluteAndPerformTransferIfValid(Embassy.origin_target, capturing_landable)
         }
 
         if(Embassy.active_target){
-            Embassy.active_target.current.props.onLoseFocus()
+            Embassy.active_target.onGestureLoseFocus()
             Embassy.active_target = null
         }
         
@@ -181,7 +184,7 @@ export default class Embassy{
 
         //Return scrolling capabilities to all landables
         for(let landable of Embassy.registeredLandables){
-            landable.current.props.toggleScroll(false)
+            landable.toggleScroll(false)
         }
     }
 }
