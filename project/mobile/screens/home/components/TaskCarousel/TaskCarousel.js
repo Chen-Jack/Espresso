@@ -195,7 +195,13 @@ export default class TaskCarousel extends React.Component{
         })     
     }
 
+    onGestureFocus = ()=>{
+        this.focused_list.onGestureFocus()
+    }
 
+    onGestureLostFocus = ()=>{
+        this.focused_list.onGestureLostFocus()
+    }
 
     updateToDate = (date)=>{
         const index = this.props.task_data.findIndex((task)=>{

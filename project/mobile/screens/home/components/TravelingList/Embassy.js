@@ -176,15 +176,9 @@ export default class Embassy{
         }
         
         Embassy.origin_target = null
-
-
+        
         for(let event of Embassy.onReleaseEvents){
             event(coordinates)
         }
-
-        //Return scrolling capabilities to all landables
-        // for(let landable of Embassy.registeredLandables){
-            // landable.toggleScroll(false)
-        // }
     }
 }
