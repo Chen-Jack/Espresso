@@ -57,17 +57,17 @@ export default class Embassy{
 
         if(prev_target === new_target){
             // Target is still the same landable
-            Embassy.active_target.onGestureStay()
+            // Embassy.active_target.onGestureStay()
         }
         else{
             // There is a target switch
             console.log("SWITCH");
             if(prev_target){
-                prev_target.onGestureLoseFocus()
+                // prev_target.onGestureLoseFocus()
             }
             if(new_target){
                 console.log("new target", new_target);
-                new_target.onGestureFocus()
+                // new_target.onGestureFocus()
             }
         }
 
@@ -113,10 +113,10 @@ export default class Embassy{
         })
 
         Promise.all(promises).then(()=>{
-            //Disable scrolling on all landables while gesturing
-            for(let landable of Embassy.registeredLandables){
-                landable.toggleScroll(false)
-            }
+            // //Disable scrolling on all landables while gesturing
+            // for(let landable of Embassy.registeredLandables){
+            //     landable.toggleScroll(false)
+            // }
 
             const target = Embassy.findTarget(coordinates)
             Embassy.origin_target = target
@@ -165,13 +165,13 @@ export default class Embassy{
  
         const capturing_landable = Embassy.findTarget(coordinates)
         if(capturing_landable){
-            capturing_landable.onHandleReleasedGesture()
+            // capturing_landable.onHandleReleasedGesture()
 
             Embassy.evaluteAndPerformTransferIfValid(Embassy.origin_target, capturing_landable)
         }
 
         if(Embassy.active_target){
-            Embassy.active_target.onGestureLoseFocus()
+            // Embassy.active_target.onGestureLoseFocus()
             Embassy.active_target = null
         }
         
@@ -183,8 +183,8 @@ export default class Embassy{
         }
 
         //Return scrolling capabilities to all landables
-        for(let landable of Embassy.registeredLandables){
-            landable.toggleScroll(false)
-        }
+        // for(let landable of Embassy.registeredLandables){
+            // landable.toggleScroll(false)
+        // }
     }
 }

@@ -71,37 +71,11 @@ export default class TaskList extends React.Component{
     // }
 
 
-    isGestureOnTop = (location)=>{
-        /*
-        Checks if the given coordinates are ontop of the landable
-        */
-
-        this.measureLayout((layout)=>{
-            if(!location.x || !location.y){
-                console.log("You forgot params");
-                return false
-            }
-
-            const x0 = layout.x
-            const y0 = layout.y
-            const x1 = layout.x + layout.width 
-            const y1 = layout.y + layout.height
-
-            const isWithinX = (x0 < location.x ) && (location.x < x1)
-            const isWithinY = (y0 < location.y) && (location.y < y1)
-
-            if( isWithinX && isWithinY ){
-                return true
-            }
-            else{
-                return false
-            }
-        })
-    }
+    
 
     toggleScroll = (status = null)=>{
         this.setState({
-            canScroll : status || !this.state.canScroll
+            canScroll : status ? status : !this.state.canScroll
         })
     }
 

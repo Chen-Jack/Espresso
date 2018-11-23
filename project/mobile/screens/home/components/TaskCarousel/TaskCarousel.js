@@ -14,7 +14,6 @@ export default class TaskCarousel extends React.Component{
         
         this.state={
             canScroll : true,
-            isScrolling : false,
             task_cards_references : []
         }
         this.carousel = React.createRef()
@@ -23,6 +22,7 @@ export default class TaskCarousel extends React.Component{
         this.layout = null;
 
         this.focused_list = null;
+        this.focused_list_layout = null;
         
         //A setinterval timer for when the gesture is ontop of the edge
         this.autoScrollingTimer = null; 
@@ -32,16 +32,20 @@ export default class TaskCarousel extends React.Component{
     }
 
     componentDidMount(){
+        Embassy.registerLandable(this)
 
         Embassy.addOnStartHandler(this.disableCarouselScroll)
         Embassy.addOnReleaseHandler(this.enableCarouselScroll)
+
+        Embassy.addOnStartHandler(this.disableAllListScroll)
+        Embassy.addOnReleaseHandler(this.enableAllListScroll)
 
         Embassy.addOnMoveHandler(this._onGestureMove)
         Embassy.addOnReleaseHandler(this._onGestureRelease)
 
     }
 
-    onSnapHandler = (index)=>{
+    _onSnapHandler = (index)=>{
         this.setState({
             isScrolling : false
         })
@@ -52,16 +56,31 @@ export default class TaskCarousel extends React.Component{
         const new_ref = this._getReference(index)
         this.focused_list = new_ref
         
-        if(prev_ref){
-            Embassy.unregisterLandable(prev_ref)
-        }
+       
         if(new_ref){
-            Embassy.registerLandable(new_ref)
+            this.updateFocusedListLayout()
         }
         
         
     }
-    
+
+    disableAllListScroll = (coordinates, cb=()=>{})=>{
+        for(let i =0; i<this.props.task_data.length; i++){
+            const ref = this._getReference(i)
+            console.log("ref is", ref);
+            ref.toggleScroll(false)
+        }
+        cb()
+    }
+
+    enableAllListScroll = (coordinates, cb=()=>{})=>{
+        for(let i =0; i<this.props.task_data.length; i++){
+            const ref = this._getReference(i)
+            ref.toggleScroll(true)
+        }
+        cb()
+    }
+
 
     _onGestureStart = (coordinates)=>{
         
@@ -123,7 +142,38 @@ export default class TaskCarousel extends React.Component{
         }
     }
 
+    isGestureOnTop = (location)=>{
+        /*
+        Checks if the given coordinates are ontop of the focused landable
+        */
+        if(!location.x || !location.y){
+            console.log("You forgot params");
+            return false
+        }
 
+        const x0 = this.focused_list_layout.x
+        const y0 = this.focused_list_layout.y
+        const x1 = this.focused_list_layout.x + this.focused_list_layout.width 
+        const y1 = this.focused_list_layout.y + this.focused_list_layout.height
+
+        const isWithinX = (x0 < location.x ) && (location.x < x1)
+        const isWithinY = (y0 < location.y) && (location.y < y1)
+
+        if( isWithinX && isWithinY ){
+            return true
+        }
+        else{
+            return false
+        }
+        
+    }
+    enableCarouselScroll = (coordinates, cb=()=>{})=>{
+        this.setState({
+            canScroll: true
+        }, ()=>{
+            cb()
+        })
+    }
 
     disableCarouselScroll = (coordinates, cb=()=>{})=>{
         this.setState({
@@ -134,7 +184,6 @@ export default class TaskCarousel extends React.Component{
     }
     
     _onLayout = ({nativeEvent: { layout: {x, y, width, height}}})=>{
-        console.log("carousel layedout");
         this.wrapper.current._root.measure((x,y,width,height,pageX,pageY)=>{
             const layout = {
                 x: pageX,
@@ -142,18 +191,11 @@ export default class TaskCarousel extends React.Component{
                 width: width,
                 height: height
             }
-            console.log("Carousel Layout", layout);
             this.layout = layout;
         })     
     }
 
-    enableCarouselScroll = (coordinates, cb=()=>{})=>{
-        this.setState({
-            canScroll: true
-        }, ()=>{
-            cb()
-        })
-    }
+
 
     updateToDate = (date)=>{
         const index = this.props.task_data.findIndex((task)=>{
@@ -169,7 +211,6 @@ export default class TaskCarousel extends React.Component{
     }
 
     _getReference = (index)=>{
-        console.log(this[`task_${index}`]);
         return this[`task_${index}`]
     }
 
@@ -178,6 +219,15 @@ export default class TaskCarousel extends React.Component{
             <Text style={{fontSize: 16, backgroundColor:"white", padding: 10}}> {"Date: " + tasks_of_the_day.date || "Date"} </Text>
             <TaskList ref={(ref)=>{this[`task_${index}`] = ref}} index = {index} data = {tasks_of_the_day.tasks}/>
         </View>
+    }
+
+    updateFocusedListLayout = ()=>{
+        const ref = this._getReference(0)
+        console.log("ref", ref);
+        ref.measureLayout((layout)=>{
+            this.focused_list_layout = layout
+            console.log("focused layout is now", this.focused_list_layout);
+         })
     }
 
     render(){
@@ -193,7 +243,7 @@ export default class TaskCarousel extends React.Component{
                     <Text> Focused Layout Measurements</Text>
                 </Button> */}
                 <Carousel
-                    onSnapToItem = {this.onSnapHandler}
+                    onSnapToItem = {this._onSnapHandler}
                     useScrollView = {true}
                     lockScrollWhileSnapping = {true}
                     showsHorizontalScrollIndicator = {true}

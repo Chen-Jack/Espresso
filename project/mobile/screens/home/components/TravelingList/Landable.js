@@ -159,7 +159,7 @@ export default class Landable extends React.Component{
                 
 
                 <FlatList
-                    scrollEnabled = {this.props.canScroll || true}
+                    scrollEnabled = {this.props.canScroll}
                     style={{height: "100%", width: "100%"}}
                     data = {this.props.data || this.state.test_data}
                     renderItem = {this.props.renderItem}/>
