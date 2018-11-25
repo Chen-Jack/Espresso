@@ -71,6 +71,17 @@ export default class TaskList extends React.Component{
     // }
 
 
+    addItem =()=>{
+
+    }
+
+    removeItem = ()=>{
+
+    }
+    
+    getDate = ()=>{
+        return this.props.data.date
+    }
     
 
     toggleScroll = (status = null)=>{
@@ -132,7 +143,7 @@ export default class TaskList extends React.Component{
                     index = {this.props.index}
                     // onEnter = {this._onEnterHandler}
                     // onLeave = {this._onLeaveHandler}
-                    data = {this.props.data}
+                    data = {this.props.data.tasks}
                     renderItem = {this._renderListItem}
                     style={landable_style}/>          
             }
@@ -142,5 +153,8 @@ export default class TaskList extends React.Component{
 }
 
 TaskList.propTypes = {
-    data: PropTypes.array.isRequired
+    data: PropTypes.shape({
+        date :PropTypes.string.isRequired,
+        tasks: PropTypes.array.isRequired
+    }).isRequired
 }

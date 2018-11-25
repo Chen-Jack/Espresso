@@ -14,7 +14,7 @@ export default class TaskCard extends React.Component{
         return (
             <UserTaskContext.Consumer>
                 {({updateStatus})=>{
-                    return <Draggable doubleTapHandler = {()=>{updateStatus(this.props.task_id, !this.props.isCompleted)}}>
+                    return <Draggable source = {this} doubleTapHandler = {()=>{updateStatus(this.props.task_id, !this.props.isCompleted)}}>
                         <Card>
                             <CardItem bordered>
                                 <Text style={this.props.isCompleted ? strike_through_style : {} }>{this.props.title || "Title"}</Text>

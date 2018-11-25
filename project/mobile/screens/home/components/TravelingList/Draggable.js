@@ -73,7 +73,8 @@ export default class Draggable extends React.Component{
             x : e.nativeEvent.pageX,
             y: e.nativeEvent.pageY
         }
-        Embassy.onStartHandler(coordinates)
+
+        Embassy.onStartHandler(coordinates, this.props.source)
         
         this.gesture_started = true
         console.log("gesture started");
@@ -246,6 +247,7 @@ export default class Draggable extends React.Component{
 
 
 Draggable.propType = {
-    children : PropTypes.element.isRequired,
+    source : PropTypes.isRequired,
+    // children : PropTypes.element.isRequired,
     doubleTapHandler : PropTypes.func
 }

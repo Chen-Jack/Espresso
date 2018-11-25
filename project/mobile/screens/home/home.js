@@ -36,7 +36,7 @@ class HomeScreen extends React.Component{
             add: this.addTaskToState,
             remove: this.removeTaskFromState,
             updateStatus: this.updateCompletionStatusOfState,
-            setDate : this.allocateTaskToDate
+            setTaskDate : this.allocateTaskToDate
         }
      
     }
@@ -117,8 +117,52 @@ class HomeScreen extends React.Component{
         })
     }
 
-    allocateTaskToDate = ()=>{
+    allocateTaskToDate = (task_id, new_date)=>{
+        AsyncStorage.getItem("session_token", (err, session_token)=>{
+            const data = {
+                task_id: task_id,
+                new_date: new_date
+            }
+            fetch("http://localhost:3000/allocate-task", {
+                method: 'POST',
+                headers: {
+                    "Authorization": `Bearer ${session_token}`,
+                    "Content-Type": "application/json; charset=utf-8",
+                },
+                body : JSON.stringify(data)
+            }).then(
+                (res)=>{
+                    if(res.ok){
+                        console.log("Reallocating task task");
 
+                      
+                        // //First Search Through Allocated Tasks
+                        // for(let day_index in this.state.allocated_tasks){
+                        //     let day_tasks = this.state.allocated_tasks[day_index].tasks
+                        //     for(let task_index in day_tasks){
+                        //         if(day_tasks[task_index].id === task_id){
+                        //             const new_state = update(this.state.allocated_tasks, {[day_index]: {tasks: {[task_index] : {completed: {$set : new_status}}}}});
+                        //             found = true;
+                        //             this.setState({
+                        //                 allocated_tasks : new_state
+                        //             })
+                        //         }
+                        //     }
+                        // }
+                    
+                        cb()
+                    }
+
+                    else{
+                        cb("Res not ok")
+                    }
+                }
+            ).catch((err)=>{
+                console.log("Error when toggling tasks", err)
+                cb(err)
+                alert("Error")
+            })
+        })
     }
 
     _onDateSelection=(isodate)=>{
@@ -146,7 +190,7 @@ class HomeScreen extends React.Component{
         const seconds_per_day = 86400;
         let task_set = [];
 
-        const past_days_allowed = 9; //How far back in time do you want to see
+        const past_days_allowed = 14; //How far back in time do you want to see
 
         let starting_date_in_epoch = Math.floor(Date.now()/1000 - (seconds_per_day * past_days_allowed))
 

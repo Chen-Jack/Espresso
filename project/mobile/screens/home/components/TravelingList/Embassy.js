@@ -1,3 +1,12 @@
+/*
+Interface Landable
+isGestureOnTop
+onGestureFocus
+onGestureLoseFocus
+onGestureStay
+onHandleReleaseGesture
+*/
+
 
 export default class Embassy{
     /*
@@ -10,6 +19,7 @@ export default class Embassy{
     static onStartEvents = [];
     static onMoveEvents = [];
     static onReleaseEvents = [];
+    static traveler = null;
     static origin_target = null; //React reference to the source of the original Landable
     static active_target = null; //React reference to the active Landable
 
@@ -35,6 +45,10 @@ export default class Embassy{
         return false
     }
 
+    static getTraveler = ()=>{
+        return Embassy.traveler
+    }
+
     static findTarget = (coordinates) => {
         for( let landable of Embassy.registeredLandables){
             if(landable.isGestureOnTop(coordinates)){
@@ -57,17 +71,18 @@ export default class Embassy{
 
         if(prev_target === new_target){
             // Target is still the same landable
+            console.log("Same target");
             // Embassy.active_target.onGestureStay()
         }
         else{
             // There is a target switch
             console.log("SWITCH");
             if(prev_target){
-                // prev_target.onGestureLoseFocus()
+                prev_target.onGestureLoseFocus()
             }
             if(new_target){
                 console.log("new target", new_target);
-                // new_target.onGestureFocus()
+                new_target.onGestureFocus()
             }
         }
 
@@ -81,26 +96,59 @@ export default class Embassy{
         Embassy.updateTarget(new_target)
     }
 
-    static addOnStartHandler = (handler) => {
+    static addOnStartHandlers = (handlers) => {
         // All handlers must have two params, coordinates and a callback
-        Embassy.onStartEvents.push(handler)
+        if(Array.isArray(handlers)){
+            for(let func of handlers){
+                Embassy.onStartEvents.push(func)
+            }
+        }
+        else if(typeof handlers === "function"){
+            Embassy.onStartEvents.push(handlers)
+        }
+        else{
+            console.log("Incorrect handler passed into Embassy.addOnStartHandler");
+        }
     }
 
-    static addOnMoveHandler = (handler) => {
-        Embassy.onMoveEvents.push(handler)
+    static addOnMoveHandlers = (handlers) => {
+        
+        if(Array.isArray(handlers)){
+            for(let func of handlers){
+                Embassy.onMoveEvents.push(func)
+            }
+        }
+        else if(typeof handlers === "function"){
+            Embassy.onMoveEvents.push(handlers)
+        }
+        else{
+            console.log("Incorrect handler passed into Embassy.addOnMoveHandler");
+        }
     }
 
-    static addOnReleaseHandler = (handler) => {
-        Embassy.onReleaseEvents.push(handler)
+    static addOnReleaseHandlers = (handlers) => {
+        if(Array.isArray(handlers)){
+            for(let func of handlers){
+                Embassy.onReleaseEvents.push(func)
+            }
+        }
+        else if(typeof handlers === "function"){
+            Embassy.onReleaseEvents.push(handlers)
+        }
+        else{
+            console.log("Incorrect handler passed into Embassy.addOnReleaseHandler");
+        }
     }
 
-    static onStartHandler = (coordinates)=>{
+    static onStartHandler = (coordinates, traveler)=>{
         /*
         The starting handler and active handler are always the same.
         Cause you havent moved away from the origin yet
         */
 
-      
+        Embassy.traveler = traveler
+        console.log("TRAVELER IS", Embassy.traveler);
+
         const promises = Embassy.onStartEvents.map((evt)=>{
             return new Promise((resolve, reject) => {
                 evt(coordinates, (err)=>{
@@ -113,13 +161,11 @@ export default class Embassy{
         })
 
         Promise.all(promises).then(()=>{
-            // //Disable scrolling on all landables while gesturing
-            // for(let landable of Embassy.registeredLandables){
-            //     landable.toggleScroll(false)
-            // }
+            //Disable scrolling on all landables while gesturing
 
             const target = Embassy.findTarget(coordinates)
             Embassy.origin_target = target
+           
             Embassy.updateTarget(target)
         }).catch((err)=>{
             console.log("ERROR WHEN USING EMBASSY's ONSTARTHANDLER", err);
@@ -162,20 +208,21 @@ export default class Embassy{
     }
 
     static onReleaseHandler = (coordinates)=>{
- 
+
         const capturing_landable = Embassy.findTarget(coordinates)
         if(capturing_landable){
-            // capturing_landable.onHandleReleasedGesture()
+            capturing_landable.onHandleReleaseGesture()
 
-            Embassy.evaluteAndPerformTransferIfValid(Embassy.origin_target, capturing_landable)
+            // Embassy.evaluteAndPerformTransferIfValid(Embassy.origin_target, capturing_landable)
         }
 
         if(Embassy.active_target){
-            // Embassy.active_target.onGestureLoseFocus()
+            Embassy.active_target.onGestureLoseFocus()
             Embassy.active_target = null
         }
         
         Embassy.origin_target = null
+        Embassy.traveler = null
         
         for(let event of Embassy.onReleaseEvents){
             event(coordinates)
