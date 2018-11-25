@@ -139,9 +139,11 @@ export default class TaskCarousel extends React.Component{
        if(this.focused_list_from_gesture_start !== this.focused_list){
             /* Reallocate Task To Different Date */
             const task_id = Embassy.getTraveler().props.task_id
-            console.log("Task id", task_id);
-            console.log("date of release is", this.focused_list.getDate());
-            // console.log("Calling", this.carousel.current.props.reallocateTaskDate)
+            const original_date = this.focused_list_from_gesture_start.getDate();
+            console.log(original_date);
+            const new_date = this.focused_list.getDate();
+            console.log("uh",this.carousel.current.props.reallocateTaskDate);
+            this.carousel.current.props.reallocateTaskDate(task_id, original_date, new_date)
        }
     }
 

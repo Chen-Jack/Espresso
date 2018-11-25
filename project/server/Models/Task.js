@@ -29,6 +29,7 @@ class Task{
     }
 
     static allocateTask(creator_id, task_id, date, callback=()=>{}){
+        console.log("CALLED TASK", creator_id, task_id, date);
         //Date format should be yyyy-mm-dd
         const sql_query = `UPDATE task SET allocated_date = (?) WHERE creator_id = (?) AND id = (?)`
 

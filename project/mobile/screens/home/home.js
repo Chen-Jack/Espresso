@@ -117,8 +117,61 @@ class HomeScreen extends React.Component{
         })
     }
 
-    allocateTaskToDate = (task_id, new_date)=>{
+    allocateTaskToDate = (task_id, original_date, new_date, cb=()=>{})=>{
+        const original_state = this.state.allocated_tasks
+
+        let original_task = null;
+        let day_index_original = null
+        let task_index_original = null
+
+        let day_index_updated = null
+        
+        //Visually Update before fetching. 
+
+        //Gather variables to know what to mutate
+        for(let day_index in this.state.allocated_tasks){
+            let day_tasks = this.state.allocated_tasks[day_index].tasks
+            date = this.state.allocated_tasks[day_index].date
+
+            if(date === new_date){
+                day_index_updated = day_index
+            }
+            
+            for(let task_index in day_tasks){
+                if(day_tasks[task_index].id === task_id){
+                    original_task = day_tasks[task_index]
+                    day_index_original = day_index
+                    task_index_original = task_index
+                }
+            }
+        }
+        
+
+        const updated_task = update(original_task , {allocated_date : {$set : new_date} })
+        const new_state = update(this.state.allocated_tasks, 
+            {
+                [day_index_updated]: { //Add Item To New Date
+                    tasks: {
+                        $push: [updated_task]
+                    }
+                },
+                [day_index_original] : { // Remove Item from Old Date
+                    tasks: {
+                        $splice: [[task_index_original, 1]]
+                    }
+                }
+            }
+        );
+
+        this.setState({
+            allocated_tasks : new_state
+        })
+    
+
         AsyncStorage.getItem("session_token", (err, session_token)=>{
+            if(err)
+                return console.log("ERROR WHEN RETRIEVING SESSION TOKEN")
+                
             const data = {
                 task_id: task_id,
                 new_date: new_date
@@ -133,32 +186,24 @@ class HomeScreen extends React.Component{
             }).then(
                 (res)=>{
                     if(res.ok){
-                        console.log("Reallocating task task");
-
-                      
-                        // //First Search Through Allocated Tasks
-                        // for(let day_index in this.state.allocated_tasks){
-                        //     let day_tasks = this.state.allocated_tasks[day_index].tasks
-                        //     for(let task_index in day_tasks){
-                        //         if(day_tasks[task_index].id === task_id){
-                        //             const new_state = update(this.state.allocated_tasks, {[day_index]: {tasks: {[task_index] : {completed: {$set : new_status}}}}});
-                        //             found = true;
-                        //             this.setState({
-                        //                 allocated_tasks : new_state
-                        //             })
-                        //         }
-                        //     }
-                        // }
-                    
+                
                         cb()
                     }
 
                     else{
+                        this.setState({
+                            allocated_tasks : original_state
+                        })
                         cb("Res not ok")
                     }
                 }
             ).catch((err)=>{
-                console.log("Error when toggling tasks", err)
+                
+                this.setState({
+                    allocated_tasks : original_state
+                })
+
+                console.log("Error when allocateTaskToDate", err)
                 cb(err)
                 alert("Error")
             })
@@ -321,13 +366,13 @@ class HomeScreen extends React.Component{
                 </Header>
 
                 <Content style={{backgroundColor: "#333"}} scrollEnabled = {false}>
-                    <Button onPress={()=>{
+                    {/* <Button onPress={()=>{
                         console.log(Embassy.registeredLandables.length)
                     }}>
                         <Text>
                             Embassy
                         </Text>
-                    </Button>
+                    </Button> */}
                     <UserTaskProvider value={this.task_management_context}>
 
                         <Calendar

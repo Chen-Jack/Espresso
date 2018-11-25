@@ -102,14 +102,15 @@ app.post('/create-account', (req,res)=>{
 
 app.post('/allocate-task', (req,res)=>{
 
-    // const payload = extractPayloadFromHeader(req.headers)
-    // if(!payload)
-    //     return res.status(401).end() 
+    const payload = extractPayloadFromHeader(req.headers)
+    if(!payload)
+        return res.status(401).end() 
 
     const task_id = req.body.task_id
     const new_date = req.body.new_date
-    const creator_id = req.body.creator_id
-    // const creator_id = payload
+    const creator_id = payload.id
+
+    console.log("APP WAS CALLED");
 
     Task.allocateTask(creator_id, task_id, new_date , (err)=>{
         if(err)
