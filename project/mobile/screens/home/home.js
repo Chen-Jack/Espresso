@@ -198,7 +198,7 @@ class HomeScreen extends React.Component{
                     }
                 }
             ).catch((err)=>{
-                
+
                 this.setState({
                     allocated_tasks : original_state
                 })
@@ -357,8 +357,8 @@ class HomeScreen extends React.Component{
     }
 
     render(){
-        // return <TaskDrawer ref={this.drawer} task_data = {this.state.unallocated_tasks}>
-            return <Container >
+        return <TaskDrawer ref={this.drawer} task_data = {this.state.unallocated_tasks}>
+            <Container >
                 <Header style={{backgroundColor: '#222'}}>
                     <Body>
                         <Title style={{color:"white"}}>Header</Title>
@@ -415,10 +415,8 @@ class HomeScreen extends React.Component{
                         
                     </FooterTab>
                 </Footer>
-
-        
-        </Container>
-        {/* </TaskDrawer> */}
+            </Container>
+        </TaskDrawer> 
     }
 }
 

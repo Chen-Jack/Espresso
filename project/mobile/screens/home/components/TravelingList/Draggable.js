@@ -14,7 +14,7 @@ export default class Draggable extends React.Component{
             modal_scale: new Animated.Value(1)
         }
 
-        this.animation_speed = 250;
+        this.animation_speed = 350;
         
         this.time_of_last_press = Date.now();
         this.waiting_for_second_tap = false;
@@ -40,18 +40,18 @@ export default class Draggable extends React.Component{
             focus: true
         }, ()=>{
             Animated.parallel([
-                Animated.timing(                  // Animate over time
-                    this.state.modal_scale,            // The animated value to drive
+                Animated.spring(                
+                    this.state.modal_scale,          
                     {
-                        toValue: 0.8,                   // Animate to opacity: 1 (opaque)
-                        duration: this.animation_speed,              // Make it take a while
+                        toValue: 1.1,                   
+                        friction: 3, 
                     }
                 ),
-                Animated.timing(
+                Animated.spring(
                     this.state.scale,
                     {
                         toValue: 0,
-                        duration: this.animation_speed
+                        friction: 3
                     }
                 )
             ]).start()
@@ -74,18 +74,17 @@ export default class Draggable extends React.Component{
             y: e.nativeEvent.pageY
         }
 
-        Embassy.onStartHandler(coordinates, this.props.source)
+        Embassy.onStartTraveling(coordinates, this.props.source, this.props.origin_list)
         
         this.gesture_started = true
-        console.log("gesture started");
     }
 
     componentWillMount(){
-        Animated.timing(                  // Animate over time
+        Animated.spring(                  // Animate over time
             this.state.scale,            // The animated value to drive
             {
               toValue: 1,                   // Animate to opacity: 1 (opaque)
-              duration: 500,              // Make it take a while
+              friction: 3
             }
           ).start();  
 
@@ -148,7 +147,7 @@ export default class Draggable extends React.Component{
                         x : nativeEvent.pageX,
                         y: nativeEvent.pageY
                     }
-                    Embassy.onMoveHandler(coordinates)
+                    Embassy.onTravel(coordinates)
                     
  
                 }
@@ -156,7 +155,6 @@ export default class Draggable extends React.Component{
 
 
             onResponderTerminationRequest: (e,gesturestate) => {
-                console.log("requseted to terminat");
                 return false
             },
 
@@ -199,7 +197,7 @@ export default class Draggable extends React.Component{
                         x : e.nativeEvent.pageX,
                         y: e.nativeEvent.pageY
                     }
-                    Embassy.onReleaseHandler(coordinates)
+                    Embassy.onFinishTraveling(coordinates)
                     this.gesture_started = false
                 }
             }
@@ -247,7 +245,7 @@ export default class Draggable extends React.Component{
 
 
 Draggable.propType = {
-    source : PropTypes.isRequired,
-    // children : PropTypes.element.isRequired,
+    source : PropTypes.any.isRequired,
+    origin_list: PropTypes.any.isRequired,
     doubleTapHandler : PropTypes.func
 }

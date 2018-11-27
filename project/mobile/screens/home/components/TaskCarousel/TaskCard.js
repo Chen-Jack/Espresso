@@ -14,10 +14,10 @@ export default class TaskCard extends React.Component{
         return (
             <UserTaskContext.Consumer>
                 {({updateStatus})=>{
-                    return <Draggable source = {this} doubleTapHandler = {()=>{updateStatus(this.props.task_id, !this.props.isCompleted)}}>
+                    return <Draggable origin_list = {this.props.parent_list} source = {this} doubleTapHandler = {()=>{updateStatus(this.props.task_id, !this.props.isCompleted)}}>
                         <Card>
                             <CardItem bordered>
-                                <Text style={this.props.isCompleted ? strike_through_style : {} }>{this.props.title || "Title"}</Text>
+                                <Text style={this.props.isCompleted ? strike_through_style : {} }>{this.props.title || "Task"}</Text>
                             </CardItem>
 
                             <CardItem>
@@ -35,6 +35,7 @@ export default class TaskCard extends React.Component{
 }
 
 TaskCard.propTypes = {
+    parent_list: PropTypes.any.isRequired,
     task_id: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     date: PropTypes.string,

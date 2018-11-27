@@ -27,7 +27,13 @@ export default class TaskList extends React.Component{
     }
     _renderListItem = ({item,index})=>{
         return (
-            <TaskCard task_id={item.id} title={item.title} date={item.allocated_date} details={item.details} isCompleted={item.completed}/>
+            <TaskCard 
+                parent_list = {this} 
+                task_id={item.id} 
+                title={item.title} 
+                date={item.allocated_date} 
+                details={item.details} 
+                isCompleted={item.completed}/>
         )  
     }
 
@@ -80,7 +86,7 @@ export default class TaskList extends React.Component{
     }
     
     getDate = ()=>{
-        return this.props.data.date
+        return this.props.data.date || "Unallocated"
     }
     
 
@@ -90,14 +96,22 @@ export default class TaskList extends React.Component{
         })
     }
 
+    onGestureStay = ()=>{
+        console.log(`${this.props.data.date} still focused`);
+    }
+
     onGestureFocus = ()=>{
-        console.log("Gesture start");
-        this._onEnterHandler()
+        console.log(`${this.props.data.date} is focused`);
+        // this._onEnterHandler()
     }
 
     onGestureLoseFocus = ()=>{
-        this._onLeaveHandler()
-        console.log("Gesture leave");
+        console.log(`${this.props.data.date} lost focus`);
+        // this._onLeaveHandler()
+    }
+
+    onHandleReleaseGesture = ()=>{
+        console.log(`${this.props.data.date } captured the released gesture`);
     }
 
     // onFocusedList = ()=>{
@@ -110,13 +124,7 @@ export default class TaskList extends React.Component{
     //     console.log("No longer the focused list");
     // }
 
-    onGestureStay = ()=>{
-        console.log("Gesture Stay");
-    }
-
-    onHandleReleasedGesture = ()=>{
-        console.log("Captured the released gesture");
-    }
+   
 
     // onLayoutHandler = ()=>{
     //     this.measureLayout((layout)=>{
@@ -154,7 +162,7 @@ export default class TaskList extends React.Component{
 
 TaskList.propTypes = {
     data: PropTypes.shape({
-        date :PropTypes.string.isRequired,
+        date :PropTypes.string,
         tasks: PropTypes.array.isRequired
     }).isRequired
 }

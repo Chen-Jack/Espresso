@@ -124,19 +124,19 @@ export default class Landable extends React.Component{
         return (
 
             <View 
-                onLayout={this._updateLayout}
-                updateLayout = {this._updateLayout}
-                ref = {this.list}
-                isGestureOnTop = {this._isGestureOnTop}
-                toggleScroll = {this._toggleScroll}
+                // onLayout={this._updateLayout}
+                // updateLayout = {this._updateLayout}
+                // ref = {this.list}
+                // isGestureOnTop = {this._isGestureOnTop}
+                // toggleScroll = {this._toggleScroll}
 
-                onFocus = {this._onGestureFocus}
-                onLoseFocus = {this._onGestureLoseFocus}
-                onStay = {this._onStay}
-                onHandleRelease = {this._onHandleRelease}
+                // onFocus = {this._onGestureFocus}
+                // onLoseFocus = {this._onGestureLoseFocus}
+                // onStay = {this._onStay}
+                // onHandleRelease = {this._onHandleRelease}
 
-                addItem = {this.addItem}
-                removeItem = {this.removeItem}
+                // addItem = {this.addItem}
+                // removeItem = {this.removeItem}
                 
                 style={this.props.style || {height:"100%", width: "100%"}}>
 

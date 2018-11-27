@@ -5,8 +5,21 @@ onGestureFocus
 onGestureLoseFocus
 onGestureStay
 onHandleReleaseGesture
-*/
 
+TSAK LSIT MUST IMPLEMENT
+onGestureLoseFocus
+onGestureFocus 
+onGestureStay
+onHandleReleaseGesture
+
+IF TASK LIST CONTAINER, MUST IMPLEMENT
+getList()
+isGestureOnTop()
+
+all subscribled events must have (coordinates) as their parameters
+
+*/
+import TaskList from './../TaskCarousel/TaskList'
 
 export default class Embassy{
     /*
@@ -15,19 +28,40 @@ export default class Embassy{
     A class to act as a middleman between all the landables. Not intended to be 
     instantiated. Every instantiated landable should let the Embassy know.
     */
-    static registeredLandables = [];
+    static registeredLandables = []; //Can either be a TaskList, or a container containing TaskLists
     static onStartEvents = [];
     static onMoveEvents = [];
     static onReleaseEvents = [];
+
     static traveler = null;
-    static origin_target = null; //React reference to the source of the original Landable
-    static active_target = null; //React reference to the active Landable
+    static traveler_origin_list = null;
 
-    static registerLandable = (ref)=>{
-        if(ref)
-            Embassy.registeredLandables.push(ref)
+    // static original_list = null; //React reference to the source of the original Landable
+    static active_list = null; //React reference to the active Landable
+
+    static resetTravelDetails = ()=>{
+        /*
+        Clears all the Embassy's variables
+        */
+        Embassy.setStartingDetails(null,null)
+        if(Embassy.active_list){
+            Embassy.active_list.onGestureLoseFocus()
+            Embassy.active_list = null;
+        }
     }
+    static setStartingDetails = (traveler, origin)=>{
+        Embassy.traveler = traveler
+        Embassy.traveler_origin_list = origin
+    }
+    static getTraveler = ()=>{
+        return Embassy.traveler
+    }
+    static registerLandable = (ref)=>{
+        if(ref){
+            Embassy.registeredLandables.push(ref)
+        }
 
+    }
     static unregisterLandable = (ref)=>{
         /*
         This function takes a react reference
@@ -44,58 +78,6 @@ export default class Embassy{
         }
         return false
     }
-
-    static getTraveler = ()=>{
-        return Embassy.traveler
-    }
-
-    static findTarget = (coordinates) => {
-        for( let landable of Embassy.registeredLandables){
-            if(landable.isGestureOnTop(coordinates)){
-                return landable
-            }
-        }
-        return null
-    }
-
-    static updateTarget = (new_target) => {
-        /*
-        Updates the active target. The prev target then should lose focus, while
-        the new target gains focus
-        */
-        const prev_target = Embassy.active_target
-        if((prev_target === null) && (new_target === null)){
-            //If nothing happened. No prev target, no new target
-            return null
-        }
-
-        if(prev_target === new_target){
-            // Target is still the same landable
-            console.log("Same target");
-            // Embassy.active_target.onGestureStay()
-        }
-        else{
-            // There is a target switch
-            console.log("SWITCH");
-            if(prev_target){
-                prev_target.onGestureLoseFocus()
-            }
-            if(new_target){
-                console.log("new target", new_target);
-                new_target.onGestureFocus()
-            }
-        }
-
-        Embassy.active_target = new_target
-        return Embassy.active_target
-    }
-
-    static findAndUpdateTarget = (coordinates) => {
-        console.log("called");
-        const new_target = Embassy.findTarget(coordinates)
-        Embassy.updateTarget(new_target)
-    }
-
     static addOnStartHandlers = (handlers) => {
         // All handlers must have two params, coordinates and a callback
         if(Array.isArray(handlers)){
@@ -110,7 +92,6 @@ export default class Embassy{
             console.log("Incorrect handler passed into Embassy.addOnStartHandler");
         }
     }
-
     static addOnMoveHandlers = (handlers) => {
         
         if(Array.isArray(handlers)){
@@ -125,7 +106,6 @@ export default class Embassy{
             console.log("Incorrect handler passed into Embassy.addOnMoveHandler");
         }
     }
-
     static addOnReleaseHandlers = (handlers) => {
         if(Array.isArray(handlers)){
             for(let func of handlers){
@@ -139,93 +119,126 @@ export default class Embassy{
             console.log("Incorrect handler passed into Embassy.addOnReleaseHandler");
         }
     }
-
-    static onStartHandler = (coordinates, traveler)=>{
+    static findList = (coordinates) => {
         /*
-        The starting handler and active handler are always the same.
-        Cause you havent moved away from the origin yet
+        Gets a reference of the TaskList that the gesture is ontop of.
         */
+        for( let landable of Embassy.registeredLandables){
+            if(landable.isGestureOnTop(coordinates)){
+                if(landable instanceof TaskList)
+                    return landable
+                else
+                    return landable.getList()
+            }
+        }
+        return null
+    }
+    static setActiveList = (new_list) => {
+        /*
+        Updates the current list that the traveler is on top of. 
+        The prev target then should lose focus, while the new target gains focus.
+        */
+        const prev_list = Embassy.active_list
+        if((prev_list === null) && (new_list === null)){
+            //If nothing happened. No prev target, no new target
+            return null
+        }
 
-        Embassy.traveler = traveler
-        console.log("TRAVELER IS", Embassy.traveler);
+        if(prev_list === new_list){
+            // Target is still the same landable
+            Embassy.active_list.onGestureStay()
+        }
+        else{
+            // There is a target switch
+            if(prev_list){
+                prev_list.onGestureLoseFocus()
+            }
+            if(new_list){
+                new_list.onGestureFocus()
+            }
+        }
 
-        const promises = Embassy.onStartEvents.map((evt)=>{
-            return new Promise((resolve, reject) => {
-                evt(coordinates, (err)=>{
-                    if(err)
-                        reject(err)
-                    else
-                        resolve()
-                })
-            });
-        })
+        Embassy.active_list = new_list
+        return Embassy.active_list
+    }
+    static onStartTraveling = (coordinates, traveler, origin_list)=>{
+        /*
+        Should be called by the draggable that initates the travel
+        The traveler and the origin_list are the references to the
+        card that started the gesture.
+        Traveler_task_list is the tasklist the traveler comes from.
+        */
+      
+        Embassy.setStartingDetails(traveler, origin_list)
+        Embassy.setActiveList(origin_list)
 
-        Promise.all(promises).then(()=>{
-            //Disable scrolling on all landables while gesturing
+        // const promises = Embassy.onStartEvents.map((evt)=>{
+        //     return new Promise((resolve, reject) => {
+        //         evt(coordinates, (err)=>{
+        //             if(err){
+        //                 reject(err)
+        //             }
+        //             else{
+        //                 resolve()
+        //             }
+        //         })
+        //     });
+        // })
 
-            const target = Embassy.findTarget(coordinates)
-            Embassy.origin_target = target
-           
-            Embassy.updateTarget(target)
-        }).catch((err)=>{
-            console.log("ERROR WHEN USING EMBASSY's ONSTARTHANDLER", err);
-        })
-
-        
+        for(let event of Embassy.onStartEvents){
+            event(coordinates)
+        }
     }
 
-    static onMoveHandler = (coordinates)=>{
-        const new_target = Embassy.findTarget(coordinates)
-        Embassy.updateTarget(new_target)
+    static onTravel = (coordinates)=>{
+        /*
+        Call back to only be used by the traveling Draggable
+        */
+        const new_target = Embassy.findList(coordinates)
+        Embassy.setActiveList(new_target)
 
         for(let event of Embassy.onMoveEvents){
             event(coordinates)
         }
     }
 
-    static canPerformTransfer = (source, target)=>{
-        if( (source === null) || (target === null) || source === target){
-            return false
-        }
-        else if( source !== target ){
-            return true
-        }
-        else{
-            //Just incase im missing some logic, default returns false
-            return false
-        }
-    }
-
-    static performTransfer = (source, target)=>{
-        // source.props.removeItem()
-        // target.props.addItem()
-    }
-
-    static evaluteAndPerformTransferIfValid = (source ,target)=>{
-        if(Embassy.canPerformTransfer(source,target)){
-            Embassy.performTransfer(source,target)
-        }
-    }
-
-    static onReleaseHandler = (coordinates)=>{
-
-        const capturing_landable = Embassy.findTarget(coordinates)
-        if(capturing_landable){
-            capturing_landable.onHandleReleaseGesture()
-
+    static onFinishTraveling = (coordinates)=>{
+        const final_target_list = Embassy.findList(coordinates)
+        if(final_target_list){
+            final_target_list.onHandleReleaseGesture()
             // Embassy.evaluteAndPerformTransferIfValid(Embassy.origin_target, capturing_landable)
         }
-
-        if(Embassy.active_target){
-            Embassy.active_target.onGestureLoseFocus()
-            Embassy.active_target = null
-        }
-        
-        Embassy.origin_target = null
-        Embassy.traveler = null
         
         for(let event of Embassy.onReleaseEvents){
             event(coordinates)
         }
+
+        Embassy.resetTravelDetails();
     }
+
+    // static canPerformTransfer = (source, target)=>{
+    //     if( (source === null) || (target === null) || source === target){
+    //         return false
+    //     }
+    //     else if( source !== target ){
+    //         return true
+    //     }
+    //     else{
+    //         //Just incase im missing some logic, default returns false
+    //         return false
+    //     }
+    // }
+
+    // static performTransfer = (source, target)=>{
+    //     // source.props.removeItem()
+    //     // target.props.addItem()
+    // }
+
+    // static evaluteAndPerformTransferIfValid = (source ,target)=>{
+    //     if(Embassy.canPerformTransfer(source,target)){
+    //         Embassy.performTransfer(source,target)
+    //     }
+    // }
+
+    
 }
