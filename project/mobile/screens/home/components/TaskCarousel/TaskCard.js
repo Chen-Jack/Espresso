@@ -1,5 +1,6 @@
 import React from 'react'
-import {Card, CardItem, Text, Body,Button} from 'native-base'
+import {Card, CardItem, Text, Body,Button, View, Badge, Icon} from 'native-base'
+import {TouchableOpacity} from 'react-native'
 import {Draggable} from './../TravelingList'
 import PropTypes from 'prop-types'
 import UserTaskContext from '../../UserTaskContext'
@@ -19,6 +20,7 @@ export default class TaskCard extends React.Component{
             isCollapsed: !this.state.isCollapsed
         })
     }
+
     componentWillUnmount(){
         console.log("TaskCard Unmounting");
     }
@@ -33,12 +35,12 @@ export default class TaskCard extends React.Component{
                         doubleTapHandler = {()=>{updateStatus(this.props.task_id, !this.props.isCompleted)}}>
                         <Card>
                             <CardItem bordered>
-                                <Text style={this.props.isCompleted ? strike_through_style : {} }>{this.props.title || "Task"}</Text>
-                                <Button onPress={this.toggleCard}>
-                                    <Text>
-                                        View Details
-                                    </Text>
-                                </Button>
+                                <View style={{width:"100%", flexDirection:"row", justifyContent: "space-between"}}>
+                                    <Text style={this.props.isCompleted ? strike_through_style : {} }>{this.props.title || "Task"}</Text>
+                                    <TouchableOpacity onPress={this.toggleCard}>
+                                        <Text> {this.state.isCollapsed ? "+" : "-"}  </Text>
+                                    </TouchableOpacity>
+                                </View>
                             </CardItem>
 
                             <Collapsible collapsed = {this.state.isCollapsed}>

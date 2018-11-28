@@ -1,8 +1,8 @@
 //The home page for an account
 
 import React from 'react'
-import {Title, Header, Body,Footer, FooterTab, Container, Content, Text, Button, Toast} from 'native-base'
-import {AsyncStorage, View, Dimensions } from 'react-native'
+import {Title, Header, Body,Footer, FooterTab, Container, Content, Text, Button, Toast, Thumbnail} from 'native-base'
+import {AsyncStorage, View, Dimensions, TouchableOpacity } from 'react-native'
 import { Calendar } from 'react-native-calendars';
 import {TaskCarousel} from './components/TaskCarousel'
 import {TaskCreationPrompt} from './components/TaskForm'
@@ -280,7 +280,7 @@ class HomeScreen extends React.Component{
             {
                 [day_index_updated]: { //Add Item To New Date
                     tasks: {
-                        $push: [updated_task]
+                        $unshift: [updated_task]
                     }
                 },
                 [day_index_original] : { // Remove Item from Old Date
@@ -495,6 +495,7 @@ class HomeScreen extends React.Component{
     }
 
     render(){
+        const uri = "https://facebook.github.io/react-native/docs/assets/favicon.png";
         return <TaskDrawer ref={(ref)=>{this.drawer = ref}} unallocated_tasks = {this.state.unallocated_tasks}>
             <Container style={{overflow:"hidden", height: Dimensions.get('window').height, flexDirection: "column"}}>
                 <Header style={{backgroundColor: '#061328'}}>
@@ -509,6 +510,7 @@ class HomeScreen extends React.Component{
                     <UserTaskProvider value={this.manager}>
 
                         <Calendar
+                            style={{paddingVertical: 5}}
                             markingType={'multi-dot'}
                             onDayPress={(day)=>{
                                 this._onDateSelection(day.dateString)}}
@@ -528,18 +530,20 @@ class HomeScreen extends React.Component{
                     </View>
                 </Content>
 
-                <Footer style={{backgroundColor: "#222", height: 50, padding:0, margin: 0}} >
-                    <FooterTab>
-                        <TaskCreationPrompt />
+                <Footer style={{backgroundColor: "#222", width:Dimensions.get('window').width, height: 50, padding:0, margin: 0}} >
+                    <FooterTab style={{padding:0,margin:0, flexDirection: "row", width:"100%", justifyContent:"center"}}>
+                        {/* <View> */}
+                        {/* <TaskCreationPrompt /> */}
 
                         {/* <Button onPress = {this._logout}> 
                             <Text style={{color:"white"}}> Logout</Text>
                         </Button> */}
                        
-                        <Button onPress={this._openDrawer}>
-                            <Text> Toggle Drawer</Text>
-                        </Button>
                         
+                        <TouchableOpacity onPress={this._openDrawer}>
+                            <Thumbnail small source={{uri: uri}} />
+                        </TouchableOpacity>
+                        {/* </View> */}
                     </FooterTab>
                 </Footer>
             </Container>

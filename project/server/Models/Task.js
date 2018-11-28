@@ -60,7 +60,7 @@ class Task{
                         id: result.id,
                         creator_id: result.creator_id,
                         title: result.title,
-                        details: result.title,
+                        details: result.details,
                         completed: result.completed,
                         created_at: result.created_at,
                         allocated_date: result.allocated_date
