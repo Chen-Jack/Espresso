@@ -20,7 +20,7 @@ export default class TaskDrawer extends React.Component{
     }
 
     componentDidMount(){
-        // Embassy.addOnStartHandlers(this.closeDrawer)
+        Embassy.addOnStartHandlers(this.closeDrawer)
     }
 
     componentWillMount(){

@@ -35,8 +35,9 @@ class HomeScreen extends React.Component{
 
         this.manager = {
             updateStatus: this.updateCompletionStatusOfState,
-            reallocateTask: this.allocateTaskToDate,
-            deallocateTask: this.deallocateTask
+            reallocateTask: this.reallocateTask,
+            deallocateTask: this.deallocateTask,
+            allocateTask: this.allocateTask
         }
 
         //Give the Embassy access to the same context manager
@@ -124,11 +125,70 @@ class HomeScreen extends React.Component{
         })
     }
 
+    allocateTask = (task_id, new_date, cb=()=>{})=>{
+        const original_allocated_state = this.state.allocated_tasks
+        const original_unallocated_state = this.state.unallocated_tasks
+
+        let original_task = {};
+        let day_index_updated = null
+        let task_index_original = null
+
+        //Search through your state to know what indexes to update
+        for(let task_index in this.state.unallocated_tasks){
+            let task = this.state.unallocated_tasks[task_index]
+            
+            if(task.id === task_id){
+                Object.assign(original_task , task)
+                task_index_original = task_index
+            }
+            
+        }
+        for(let day_index in this.state.allocated_tasks){
+            let date = this.state.allocated_tasks[day_index].date
+            if(date == new_date){
+                day_index_updated = day_index
+                break
+            }
+        }
+
+        
+        new_unallocated_state = update(this.state.unallocated_tasks, {
+            $splice: [[task_index_original, 1]]
+        })
+        new_allocated_state = update(this.state.allocated_tasks, {
+            [day_index_updated] : {
+                tasks : {
+                    $push : [original_task]
+                }
+            }
+        })
+
+        this.setState({
+            unallocated_tasks : new_unallocated_state,
+            allocated_tasks : new_allocated_state
+        }, ()=>{
+            Toast.show({
+                text: `Task was assigned to ${new_date}`,
+                buttonText: 'Ok'
+              })
+        })
+
+        this._updateTaskDateServerSide(task_id, new_date, (err)=>{
+            if(err){
+                this.setState({
+                    unallocated_tasks : original_unallocated_state,
+                    allocated_tasks : original_allocated_state
+                })
+            }
+        })
+    }
+
+
     deallocateTask = (task_id, cb=()=>{}) => {
         const original_allocated_state = this.state.allocated_tasks
         const original_unallocated_state = this.state.unallocated_tasks
 
-        let original_task = null;
+        let original_task = {};
         let day_index_original = null
         let task_index_original = null
 
@@ -138,7 +198,7 @@ class HomeScreen extends React.Component{
             
             for(let task_index in day_tasks){
                 if(day_tasks[task_index].id === task_id){
-                    original_task = day_tasks[task_index]
+                    Object.assign(original_task ,day_tasks[task_index])
                     day_index_original = day_index
                     task_index_original = task_index
                 }
@@ -182,7 +242,7 @@ class HomeScreen extends React.Component{
         })
     }
 
-    allocateTaskToDate = (task_id, new_date, cb=()=>{})=>{
+    reallocateTask = (task_id, new_date, cb=()=>{})=>{
         /*
         Uses an optomistic UX approach. Update the UI before API actually
         finishes.
@@ -211,7 +271,7 @@ class HomeScreen extends React.Component{
                     day_index_original = day_index
                     task_index_original = task_index
                 }
-            }
+            }   
             
         }
 

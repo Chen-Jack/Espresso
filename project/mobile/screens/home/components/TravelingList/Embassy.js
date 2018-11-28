@@ -234,6 +234,7 @@ export default class Embassy{
        else if( !old_list_date && new_list_date){
            //Allocating
             console.log("Allocating");
+            Embassy.manager.allocateTask(task_id, new_list_date)
        }
        else if( (old_list_date && new_list_date) &&
         (old_list_date !== new_list_date)){
