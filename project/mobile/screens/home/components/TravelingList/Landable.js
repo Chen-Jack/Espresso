@@ -31,31 +31,6 @@ export default class Landable extends React.Component{
         }) 
     }
 
-
-    addItem = ()=>{
-        // const new_data = this.state.test_data
-        // new_data.push(10)
-            
-        // this.setState({
-        //     data: new_data
-        // })
-    }
-
-    removeItem = ()=>{
-        // const new_data = this.state.test_data
-        // new_data.shift()
-        // this.setState({
-        //     data: new_data
-        // })
-    }
-
-    // _toggleScroll = (specifiedScrollStatus = null)=>{
-    //     this.setState({
-    //         canScroll: specifiedScrollStatus? specifiedScrollStatus: !this.state.canScroll
-    //     })
-    // }
-    
-
     _updateLayout = ()=>{
         this.list.current.measure((x,y,width,height,pageX,pageY)=>{
             const layout = {
@@ -124,37 +99,8 @@ export default class Landable extends React.Component{
         return (
 
             <View 
-                // onLayout={this._updateLayout}
-                // updateLayout = {this._updateLayout}
-                // ref = {this.list}
-                // isGestureOnTop = {this._isGestureOnTop}
-                // toggleScroll = {this._toggleScroll}
-
-                // onFocus = {this._onGestureFocus}
-                // onLoseFocus = {this._onGestureLoseFocus}
-                // onStay = {this._onStay}
-                // onHandleRelease = {this._onHandleRelease}
-
-                // addItem = {this.addItem}
-                // removeItem = {this.removeItem}
                 
                 style={this.props.style || {height:"100%", width: "100%"}}>
-
-                {/* <Button onPress={()=>{
-                    this.list.current.measure((x,y,width,height,pageX,pageY)=>{
-                        const layout = {
-                            x: pageX,
-                            y: pageY,
-                            width: width,
-                            height: height
-                        }
-                        console.log("x, y is", layout.x, layout.y);
-                        console.log("wid, height is", layout.width, layout.height);
-                    })
-                    this._updateLayout()
-                }}>
-                    <Text>Check Dimensions</Text>
-                </Button> */}
 
                 
 

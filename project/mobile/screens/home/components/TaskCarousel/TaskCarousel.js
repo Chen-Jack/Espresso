@@ -245,8 +245,8 @@ export default class TaskCarousel extends React.Component{
     }
 
     _renderTaskList = ({item: tasks_of_the_day, index})=>{
-        return <View>
-            <Text style={{fontSize: 16, backgroundColor:"white", padding: 10}}> {"Date: " + tasks_of_the_day.date || "Date"} </Text>
+        return <View style={{overflow: "hidden", margin: 20, height: "85%", width: "85%", backgroundColor: "#ddd", borderRadius: 10, alignSelf:"center"}}>
+            <Text style={{borderTopLeftRadius: 10, borderTopRightRadius: 10, padding: 10, fontSize: 16, backgroundColor:"#222", color: "white"}}> {tasks_of_the_day.date || "Date"} </Text>
             <TaskList ref={(ref)=>{this[`task_${index}`] = ref}} index = {index} data = {tasks_of_the_day}/>
         </View>
     }
@@ -267,7 +267,7 @@ export default class TaskCarousel extends React.Component{
             { ({setTaskDate}) => <View 
                 ref = {this.wrapper}
                 onLayout = {this._onLayout}
-                style={{marginTop: 20, height:300}}>
+                style={{overflow: "hidden", flex: 1, flexDirection:"column",  marginBottom: 105, backgroundColor: "#2460c1"}}>
                 <Carousel
                     ref = {this.carousel}
                     reallocateTaskDate = {setTaskDate}

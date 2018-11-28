@@ -34,13 +34,13 @@ export default class DrawerContent extends React.Component{
     render(){
 
         return (
-        <View style={{backgroundColor: "darkblue", height: Dimensions.get('window').height, width: "100%"}}>
+        <View style={{backgroundColor: "#ddd", height: Dimensions.get('window').height, width: "100%"}}>
 
             <DrawerHeader />
 
             <View 
                 ref = {this.list}
-                style={{padding:10, width:"100%", height:"100%"}}>
+                style={{padding:10, flex: 1}}>
                 <TaskList
                     ref={(ref)=>{this.list}}
                     data = {{

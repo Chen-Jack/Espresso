@@ -1,6 +1,5 @@
 import React from 'react'
-import {View, Text, Button} from 'react-native'
-import {Landable} from './../TravelingList'
+import {View, Text, FlatList} from 'react-native'
 import TaskCard from './TaskCard'
 import PropTypes from 'prop-types'
 
@@ -29,7 +28,7 @@ export default class TaskList extends React.Component{
     componentWillUnmount(){
         console.log("TaskList unmounting");
     }
-    
+
     _renderListItem = ({item,index})=>{
         return (
             <TaskCard 
@@ -69,31 +68,10 @@ export default class TaskList extends React.Component{
         })
     }
 
-    // updateLayout = ()=>{
-    //     this.list.current.measure((x,y,width,height,pageX,pageY)=>{
-    //         const layout = {
-    //             x: pageX,
-    //             y: pageY,
-    //             width: width,
-    //             height: height
-    //         }
-    //         this.layout = layout
-    //     })
-    // }
-
-
-    addItem =()=>{
-
-    }
-
-    removeItem = ()=>{
-
-    }
     
     getDate = ()=>{
         return this.props.data.date || null
     }
-    
 
     toggleScroll = (status = null)=>{
         this.setState({
@@ -119,47 +97,24 @@ export default class TaskList extends React.Component{
         console.log(`${this.props.data.date } captured the released gesture`);
     }
 
-    // onFocusedList = ()=>{
-    //     this.updateLayout()
-    //     console.log("Now the focused List");
-    // }
-
-    // onLostFocusedList = ()=>{
-    //     // this.updateLayout()
-    //     console.log("No longer the focused list");
-    // }
-
-   
-
-    // onLayoutHandler = ()=>{
-    //     this.measureLayout((layout)=>{
-            
-    //     })
-    // }
 
     render(){
         let focus_style = {backgroundColor: (this.state.isGestureHovering ? "yellow" : null)}
-        let landable_style = {height: "100%", width: "100%", ...focus_style}
-        return <View
-            // onLayout={this.onLayoutHandler}
-            ref={this.list}
-            // isGestureOnTop = {this.isGestureOnTop}
-            // onFocusedList = {this._onFocusedList}
-            // onLostFocusedList = {this.onLostFocusedList}
-            // measureLayout = {this.measureLayout}
-            >
+        let landable_style = {flex: 1, ...focus_style}
 
-            { this.props.data.length === 0 ? 
-                <EmptyList/> :
-                <Landable
-                    canScroll = {this.state.canScroll}
+        return <View 
+                ref={this.list} 
+                style={{flex: 1}}>
+
+                { this.props.data.length === 0 ?     
+                <EmptyList/> :   
+                <FlatList
+                    scrollEnabled = {this.state.canScroll}
                     index = {this.props.index}
-                    // onEnter = {this._onEnterHandler}
-                    // onLeave = {this._onLeaveHandler}
                     data = {this.props.data.tasks}
                     renderItem = {this._renderListItem}
-                    style={landable_style}/>          
-            }
+                    style={landable_style}/>
+                }
 
         </View>
     }

@@ -2,7 +2,7 @@
 
 import React from 'react'
 import {Title, Header, Body,Footer, FooterTab, Container, Content, Text, Button, Toast} from 'native-base'
-import {AsyncStorage } from 'react-native'
+import {AsyncStorage, View, Dimensions } from 'react-native'
 import { Calendar } from 'react-native-calendars';
 import {TaskCarousel} from './components/TaskCarousel'
 import {TaskCreationPrompt} from './components/TaskForm'
@@ -485,7 +485,10 @@ class HomeScreen extends React.Component{
                 markers_list[day.date] = {dots: []}
 
             for(task of day.tasks){
-                markers_list[day.date]["dots"].push({key: task.id, color: "blue"})
+                if(task.completed)
+                    markers_list[day.date]["dots"].push({key: task.id, color: "blue"})
+                else
+                    markers_list[day.date]["dots"].push({key: task.id, color: "red"})
             }
         }
         return markers_list
@@ -493,21 +496,16 @@ class HomeScreen extends React.Component{
 
     render(){
         return <TaskDrawer ref={(ref)=>{this.drawer = ref}} unallocated_tasks = {this.state.unallocated_tasks}>
-            <Container >
-                <Header style={{backgroundColor: '#222'}}>
+            <Container style={{overflow:"hidden", height: Dimensions.get('window').height, flexDirection: "column"}}>
+                <Header style={{backgroundColor: '#061328'}}>
                     <Body>
-                        <Title style={{color:"white"}}>Header</Title>
+                        <Title style={{color:"#fff"}}>Header</Title>
                     </Body>
                 </Header>
 
-                <Content style={{backgroundColor: "#333"}} scrollEnabled = {false}>
-                    {/* <Button onPress={()=>{
-                        console.log(Embassy.registeredLandables.length)
-                    }}>
-                        <Text>
-                            Embassy
-                        </Text>
-                    </Button> */}
+                <Content style={{backgroundColor: "#fff"}} scrollEnabled = {false}>
+                    <View style={{height: Dimensions.get('window').height, width: Dimensions.get('window').width}}>
+                  
                     <UserTaskProvider value={this.manager}>
 
                         <Calendar
@@ -519,10 +517,6 @@ class HomeScreen extends React.Component{
                                 ...this._generateCalendarMarkers()
                             }}/>
 
-                        {/* <Button onPress={()=>console.log(this.state)}>
-                            <Text> State </Text>
-                        </Button> */}
-
                         <TaskCarousel
                             ref = {this.carousel}
                             selected_date = {this.state.selected_date}
@@ -530,20 +524,18 @@ class HomeScreen extends React.Component{
                             task_data={this.state.allocated_tasks} />
 
                     </UserTaskProvider>
-            
+
+                    </View>
                 </Content>
 
-                <Footer style={{backgroundColor: "#222", padding:0, margin: 0}} >
+                <Footer style={{backgroundColor: "#222", height: 50, padding:0, margin: 0}} >
                     <FooterTab>
                         <TaskCreationPrompt />
 
-                        <Button onPress = {this._logout}> 
+                        {/* <Button onPress = {this._logout}> 
                             <Text style={{color:"white"}}> Logout</Text>
-                        </Button>
-                        
-                        <Button onPress= {()=>this.props.navigation.navigate("sandbox")}>
-                            <Text style={{color: "white"}}> SandBox </Text>
-                        </Button>
+                        </Button> */}
+                       
                         <Button onPress={this._openDrawer}>
                             <Text> Toggle Drawer</Text>
                         </Button>

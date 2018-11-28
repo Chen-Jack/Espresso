@@ -90,18 +90,19 @@ export default class Draggable extends React.Component{
 
         this._panResponder = PanResponder.create({
             onStartShouldSetResponder: (evt, gesture) => true,
-            onStartShouldSetResponderCapture: (evt,gesture)=> true,
+            // onStartShouldSetResponderCapture: (evt,gesture)=> true,
             onStartShouldSetPanResponder : (evt, gesture) => true,
-            onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
+            // onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
 
             onMoveShouldSetResponder: (evt, gestureState) => true,
-            onMoveShouldSetResponderCapture : (evt, gesture) => true,
+            // onMoveShouldSetResponderCapture : (evt, gesture) => true,
             onMoveShouldSetPanResponder: (evt,gestureState) => true,
-            onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
+            // onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
 
             onPanResponderGrant: (e, gestureState) => {
                 e.persist() //Must persist event to access async
                 const time_of_press = Date.now();
+
 
                 if(this.waiting_for_second_tap){ 
                     if(time_of_press - this.time_of_last_press < this.ms_to_trigger_double_tap){

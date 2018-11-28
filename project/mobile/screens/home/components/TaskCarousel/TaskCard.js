@@ -1,13 +1,23 @@
 import React from 'react'
-import {Card, CardItem, Text, Body} from 'native-base'
+import {Card, CardItem, Text, Body,Button} from 'native-base'
 import {Draggable} from './../TravelingList'
 import PropTypes from 'prop-types'
 import UserTaskContext from '../../UserTaskContext'
+import Collapsible from 'react-native-collapsible';
 
 export default class TaskCard extends React.Component{
     constructor(props) {
         super(props)
 
+        this.state={
+            isCollapsed : true
+        }
+
+    }
+    toggleCard = ()=>{
+        this.setState({
+            isCollapsed: !this.state.isCollapsed
+        })
     }
     componentWillUnmount(){
         console.log("TaskCard Unmounting");
@@ -17,19 +27,31 @@ export default class TaskCard extends React.Component{
         return (
             <UserTaskContext.Consumer>
                 {({updateStatus})=>{
-                    return <Draggable origin_list = {this.props.parent_list} source = {this} doubleTapHandler = {()=>{updateStatus(this.props.task_id, !this.props.isCompleted)}}>
+                    return <Draggable 
+                        origin_list = {this.props.parent_list} 
+                        source = {this}
+                        doubleTapHandler = {()=>{updateStatus(this.props.task_id, !this.props.isCompleted)}}>
                         <Card>
                             <CardItem bordered>
                                 <Text style={this.props.isCompleted ? strike_through_style : {} }>{this.props.title || "Task"}</Text>
+                                <Button onPress={this.toggleCard}>
+                                    <Text>
+                                        View Details
+                                    </Text>
+                                </Button>
                             </CardItem>
 
-                            <CardItem>
-                                <Body>
-                                    <Text>
-                                        {this.props.details || ""}
-                                    </Text>
-                                </Body>
-                            </CardItem>
+                            <Collapsible collapsed = {this.state.isCollapsed}>
+                                <CardItem>
+                                    <Body>
+                                        <Text>
+                                            {this.props.details || ""}
+                                        </Text>
+                                    </Body>
+                                </CardItem>
+                            </Collapsible>
+
+
                         </Card>
                     </Draggable>
                 }}
