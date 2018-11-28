@@ -1,8 +1,8 @@
 //The home page for an account
 
 import React from 'react'
-import {Title, Header, Body,Footer, FooterTab, Container, Content, Text, Button} from 'native-base'
-import {Dimensions, AsyncStorage } from 'react-native'
+import {Title, Header, Body,Footer, FooterTab, Container, Content, Text, Button, Toast} from 'native-base'
+import {AsyncStorage } from 'react-native'
 import { Calendar } from 'react-native-calendars';
 import {TaskCarousel} from './components/TaskCarousel'
 import {TaskCreationPrompt} from './components/TaskForm'
@@ -10,6 +10,7 @@ import {TaskDrawer} from './components/TaskDrawer'
 import {UserTaskProvider} from './UserTaskContext'
 import update from 'immutability-helper'
 import { Embassy } from './components/TravelingList';
+
 
 
 
@@ -125,10 +126,52 @@ class HomeScreen extends React.Component{
     }
 
     deallocateTask = (task_id, cb=()=>{}) => {
+        const original_allocated_state = this.state.allocated_tasks
+        const original_unallocated_state = this.state.unallocated_tasks
 
+        let original_task = null;
+        let day_index_original = null
+        let task_index_original = null
+
+        //Search through your state to know what indexes to update
+        for(let day_index in this.state.allocated_tasks){
+            let day_tasks = this.state.allocated_tasks[day_index].tasks
+            
+            for(let task_index in day_tasks){
+                if(day_tasks[task_index].id === task_id){
+                    original_task = day_tasks[task_index]
+                    day_index_original = day_index
+                    task_index_original = task_index
+                }
+            }
+        }
+
+        const new_allocated_state = update(this.state.allocated_tasks, 
+            {
+                [day_index_original] : { // Remove Item from Old Date
+                    tasks: {
+                        $splice: [[task_index_original, 1]]
+                    }
+                }
+            }
+        );
+
+        const new_unallocated_state = update(this.state.unallocated_tasks, {
+            $push : [original_task]
+        })
+
+        this.setState({
+            allocated_tasks : new_allocated_state,
+            unallocated_tasks : new_unallocated_state
+        }, ()=>{
+            Toast.show({
+                text: 'Task was moved back to your board!',
+                buttonText: 'Got it'
+              })
+        })
     }
 
-    allocateTaskToDate = (task_id, original_date, new_date, cb=()=>{})=>{
+    allocateTaskToDate = (task_id, new_date, cb=()=>{})=>{
         /*
         Uses an optomistic UX approach. Update the UI before API actually
         finishes.
@@ -158,6 +201,7 @@ class HomeScreen extends React.Component{
                     task_index_original = task_index
                 }
             }
+            
         }
         
 

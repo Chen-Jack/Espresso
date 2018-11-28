@@ -213,8 +213,9 @@ export default class Embassy{
         const final_target_list = Embassy.findList(coordinates)
         if(final_target_list){
             final_target_list.onHandleReleaseGesture()
-            Embassy.performTransfer(final_target_list)
         }
+
+        Embassy.performTransfer(final_target_list)
         
         for(let event of Embassy.onReleaseEvents){
             event(coordinates)
@@ -241,13 +242,15 @@ export default class Embassy{
             Transfers the contents from the traveler's origin to the 
             target
         */
+       const task_id = Embassy.getTraveler().props.task_id
        const old_list_date = Embassy.traveler_origin_list.getDate()
-       const new_list_date = target.getDate()
+       const new_list_date = target ? target.getDate() : null
 
        console.log("Transfering", old_list_date, "--->", new_list_date);
        if(new_list_date === null){
         //Deallocate
             console.log("Deallocating");
+            Embassy.manager.deallocateTask(task_id)
        }
        else if( !old_list_date && new_list_date){
            //Allocating
@@ -256,9 +259,7 @@ export default class Embassy{
        else if( (old_list_date && new_list_date) &&
         (old_list_date !== new_list_date)){
             //Reallocating
-            Embassy.manager.reallocateTask(
-                Embassy.getTraveler().props.task_id,
-                old_list_date, new_list_date)
+            Embassy.manager.reallocateTask(task_id, new_list_date)
         }   
     }    
 }
