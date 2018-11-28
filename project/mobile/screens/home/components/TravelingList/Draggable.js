@@ -18,9 +18,9 @@ export default class Draggable extends React.Component{
         
         this.time_of_last_press = Date.now();
         this.waiting_for_second_tap = false;
-        this.ms_to_trigger_double_tap = 500;
+        this.ms_to_trigger_double_tap = 350;
 
-        this.ms_to_trigger_long_press = 500; 
+        this.ms_to_trigger_long_press = 200; 
         this.timer_ref = null   //Ref to keep track of long press
         this.gesture_started = false //a variable to know allow/know if the gesture has officially started
 

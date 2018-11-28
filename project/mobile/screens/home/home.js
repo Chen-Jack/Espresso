@@ -54,75 +54,53 @@ class HomeScreen extends React.Component{
         return this.manager
     }
 
-    addTaskToState = ()=>{
-
-    }
-
-    removeTaskFromState = ()=>{
-
-    }
-
     updateCompletionStatusOfState = (task_id, new_status, cb=()=>{})=>{
-        AsyncStorage.getItem("session_token", (err, session_token)=>{
-            const data = {
-                task_id: task_id,
-                completion_status: new_status
-            }
-            fetch("http://localhost:3000/toggle-task-completion", {
-                method: 'POST',
-                headers: {
-                    "Authorization": `Bearer ${session_token}`,
-                    "Content-Type": "application/json; charset=utf-8",
-                },
-                body : JSON.stringify(data)
-            }).then(
-                (res)=>{
-                    if(res.ok){
-                        console.log("Updating completion of task");
-                        let found = false;
-       
-                        
-                        //First Search Through Allocated Tasks
-                        for(let day_index in this.state.allocated_tasks){
-                            let day_tasks = this.state.allocated_tasks[day_index].tasks
-                            for(let task_index in day_tasks){
-                                if(day_tasks[task_index].id === task_id){
-                                    const new_state = update(this.state.allocated_tasks, {[day_index]: {tasks: {[task_index] : {completed: {$set : new_status}}}}});
-                                    found = true;
-                                    this.setState({
-                                        allocated_tasks : new_state
-                                    })
-                                }
-                            }
-                        }
-                    
+        console.log("Updating completion of task");
 
-                        //Search through unallocated tasks if still haven't found
-                        if(!found){
-                            for(let i in this.state.unallocated_tasks){
-                                if(this.state.unallocated_tasks[i].id === task_id){
-                                    new_state = update(this.state.unallocated_tasks, {[i] : {isCompleted: {$set, new_status}}})
-                                    console.log("found unallocated");
-                                    this.setState({
-                                        unallocated_tasks : new_state
-                                    })
-                                }
-                            }
-                        }
+        const original_allocated_state = this.state.allocated_tasks
+        const original_unallocated_state = this.state.unallocated_tasks
 
-                        cb()
-                    }
+        let found = false;        
+        //First Search Through Allocated Tasks
+        for(let day_index in this.state.allocated_tasks){
+            let day_tasks = this.state.allocated_tasks[day_index].tasks
+            for(let task_index in day_tasks){
+                if(day_tasks[task_index].id === task_id){
+                    const new_state = update(this.state.allocated_tasks, {[day_index]: {tasks: {[task_index] : {completed: {$set : new_status}}}}});
+                    found = true;
 
-                    else{
-                        cb("Res not ok")
-                    }
+                    original_state = this.state.allocated_tasks
+                    this.setState({
+                        allocated_tasks : new_state
+                    })
                 }
-            ).catch((err)=>{
-                console.log("Error when toggling tasks", err)
-                cb(err)
-                alert("Error")
-            })
+            }
+        }
+    
+
+        //Search through unallocated tasks if still haven't found
+        if(!found){
+            for(let i in this.state.unallocated_tasks){
+                if(this.state.unallocated_tasks[i].id === task_id){
+                    new_state = update(this.state.unallocated_tasks, {[i] : {isCompleted: {$set, new_status}}})
+                    
+                    original_state = this.state.unallocated_tasks
+                    this.setState({
+                        unallocated_tasks : new_state
+                    })
+                }
+            }
+        }
+            
+        this._updateTaskStatusServerSide( (err)=>{
+            if(err){
+                this.setState({
+                    allocated_tasks : original_allocated_state,
+                    unallocated_tasks : original_unallocated_state
+                })
+            }
         })
+
     }
 
     allocateTask = (task_id, new_date, cb=()=>{})=>{
@@ -306,6 +284,38 @@ class HomeScreen extends React.Component{
                     alert("Error with api call")
                 })
             }
+        })
+    }
+
+    _updateTaskStatusServerSide = (task_id, new_status, cb=()=>{})=>{
+        AsyncStorage.getItem("session_token", (err, session_token)=>{
+            const data = {
+                task_id: task_id,
+                completion_status: new_status
+            }
+            fetch("http://localhost:3000/toggle-task-completion", {
+                method: 'POST',
+                headers: {
+                    "Authorization": `Bearer ${session_token}`,
+                    "Content-Type": "application/json; charset=utf-8",
+                },
+                body : JSON.stringify(data)
+            }).then(
+                (res)=>{
+                    if(res.ok){
+                        
+                        cb()
+                    }
+
+                    else{
+                        cb("Res not ok")
+                    }
+                }
+            ).catch((err)=>{
+                console.log("Error when toggling tasks", err)
+                cb(err)
+                alert("Error")
+            })
         })
     }
 
