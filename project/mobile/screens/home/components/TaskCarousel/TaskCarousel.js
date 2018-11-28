@@ -34,6 +34,10 @@ export default class TaskCarousel extends React.Component{
         //The references are assigned when the list is rendered.
     }
 
+    _getReference = (index)=>{
+        return this[`task_${index}`]
+    }
+    
     getList = ()=>{
         return this.focused_list
     }
@@ -45,14 +49,14 @@ export default class TaskCarousel extends React.Component{
         const onStartHandlers = [this._onCardPickedUp, this.disableAllListScroll,
             this.disableCarouselScroll]
 
-        // const onMoveHandlers = [this._onCardMoved]
+        const onMoveHandlers = [this._onCardMoved]
 
-        // const onReleaseHandlers = [this._onCardReleased, this.enableAllListScroll,
-        //     this.enableCarouselScroll]
+        const onReleaseHandlers = [this._onCardReleased, this.enableAllListScroll,
+            this.enableCarouselScroll]
 
         Embassy.addOnStartHandlers(onStartHandlers)
-        // Embassy.addOnMoveHandlers(onMoveHandlers)
-        // Embassy.addOnReleaseHandlers(onReleaseHandlers)
+        Embassy.addOnMoveHandlers(onMoveHandlers)
+        Embassy.addOnReleaseHandlers(onReleaseHandlers)
 
     }
 
@@ -70,24 +74,25 @@ export default class TaskCarousel extends React.Component{
         
     }
 
-    disableAllListScroll = (coordinates, cb=()=>{})=>{
+    disableAllListScroll = (coordinates)=>{
+        //Subscribed Event Handler
         for(let i =0; i<this.props.task_data.length; i++){
             const ref = this._getReference(i)
             ref.toggleScroll(false)
         }
-        cb()
     }
 
-    enableAllListScroll = (coordinates, cb=()=>{})=>{
+    enableAllListScroll = (coordinates)=>{
+        //Subscribed Event Handler
         for(let i =0; i<this.props.task_data.length; i++){
             const ref = this._getReference(i)
             ref.toggleScroll(true)
         }
-        cb()
     }
 
 
     _onCardPickedUp = (coordinates, cb=()=>{})=>{
+        //Subscribed Event Handler
         this.focused_list_from_gesture_start = this.focused_list
 
         const direction = this.whichEdgeIsGestureOn(coordinates)
@@ -101,6 +106,7 @@ export default class TaskCarousel extends React.Component{
     }
     
     _onCardMoved = (coordinates)=>{
+        //Subscribed Event Handler
        const direction = this.whichEdgeIsGestureOn(coordinates)
        if(this.autoScrollingTimer === null && (direction === "LEFT" || direction === "RIGHT")){
             this.enableAutoScroller(direction)         
@@ -112,48 +118,28 @@ export default class TaskCarousel extends React.Component{
     
 
     _onCardReleased = (coordinates)=>{
-        /*
-        Note not the same thing as onHandleReleaseGesture.
-        A card can be released on something that isn't a landable.
-        */
-        this.focused_list_from_gesture_start = null;
-
+        //Subscribed Event Handler
         this.disableAutoScroller()
     }
 
+    // onHandleReleaseGesture = ()=>{
+    //     /*
+    //     handler for when a gesture is released on top of this
+    //     */
+    //    console.log("Captured release");
+    //    if(this.focused_list_from_gesture_start !== this.focused_list){
+    //     // if(Embassy.origin_target !== Embassy.active_target)
+    //         /* Reallocate Task To Different Date */
 
-    onGestureFocus = ()=>{
-        /*
-        What happens when the gesture moves on top of the list
-        */
-        this.focused_list.onGestureFocus()
-    }
-
-    onGestureLoseFocus = ()=>{
-            /*
-        What happens when the gesture is no longer ontop of the list
-        */
-        this.focused_list.onGestureLoseFocus()
-    }
-
-    onHandleReleaseGesture = ()=>{
-        /*
-        handler for when a gesture is released on top of this
-        */
-       console.log("Captured release");
-       if(this.focused_list_from_gesture_start !== this.focused_list){
-        // if(Embassy.origin_target !== Embassy.active_target)
-            /* Reallocate Task To Different Date */
-
-            console.log("Time to reallocate");
-            const task_id = Embassy.getTraveler().props.task_id
-            const original_date = this.focused_list_from_gesture_start.getDate();
-            console.log(original_date);
-            const new_date = this.focused_list.getDate();
-            console.log("uh",this.carousel.current.props.reallocateTaskDate);
-            this.carousel.current.props.reallocateTaskDate(task_id, original_date, new_date)
-       }
-    }
+    //         console.log("Time to reallocate");
+    //         const task_id = Embassy.getTraveler().props.task_id
+    //         const original_date = this.focused_list_from_gesture_start.getDate();
+    //         console.log(original_date);
+    //         const new_date = this.focused_list.getDate();
+    //         console.log("uh",this.carousel.current.props.reallocateTaskDate);
+    //         this.carousel.current.props.reallocateTaskDate(task_id, original_date, new_date)
+    //    }
+    // }
 
 
     enableAutoScroller = (direction)=>{
@@ -230,6 +216,7 @@ export default class TaskCarousel extends React.Component{
     }
 
     enableCarouselScroll = (coordinates, cb=()=>{})=>{
+        //Subscribed Event Handler
         this.setState({
             canScroll: true
         }, ()=>{
@@ -238,6 +225,7 @@ export default class TaskCarousel extends React.Component{
     }
 
     disableCarouselScroll = (coordinates, cb=()=>{})=>{
+        //Subscribed Event Handler
         this.setState({
             canScroll: false
         },()=>{
@@ -269,10 +257,6 @@ export default class TaskCarousel extends React.Component{
     _handleNewDateSelection = (data_index)=>{
         const iso_date = this.props.task_data[data_index].date;
         this.props.handleDateSelection(iso_date)
-    }
-
-    _getReference = (index)=>{
-        return this[`task_${index}`]
     }
 
     _renderTaskList = ({item: tasks_of_the_day, index})=>{

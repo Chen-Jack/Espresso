@@ -12,6 +12,7 @@ import update from 'immutability-helper'
 import { Embassy } from './components/TravelingList';
 
 
+
 class HomeScreen extends React.Component{
     constructor(props) {
         super(props)
@@ -32,12 +33,14 @@ class HomeScreen extends React.Component{
         this.drawer = React.createRef()
 
 
-        this.task_management_context = {
-            add: this.addTaskToState,
-            remove: this.removeTaskFromState,
+        this.manager = {
             updateStatus: this.updateCompletionStatusOfState,
-            setTaskDate : this.allocateTaskToDate
+            reallocateTask: this.allocateTaskToDate,
+            deallocateTask: this.deallocateTask
         }
+
+        //Give the Embassy access to the same context manager
+        Embassy.setManager(this.manager) 
      
     }
 
@@ -45,6 +48,10 @@ class HomeScreen extends React.Component{
         header: null,
         gesturesEnabled: false, // Prevent swipe back
     };
+
+    static getTaskManager = ()=>{
+        return this.manager
+    }
 
     addTaskToState = ()=>{
 
@@ -117,17 +124,24 @@ class HomeScreen extends React.Component{
         })
     }
 
+    deallocateTask = (task_id, cb=()=>{}) => {
+
+    }
+
     allocateTaskToDate = (task_id, original_date, new_date, cb=()=>{})=>{
+        /*
+        Uses an optomistic UX approach. Update the UI before API actually
+        finishes.
+        */
+        
+        //Keep original_state incase of failed API call
         const original_state = this.state.allocated_tasks
 
         let original_task = null;
         let day_index_original = null
         let task_index_original = null
-
         let day_index_updated = null
         
-        //Visually Update before fetching. 
-
         //Gather variables to know what to mutate
         for(let day_index in this.state.allocated_tasks){
             let day_tasks = this.state.allocated_tasks[day_index].tasks
@@ -167,7 +181,7 @@ class HomeScreen extends React.Component{
             allocated_tasks : new_state
         })
     
-
+        //Now Start The Actual API call
         AsyncStorage.getItem("session_token", (err, session_token)=>{
             if(err)
                 return console.log("ERROR WHEN RETRIEVING SESSION TOKEN")
@@ -198,7 +212,7 @@ class HomeScreen extends React.Component{
                     }
                 }
             ).catch((err)=>{
-
+                //Error with API call. Revert the state back to normal
                 this.setState({
                     allocated_tasks : original_state
                 })
@@ -209,6 +223,9 @@ class HomeScreen extends React.Component{
             })
         })
     }
+
+
+  
 
     _onDateSelection=(isodate)=>{
         this.setState({
@@ -373,7 +390,7 @@ class HomeScreen extends React.Component{
                             Embassy
                         </Text>
                     </Button> */}
-                    <UserTaskProvider value={this.task_management_context}>
+                    <UserTaskProvider value={this.manager}>
 
                         <Calendar
                             markingType={'multi-dot'}

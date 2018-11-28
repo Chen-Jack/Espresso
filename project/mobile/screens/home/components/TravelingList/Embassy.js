@@ -20,6 +20,7 @@ all subscribled events must have (coordinates) as their parameters
 
 */
 import TaskList from './../TaskCarousel/TaskList'
+import {Manager} from './../../home'
 
 export default class Embassy{
     /*
@@ -28,6 +29,8 @@ export default class Embassy{
     A class to act as a middleman between all the landables. Not intended to be 
     instantiated. Every instantiated landable should let the Embassy know.
     */
+    static manager = null;
+
     static registeredLandables = []; //Can either be a TaskList, or a container containing TaskLists
     static onStartEvents = [];
     static onMoveEvents = [];
@@ -36,8 +39,11 @@ export default class Embassy{
     static traveler = null;
     static traveler_origin_list = null;
 
-    // static original_list = null; //React reference to the source of the original Landable
-    static active_list = null; //React reference to the active Landable
+    static active_list = null; //React reference to the active TaskList
+
+    static setManager = (manager)=>{
+        Embassy.manager = manager;
+    }
 
     static resetTravelDetails = ()=>{
         /*
@@ -169,6 +175,7 @@ export default class Embassy{
         Traveler_task_list is the tasklist the traveler comes from.
         */
       
+        console.log("Hm",Manager);
         Embassy.setStartingDetails(traveler, origin_list)
         Embassy.setActiveList(origin_list)
 
@@ -206,7 +213,7 @@ export default class Embassy{
         const final_target_list = Embassy.findList(coordinates)
         if(final_target_list){
             final_target_list.onHandleReleaseGesture()
-            // Embassy.evaluteAndPerformTransferIfValid(Embassy.origin_target, capturing_landable)
+            Embassy.performTransfer(final_target_list)
         }
         
         for(let event of Embassy.onReleaseEvents){
@@ -229,16 +236,29 @@ export default class Embassy{
     //     }
     // }
 
-    // static performTransfer = (source, target)=>{
-    //     // source.props.removeItem()
-    //     // target.props.addItem()
-    // }
+    static performTransfer = (target)=>{
+        /*
+            Transfers the contents from the traveler's origin to the 
+            target
+        */
+       const old_list_date = Embassy.traveler_origin_list.getDate()
+       const new_list_date = target.getDate()
 
-    // static evaluteAndPerformTransferIfValid = (source ,target)=>{
-    //     if(Embassy.canPerformTransfer(source,target)){
-    //         Embassy.performTransfer(source,target)
-    //     }
-    // }
-
-    
+       console.log("Transfering", old_list_date, "--->", new_list_date);
+       if(new_list_date === null){
+        //Deallocate
+            console.log("Deallocating");
+       }
+       else if( !old_list_date && new_list_date){
+           //Allocating
+            console.log("Allocating");
+       }
+       else if( (old_list_date && new_list_date) &&
+        (old_list_date !== new_list_date)){
+            //Reallocating
+            Embassy.manager.reallocateTask(
+                Embassy.getTraveler().props.task_id,
+                old_list_date, new_list_date)
+        }   
+    }    
 }
