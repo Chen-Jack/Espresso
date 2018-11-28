@@ -532,7 +532,7 @@ class HomeScreen extends React.Component{
 
                 <Footer style={{backgroundColor: "#222", width:Dimensions.get('window').width, height: 50, padding:0, margin: 0}} >
                     <FooterTab style={{padding:0,margin:0, flexDirection: "row", width:"100%", justifyContent:"center"}}>
-                        {/* <View> */}
+                        
                         {/* <TaskCreationPrompt /> */}
 
                         {/* <Button onPress = {this._logout}> 
@@ -543,7 +543,6 @@ class HomeScreen extends React.Component{
                         <TouchableOpacity onPress={this._openDrawer}>
                             <Thumbnail small source={{uri: uri}} />
                         </TouchableOpacity>
-                        {/* </View> */}
                     </FooterTab>
                 </Footer>
             </Container>

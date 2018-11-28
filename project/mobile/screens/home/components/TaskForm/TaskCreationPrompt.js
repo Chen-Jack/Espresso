@@ -1,5 +1,6 @@
 import React from 'react'
-import {View, Text, Button, Toast} from 'native-base'
+import {View, Text, Button, Toast, Thumbnail} from 'native-base'
+import {TouchableOpacity} from 'react-native'
 import Modal from 'react-native-modal'
 import TaskCreationForm from './TaskCreationForm'
 
@@ -28,10 +29,12 @@ export default class TaskCreationModalPrompt extends React.Component{
     }
 
     render(){
+
+        const uri = "https://facebook.github.io/react-native/docs/assets/favicon.png";
         return <View>
-            <Button style={{padding:0, margin:0}} onPress={this.togglePrompt}>
-                <Text>Create Task</Text>
-            </Button>
+            <TouchableOpacity style={{marginVertical: 10}} onPress={this.togglePrompt}>
+                <Thumbnail small source={{uri: uri}} />
+            </TouchableOpacity>
 
             <Modal
                 onBackdropPress= {this.togglePrompt}

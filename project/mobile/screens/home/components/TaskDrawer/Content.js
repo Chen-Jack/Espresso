@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import TaskList from '../TaskCarousel/TaskList'
 import {View, Text, Dimensions} from 'react-native'
+import {TaskCreationPrompt} from './../TaskForm'
 
 function DrawerHeader(){
     return <View style={{padding: 0, margin:0, alignItems: "center", justifyContent:"center", backgroundColor:"#222", height: "25%", width:"100%"}}>
@@ -48,6 +49,9 @@ export default class DrawerContent extends React.Component{
                         tasks: this.props.task_data
                     }}
                 />
+            </View>
+            <View style={{width:"100%", flexDirection:"row", justifyContent:"center"}}>
+                <TaskCreationPrompt />
             </View>
         </View>
         )
