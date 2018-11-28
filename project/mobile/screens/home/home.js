@@ -169,6 +169,18 @@ class HomeScreen extends React.Component{
                 buttonText: 'Got it'
               })
         })
+
+        this._updateTaskDateServerSide(task_id, null, (err)=>{
+            if(err){
+                this.setState({
+                    allocated_tasks : original_allocated_state,
+                    unallocated_tasks : original_unallocated_state
+                }, ()=>{
+                    console.log("Error with updating task date", err);
+                    alert("Error with api call")
+                })
+            }
+        })
     }
 
     allocateTaskToDate = (task_id, new_date, cb=()=>{})=>{
@@ -203,7 +215,6 @@ class HomeScreen extends React.Component{
             }
             
         }
-        
 
         const updated_task = update(original_task , {allocated_date : {$set : new_date} })
         const new_state = update(this.state.allocated_tasks, 
@@ -225,7 +236,21 @@ class HomeScreen extends React.Component{
             allocated_tasks : new_state
         })
     
+
         //Now Start The Actual API call
+        this._updateTaskDateServerSide(task_id, new_date, (err)=>{
+            if(err){
+                this.setState({
+                    allocated_tasks:  original_state
+                }, ()=>{
+                    console.log("Error with updating task date", err);
+                    alert("Error with api call")
+                })
+            }
+        })
+    }
+
+    _updateTaskDateServerSide = (task_id, new_date, cb=()=>{})=>{
         AsyncStorage.getItem("session_token", (err, session_token)=>{
             if(err)
                 return console.log("ERROR WHEN RETRIEVING SESSION TOKEN")
@@ -249,21 +274,11 @@ class HomeScreen extends React.Component{
                     }
 
                     else{
-                        this.setState({
-                            allocated_tasks : original_state
-                        })
                         cb("Res not ok")
                     }
                 }
             ).catch((err)=>{
-                //Error with API call. Revert the state back to normal
-                this.setState({
-                    allocated_tasks : original_state
-                })
-
-                console.log("Error when allocateTaskToDate", err)
                 cb(err)
-                alert("Error")
             })
         })
     }
