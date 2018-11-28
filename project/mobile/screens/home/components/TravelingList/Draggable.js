@@ -206,13 +206,14 @@ export default class Draggable extends React.Component{
     }
 
     componentWillUnmount(){
-        Animated.timing(                  // Animate over time
-            this.state.scale,            // The animated value to drive
-            {
-              toValue: 0,                   // Animate to opacity: 1 (opaque)
-              duration: 1000,              // Make it take a while
-            }
-          ).start();  
+        console.log("Draggable Unmounting");
+        // Animated.timing(                  // Animate over time
+        //     this.state.scale,            // The animated value to drive
+        //     {
+        //       toValue: 0,                   // Animate to opacity: 1 (opaque)
+        //       duration: 1000,              // Make it take a while
+        //     }
+        //   ).start();  
 
         
     }

@@ -34,10 +34,14 @@ export default class TaskCarousel extends React.Component{
         //The references are assigned when the list is rendered.
     }
 
+    componentWillUnmount(){
+        console.log("Carousel Unmounting");
+    }
+
     _getReference = (index)=>{
         return this[`task_${index}`]
     }
-    
+
     getList = ()=>{
         return this.focused_list
     }
@@ -121,25 +125,6 @@ export default class TaskCarousel extends React.Component{
         //Subscribed Event Handler
         this.disableAutoScroller()
     }
-
-    // onHandleReleaseGesture = ()=>{
-    //     /*
-    //     handler for when a gesture is released on top of this
-    //     */
-    //    console.log("Captured release");
-    //    if(this.focused_list_from_gesture_start !== this.focused_list){
-    //     // if(Embassy.origin_target !== Embassy.active_target)
-    //         /* Reallocate Task To Different Date */
-
-    //         console.log("Time to reallocate");
-    //         const task_id = Embassy.getTraveler().props.task_id
-    //         const original_date = this.focused_list_from_gesture_start.getDate();
-    //         console.log(original_date);
-    //         const new_date = this.focused_list.getDate();
-    //         console.log("uh",this.carousel.current.props.reallocateTaskDate);
-    //         this.carousel.current.props.reallocateTaskDate(task_id, original_date, new_date)
-    //    }
-    // }
 
 
     enableAutoScroller = (direction)=>{

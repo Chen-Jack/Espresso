@@ -25,6 +25,11 @@ export default class TaskList extends React.Component{
             canScroll : true
         }
     }
+
+    componentWillUnmount(){
+        console.log("TaskList unmounting");
+    }
+    
     _renderListItem = ({item,index})=>{
         return (
             <TaskCard 
@@ -86,7 +91,7 @@ export default class TaskList extends React.Component{
     }
     
     getDate = ()=>{
-        return this.props.data.date || "Unallocated"
+        return this.props.data.date || null
     }
     
 

@@ -1,10 +1,4 @@
 /*
-Interface Landable
-isGestureOnTop
-onGestureFocus
-onGestureLoseFocus
-onGestureStay
-onHandleReleaseGesture
 
 TSAK LSIT MUST IMPLEMENT
 onGestureLoseFocus
@@ -20,7 +14,6 @@ all subscribled events must have (coordinates) as their parameters
 
 */
 import TaskList from './../TaskCarousel/TaskList'
-import {Manager} from './../../home'
 
 export default class Embassy{
     /*
@@ -44,7 +37,6 @@ export default class Embassy{
     static setManager = (manager)=>{
         Embassy.manager = manager;
     }
-
     static resetTravelDetails = ()=>{
         /*
         Clears all the Embassy's variables
@@ -175,7 +167,7 @@ export default class Embassy{
         Traveler_task_list is the tasklist the traveler comes from.
         */
       
-        console.log("Hm",Manager);
+        console.log("Hm", Embassy.manager);
         Embassy.setStartingDetails(traveler, origin_list)
         Embassy.setActiveList(origin_list)
 
@@ -196,7 +188,6 @@ export default class Embassy{
             event(coordinates)
         }
     }
-
     static onTravel = (coordinates)=>{
         /*
         Call back to only be used by the traveling Draggable
@@ -224,18 +215,6 @@ export default class Embassy{
         Embassy.resetTravelDetails();
     }
 
-    // static canPerformTransfer = (source, target)=>{
-    //     if( (source === null) || (target === null) || source === target){
-    //         return false
-    //     }
-    //     else if( source !== target ){
-    //         return true
-    //     }
-    //     else{
-    //         //Just incase im missing some logic, default returns false
-    //         return false
-    //     }
-    // }
 
     static performTransfer = (target)=>{
         /*
@@ -250,7 +229,7 @@ export default class Embassy{
        if(new_list_date === null){
         //Deallocate
             console.log("Deallocating");
-            Embassy.manager.deallocateTask(task_id)
+            // Embassy.manager.deallocateTask(task_id)
        }
        else if( !old_list_date && new_list_date){
            //Allocating

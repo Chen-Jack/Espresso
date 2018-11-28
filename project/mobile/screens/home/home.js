@@ -31,7 +31,6 @@ class HomeScreen extends React.Component{
 
         this.carousel = React.createRef()
         this.calendar = React.createRef()
-        this.drawer = React.createRef()
 
 
         this.manager = {
@@ -192,7 +191,7 @@ class HomeScreen extends React.Component{
         //Keep original_state incase of failed API call
         const original_state = this.state.allocated_tasks
 
-        let original_task = null;
+        let original_task = {};
         let day_index_original = null
         let task_index_original = null
         let day_index_updated = null
@@ -208,7 +207,7 @@ class HomeScreen extends React.Component{
             
             for(let task_index in day_tasks){
                 if(day_tasks[task_index].id === task_id){
-                    original_task = day_tasks[task_index]
+                    Object.assign(original_task, day_tasks[task_index])
                     day_index_original = day_index
                     task_index_original = task_index
                 }
@@ -416,7 +415,7 @@ class HomeScreen extends React.Component{
     }
 
     _openDrawer = ()=>{
-        this.drawer.current.toggleDrawer(true)
+        this.drawer.openDrawer()
     }
 
     _generateCalendarMarkers = ()=>{
@@ -433,7 +432,7 @@ class HomeScreen extends React.Component{
     }
 
     render(){
-        return <TaskDrawer ref={this.drawer} task_data = {this.state.unallocated_tasks}>
+        return <TaskDrawer ref={(ref)=>{this.drawer = ref}} unallocated_tasks = {this.state.unallocated_tasks}>
             <Container >
                 <Header style={{backgroundColor: '#222'}}>
                     <Body>

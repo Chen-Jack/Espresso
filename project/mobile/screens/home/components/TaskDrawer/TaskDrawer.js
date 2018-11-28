@@ -1,54 +1,9 @@
 import React from 'react'
-import {View, Text, Dimensions} from 'react-native'
 import SideMenu from 'react-native-side-menu'
-import TaskList from '../TaskCarousel/TaskList'
 import PropTypes from 'prop-types'
+import Content from './Content'
 import {Embassy} from './../TravelingList'
 
-class DrawerContent extends React.Component{
-    constructor(props) {
-        super(props)
-        this.drawer = React.createRef()
-    }
-
-    measureLayout = (cb=()=>{})=>{
-        this.drawer.current.measure((x,y,width,height,pageX,pageY)=>{
-            const layout = {
-                x: pageX,
-                y: pageY,
-                width: width,
-                height: height
-            }
-            cb(layout);
-        })     
-    }
-
-
-    render(){
-
-        return (
-        <View style={{backgroundColor: "darkblue", height: Dimensions.get('window').height, width: "100%"}}>
-            <View style={{padding: 0, margin:0, alignItems: "center", justifyContent:"center", backgroundColor:"#222", height: "25%", width:"100%"}}>
-                <Text style={{ fontSize:20, color:"white"}}> Unallocated Tasks </Text>
-            </View>
-            <View 
-                style={{padding:10, width:"100%", height:"100%"}}>
-                <TaskList
-                    ref={(ref)=>{this.list}}
-                    data = {{
-                        date: null,
-                        tasks: this.props.task_data
-                    }}
-                />
-            </View>
-        </View>
-        )
-    }
-}
-
-DrawerContent.propTypes = {
-    task_data : PropTypes.array.isRequired
-}
 
 export default class TaskDrawer extends React.Component{
     constructor(props) {
@@ -65,13 +20,11 @@ export default class TaskDrawer extends React.Component{
     }
 
     componentDidMount(){
-        // Embassy.registerLandable(this)
-
         // Embassy.addOnStartHandlers(this.closeDrawer)
     }
 
-    componentWillUnmount(){
-        console.log("unmounted");
+    componentWillMount(){
+        console.log("Drawer Unmounting");
     }
 
     isGestureOnTop = ()=>{
@@ -101,83 +54,65 @@ export default class TaskDrawer extends React.Component{
             return false
         }
     }
-    onGestureFocus = ()=>{
 
-    }
-    onGestureLoseFocus = ()=>{
-
-    }
-    onGestureStay = ()=>{
-
-    }
-    onHandleReleaseGesture = ()=>{
-    }
-
-    onDrawerOpen = ()=>{
+    _onDrawerOpen = ()=>{
         Embassy.registerLandable(this)
+
         if(!this.layout){
-            this.drawer_content.measureLayout((layout)=>{
+            this.content.measureLayout((layout)=>{
                 this.layout = layout
-                console.log("Cool, the drawer is", this.layout);
             })
         }
     }
 
-    onDrawerClose = ()=>{
+    _onDrawerClose = ()=>{
         Embassy.unregisterLandable(this)
     }
 
-    closeDrawer = (coordinates, cb=()=>{})=>{
-        this.toggleDrawer(false, (err)=>{
-            if(err)
-                cb(err)
-            else{
-                this.onDrawerClose()
-                cb()
-            }
-        })
 
-    }
-
-    toggleDrawer = (toggleState, cb =()=>{}) =>{
-        const next_state = (toggleState !== null ? toggleState : !this.state.visible)
+    openDrawer = (coordinates, cb=()=>{})=>{
         this.setState({
-            visible: next_state
+            visible: true
         }, ()=>{
-            if(next_state === false){
-                this.onDrawerClose()
-            }
-            else{
-                this.onDrawerOpen()
-            }
+            this._onDrawerOpen()
             cb()
-        })
+        })  
     }
 
- 
-    _renderListItem = ({item,index})=>{
-        return (
-            <TaskCard task_id={item.id} allocated_date={item.allocated_date} title={item.title} details={item.details} isCompleted={item.completed}/>
-        )  
+    closeDrawer = (coordinates, cb=()=>{})=>{
+        this.setState({
+            visible : false
+        }, ()=>{
+            this._onDrawerClose()
+            cb()
+        })  
+
     }
+
 
 
     render(){
         return (
             <SideMenu 
-                onClose={this.closeDrawer}
                 ref={this.drawer}
                 isOpen={this.state.visible}
+
+                onClose={this.closeDrawer}
                 disableGestures = {true}
                 onChange = {(isOpen)=>{
                     this.setState({
                         visible: isOpen
                     })
                 }}
-                menu = {<DrawerContent ref={(ref)=>this.drawer_content = ref} task_data = {this.props.task_data}/>}>
+
+                menu = {<Content ref={(ref)=>this.content = ref} task_data = {this.props.unallocated_tasks}/>}>
 
                 {this.props.children}
             </SideMenu>
         )
     }
+}
+
+TaskDrawer.propTypes = {
+    unallocated_tasks : PropTypes.array.isRequired,
 }
