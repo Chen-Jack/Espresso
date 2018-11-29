@@ -37,9 +37,11 @@ export default class TaskCard extends React.Component{
                             <CardItem bordered>
                                 <View style={{width:"100%", flexDirection:"row", justifyContent: "space-between"}}>
                                     <Text style={this.props.isCompleted ? strike_through_style : {} }>{this.props.title || "Task"}</Text>
-                                    <TouchableOpacity onPress={this.toggleCard}>
+                                    {
+                                    this.props.details && <TouchableOpacity onPress={this.toggleCard}>
                                         {this.state.isCollapsed ? <Icon name="arrow-dropdown"/> : <Icon name="arrow-dropup"/>}  
                                     </TouchableOpacity>
+                                    }
                                 </View>
                             </CardItem>
 

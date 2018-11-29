@@ -606,7 +606,7 @@ class HomeScreen extends React.Component{
                 </Content>
 
                 <Footer style={{backgroundColor: "#222", width:Dimensions.get('window').width, height: 50, padding:0, margin: 0}} >
-                    <FooterTab style={{padding:0,margin:0, flexDirection: "row", width:"100%", justifyContent:"center"}}>
+                    {/* <FooterTab style={{padding:0,margin:0, flexDirection: "row", width:"100%", justifyContent:"center"}}> */}
                         
                         {/* <TaskCreationPrompt /> */}
 
@@ -615,10 +615,10 @@ class HomeScreen extends React.Component{
                         </Button> */}
                        
                         
-                        <Button style={{borderRadius:100, width:50, height:50, marginVertical: 10, backgroundColor:"white"}} onPress={this._openDrawer}>
-                            <Icon style={{ backgroundColor:"white"}} name="easel"/>
+                        <Button style={{borderRadius:100, width:50, height:50, backgroundColor:"white"}} onPress={this._openDrawer}>
+                            <Icon style={{ backgroundColor:"black", fontSize:20}}  type="Entypo" name="blackboard"/>
                         </Button>
-                    </FooterTab>
+                    {/* </FooterTab> */}
                 </Footer>
             </Container>
         </TaskDrawer> 
