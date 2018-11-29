@@ -1,7 +1,7 @@
 //The home page for an account
 
 import React from 'react'
-import {Title, Header, Body,Footer, FooterTab, Container, Content, Text, Button, Toast, Thumbnail} from 'native-base'
+import {Title, Header, Body,Footer, FooterTab, Container, Content, Text, Button, Toast, Icon} from 'native-base'
 import {AsyncStorage, View, Dimensions, TouchableOpacity } from 'react-native'
 import { Calendar } from 'react-native-calendars';
 import {TaskCarousel} from './components/TaskCarousel'
@@ -568,12 +568,14 @@ class HomeScreen extends React.Component{
     }
 
     render(){
-        const uri = "https://facebook.github.io/react-native/docs/assets/favicon.png";
         return <TaskDrawer ref={(ref)=>{this.drawer = ref}} unallocated_tasks = {this.state.unallocated_tasks}>
             <Container style={{overflow:"hidden", height: Dimensions.get('window').height, flexDirection: "column"}}>
                 <Header style={{backgroundColor: '#061328'}}>
-                    <Body>
+                    <Body style={{justifyContent:"center"}}>
                         <Title style={{color:"#fff"}}>Header</Title>
+                        <TouchableOpacity style={{position:"absolute", right:10}}>
+                            <Icon style={{color:"white"}} name="settings"/>
+                        </TouchableOpacity>
                     </Body>
                 </Header>
 
@@ -613,9 +615,9 @@ class HomeScreen extends React.Component{
                         </Button> */}
                        
                         
-                        <TouchableOpacity onPress={this._openDrawer}>
-                            <Thumbnail small source={{uri: uri}} />
-                        </TouchableOpacity>
+                        <Button style={{borderRadius:100, width:50, height:50, marginVertical: 10, backgroundColor:"white"}} onPress={this._openDrawer}>
+                            <Icon style={{ backgroundColor:"white"}} name="easel"/>
+                        </Button>
                     </FooterTab>
                 </Footer>
             </Container>

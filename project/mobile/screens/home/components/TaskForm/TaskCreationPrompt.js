@@ -48,7 +48,3 @@ export default class TaskCreationModalPrompt extends React.Component{
         </View>
     }
 }
-
-TaskCreationModalPrompt.propTypes = {
-    trigger : PropTypes.node.isRequired
-}

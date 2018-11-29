@@ -1,8 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Carousel from 'react-native-snap-carousel'
-import {View, Text, Button} from 'native-base'
-import {Dimensions} from 'react-native'
+import {View, Text, Button, Icon} from 'native-base'
+import {Dimensions, TouchableOpacity} from 'react-native'
 import TaskList from './TaskList'
 import {Embassy} from '../TravelingList'
 import UserTaskConsumer from './../../UserTaskContext'
@@ -252,7 +252,12 @@ export default class TaskCarousel extends React.Component{
 
     _renderTaskList = ({item: tasks_of_the_day, index})=>{
         return <View style={{overflow: "hidden", margin: 20, height: "85%", width: "85%", backgroundColor: "#ddd", borderRadius: 10, alignSelf:"center"}}>
-            <Text style={{borderTopLeftRadius: 10, borderTopRightRadius: 10, padding: 10, fontSize: 16, backgroundColor:"#222", color: "white"}}> {tasks_of_the_day.date || "Date"} </Text>
+            <View style={{flexDirection:"row", width:"100%", backgroundColor:"#222", alignItems: "center", justifyContent:"space-between"}}>
+                <Text style={{borderTopLeftRadius: 10, borderTopRightRadius: 10, padding: 10, fontSize: 16, color: "white"}}> {tasks_of_the_day.date || "Date"} </Text>
+                <TouchableOpacity style={{marginRight: 15}}>
+                    <Icon style={{color:"white"}} name="more"/>
+                </TouchableOpacity>
+            </View>
             <TaskList initialize={index===this.STARTING_INDEX ? this._initializeLayout : null} ref={(ref)=>{this[`task_${index}`] = ref}} index = {index} data = {tasks_of_the_day}/>
         </View>
     }

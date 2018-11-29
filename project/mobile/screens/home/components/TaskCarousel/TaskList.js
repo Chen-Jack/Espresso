@@ -5,7 +5,8 @@ import PropTypes from 'prop-types'
 
 
 const EmptyList = (props)=>{
-    return <View style={{width:"100%", height:"50%", backgroundColor: "white", alignSelf:"center", justifyContent:"center"}}>
+    console.log("Empty list created");
+    return <View style={{height:"100%", width:"100%", backgroundColor: "white", alignItems:"center", justifyContent:"center"}}>
         <Text>
             You have nothing to do.
         </Text>
@@ -116,7 +117,7 @@ export default class TaskList extends React.Component{
                 ref={this.list} 
                 style={{flex: 1}}>
 
-                { this.props.data.length === 0 ?     
+                { this.props.data.tasks.length === 0 ?     
                 <EmptyList/> :   
                 <FlatList
                     scrollEnabled = {this.state.canScroll}

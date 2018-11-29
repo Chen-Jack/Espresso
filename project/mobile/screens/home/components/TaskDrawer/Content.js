@@ -57,7 +57,7 @@ export default class DrawerContent extends React.Component{
             </View>
             <View style={{width:"100%", flexDirection:"row", justifyContent:"center"}}>
                 <TaskCreationPrompt ref={(ref=>{this.form = ref})}/>
-                <Button onPress={this.togglePrompt}>
+                <Button style={{borderRadius:100, marginVertical: 10, backgroundColor:"#222"}} onPress={this.togglePrompt}>
                     <Icon name='add' />
                 </Button>
             </View>
