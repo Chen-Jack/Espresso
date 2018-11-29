@@ -3,6 +3,7 @@ import {View, Text, Button, Toast, Thumbnail} from 'native-base'
 import {TouchableOpacity} from 'react-native'
 import Modal from 'react-native-modal'
 import TaskCreationForm from './TaskCreationForm'
+import PropTypes from 'prop-types'
 
 export default class TaskCreationModalPrompt extends React.Component{
     constructor(props) {
@@ -11,6 +12,8 @@ export default class TaskCreationModalPrompt extends React.Component{
         this.state = {
             visible: false
         }
+
+
     }
 
     togglePrompt = ()=>{
@@ -29,13 +32,10 @@ export default class TaskCreationModalPrompt extends React.Component{
     }
 
     render(){
-
-        const uri = "https://facebook.github.io/react-native/docs/assets/favicon.png";
         return <View>
-            <TouchableOpacity style={{marginVertical: 10}} onPress={this.togglePrompt}>
-                <Thumbnail small source={{uri: uri}} />
+            <TouchableOpacity onPress={this.togglePrompt}>
+                {this.props.trigger}
             </TouchableOpacity>
-
             <Modal
                 onBackdropPress= {this.togglePrompt}
                 isVisible={this.state.visible}>
@@ -47,4 +47,8 @@ export default class TaskCreationModalPrompt extends React.Component{
             </Modal>
         </View>
     }
+}
+
+TaskCreationModalPrompt.propTypes = {
+    trigger : PropTypes.node.isRequired
 }

@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import TaskList from '../TaskCarousel/TaskList'
 import {View, Text, Dimensions} from 'react-native'
+import {Icon, Button} from 'native-base'
 import {TaskCreationPrompt} from './../TaskForm'
 
 function DrawerHeader(){
@@ -32,6 +33,10 @@ export default class DrawerContent extends React.Component{
         })     
     }
 
+    togglePrompt = ()=>{
+        this.form.togglePrompt()
+    }
+
     render(){
 
         return (
@@ -51,7 +56,10 @@ export default class DrawerContent extends React.Component{
                 />
             </View>
             <View style={{width:"100%", flexDirection:"row", justifyContent:"center"}}>
-                <TaskCreationPrompt />
+                <TaskCreationPrompt ref={(ref=>{this.form = ref})}/>
+                <Button onPress={this.togglePrompt}>
+                    <Icon name='add' />
+                </Button>
             </View>
         </View>
         )
