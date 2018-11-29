@@ -44,7 +44,7 @@ export default class TaskCard extends React.Component{
                             </CardItem>
 
                             <Collapsible collapsed = {this.state.isCollapsed}>
-                                <CardItem>
+                                <CardItem style={{backgroundColor: "#eee"}}>
                                     <Body>
                                         <Text>
                                             {this.props.details || ""}

@@ -12,11 +12,14 @@ import UserTaskConsumer from './../../UserTaskContext'
 export default class TaskCarousel extends React.Component{
     constructor(props) {
         super(props)
-        
+
         this.state={
             canScroll : true,
             task_cards_references : []
         }
+
+        this.STARTING_INDEX = 0;
+
         this.carousel = React.createRef()
         this.wrapper = React.createRef()
 
@@ -37,6 +40,8 @@ export default class TaskCarousel extends React.Component{
     componentWillUnmount(){
         console.log("Carousel Unmounting");
     }
+
+
 
     _getReference = (index)=>{
         return this[`task_${index}`]
@@ -65,6 +70,7 @@ export default class TaskCarousel extends React.Component{
     }
 
     _onSnapHandler = (index)=>{
+        console.log("Snapped");
         this.setState({
             isScrolling : false
         })
@@ -247,7 +253,7 @@ export default class TaskCarousel extends React.Component{
     _renderTaskList = ({item: tasks_of_the_day, index})=>{
         return <View style={{overflow: "hidden", margin: 20, height: "85%", width: "85%", backgroundColor: "#ddd", borderRadius: 10, alignSelf:"center"}}>
             <Text style={{borderTopLeftRadius: 10, borderTopRightRadius: 10, padding: 10, fontSize: 16, backgroundColor:"#222", color: "white"}}> {tasks_of_the_day.date || "Date"} </Text>
-            <TaskList ref={(ref)=>{this[`task_${index}`] = ref}} index = {index} data = {tasks_of_the_day}/>
+            <TaskList initialize={index===this.STARTING_INDEX ? this._initializeLayout : null} ref={(ref)=>{this[`task_${index}`] = ref}} index = {index} data = {tasks_of_the_day}/>
         </View>
     }
 
@@ -256,9 +262,16 @@ export default class TaskCarousel extends React.Component{
         ref.measureLayout((layout)=>{
             this.focused_list = ref
             this.focused_list_layout = layout
-            console.log("focused layout is now", this.focused_list_layout);
+            // console.log("focused layout is now", this.focused_list_layout);
          })
     }
+
+    _initializeLayout = (list, layout, index)=>{
+        console.log("Initialized Carousel's first Item");
+        this.focused_list = list
+        this.focused_list_layout = layout
+    }
+
 
     render(){
 

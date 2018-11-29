@@ -97,12 +97,22 @@ export default class TaskList extends React.Component{
         console.log(`${this.props.data.date } captured the released gesture`);
     }
 
+    onLayoutHandler = ()=>{
+        if(this.props.initialize)
+        this.measureLayout((layout)=>{
+            console.log("uhhh", this.props.initialize);
+            if(this.props.initialize){
+                this.props.initialize(this, layout, this.props.index)
+            }
+        })
+    }
 
     render(){
         let focus_style = {backgroundColor: (this.state.isGestureHovering ? "yellow" : null)}
         let landable_style = {flex: 1, ...focus_style}
 
         return <View 
+                onLayout={this.onLayoutHandler}
                 ref={this.list} 
                 style={{flex: 1}}>
 
@@ -121,6 +131,7 @@ export default class TaskList extends React.Component{
 }
 
 TaskList.propTypes = {
+    initialize : PropTypes.func,
     data: PropTypes.shape({
         date :PropTypes.string,
         tasks: PropTypes.array.isRequired

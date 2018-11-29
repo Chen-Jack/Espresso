@@ -34,10 +34,12 @@ class HomeScreen extends React.Component{
 
 
         this.manager = {
-            updateStatus: this.updateCompletionStatusOfState,
-            reallocateTask: this.reallocateTask,
-            deallocateTask: this.deallocateTask,
-            allocateTask: this.allocateTask
+            updateStatus : this.updateCompletionStatusOfState,
+            reallocateTask : this.reallocateTask,
+            deallocateTask : this.deallocateTask,
+            allocateTask : this.allocateTask,
+            createTask : this.createTask,
+            deleteTask : this.deleteTask
         }
 
         //Give the Embassy access to the same context manager
@@ -136,7 +138,7 @@ class HomeScreen extends React.Component{
         new_allocated_state = update(this.state.allocated_tasks, {
             [day_index_updated] : {
                 tasks : {
-                    $push : [original_task]
+                    $unshift : [original_task]
                 }
             }
         })
@@ -160,7 +162,6 @@ class HomeScreen extends React.Component{
             }
         })
     }
-
 
     deallocateTask = (task_id, cb=()=>{}) => {
         const original_allocated_state = this.state.allocated_tasks
@@ -287,6 +288,71 @@ class HomeScreen extends React.Component{
         })
     }
 
+    createTask = (task_id, creator_id, creation_time, title, details, cb=()=>{})=>{
+        // const original_state = this.unallocated_tasks
+
+        // const new_task = {
+        //     allocated_date : null,
+        //     completed: false,
+        //     created_at : creation_time,
+        //     creator_id : creator_id,
+        //     details : details,
+        //     id: task_id,
+        //     title : title,
+        // }
+        // const new_state = update(this.state.unallocated_tasks, {
+        //     $unshift : [new_task]
+        // })
+
+        // this.setState({
+        //     unallocated_tasks : new_state
+        // })
+
+        // this._createTaskServerSide(title, details, (err)=>{
+        //     if(err){
+        //         this.setState({
+        //             unallocated_tasks: original_state
+        //         })
+        //     }
+        // })
+    }
+
+    deleteTask = (task_id, cb=()=>{})=>{
+
+    }
+
+    _createTaskServerSide = (title, details, cb = ()=>{})=>{
+        AsyncStorage.getItem("session_token", (err, session_token)=>{
+            const data = {
+                task_title: title,
+                task_details: details
+            }
+            fetch("http://localhost:3000/create-task", {
+                method: 'POST',
+                headers: {
+                    "Authorization": `Bearer ${session_token}`,
+                    "Content-Type": "application/json; charset=utf-8",
+                },
+                body : JSON.stringify(data)
+            }).then(
+                (res)=>{
+                    if(res.ok){
+                        
+                        cb()
+                    }
+
+                    else{
+                        cb("Res not ok")
+                    }
+                }
+            ).catch((err)=>{
+                console.log("Error when creating task", err)
+                cb(err)
+                alert("Error")
+            })
+        })
+    }
+
     _updateTaskStatusServerSide = (task_id, new_status, cb=()=>{})=>{
         AsyncStorage.getItem("session_token", (err, session_token)=>{
             const data = {
@@ -351,9 +417,6 @@ class HomeScreen extends React.Component{
             })
         })
     }
-
-
-  
 
     _onDateSelection=(isodate)=>{
         this.setState({
