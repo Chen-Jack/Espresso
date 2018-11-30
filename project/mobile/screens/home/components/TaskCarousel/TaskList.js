@@ -3,7 +3,6 @@ import {View, Text, FlatList} from 'react-native'
 import TaskCard from './TaskCard'
 import PropTypes from 'prop-types'
 
-
 const EmptyList = (props)=>{
     console.log("Empty list created");
     return <View style={{height:"100%", width:"100%", backgroundColor: "white", alignItems:"center", justifyContent:"center"}}>
@@ -118,13 +117,13 @@ export default class TaskList extends React.Component{
                 style={{flex: 1}}>
 
                 { this.props.data.tasks.length === 0 ?     
-                <EmptyList/> :   
-                <FlatList
-                    scrollEnabled = {this.state.canScroll}
-                    index = {this.props.index}
-                    data = {this.props.data.tasks}
-                    renderItem = {this._renderListItem}
-                    style={landable_style}/>
+                    <EmptyList/> :   
+                    <FlatList
+                        scrollEnabled = {this.state.canScroll}
+                        index = {this.props.index}
+                        data = {this.props.data.tasks}
+                        renderItem = {this._renderListItem}
+                        style={landable_style}/>
                 }
 
         </View>

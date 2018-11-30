@@ -23,6 +23,7 @@ class HomeScreen extends React.Component{
             user : {
                 username: ""
             },
+            isLoading : true,
             unallocated_tasks : [],
             allocated_tasks : [],
             selected_date: new Date().toISOString().substring(0,10),
@@ -462,46 +463,57 @@ class HomeScreen extends React.Component{
 
     _populateTaskSet = ()=>{
         AsyncStorage.getItem("session_token", (err, session_token)=>{
-            fetch("http://localhost:3000/retrieve-tasks-by-user", {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${session_token}`
-                }
-            }).then(
-                (res)=>{
-                    if(res.ok){
-                        res.json().then((tasks)=>{
-                            const unallocated_tasks = []
+            if(err){
+                this.setState({
+                    isLoading: false
+                })
+            }
+            else{
+                fetch("http://localhost:3000/retrieve-tasks-by-user", {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${session_token}`
+                    }
+                }).then(
+                    (res)=>{
+                        if(res.ok){
+                            res.json().then((tasks)=>{
+                                const unallocated_tasks = []
 
-                            // Generate a new object copy. React will not
-                            // properly call updates on objects due to references.
-                            const allocated_tasks = this._generateEmptyTaskSet()
+                                // Generate a new object copy. React will not
+                                // properly call updates on objects due to references.
+                                const allocated_tasks = this._generateEmptyTaskSet()
 
-                            for(let task of tasks){
-                                let wasTaskAllocated = false;
-                                for(let date_entry of allocated_tasks){
-                                    if(date_entry.date === task.allocated_date){
-                                        date_entry.tasks.push(task)
-                                        wasTaskAllocated = true
-                                        break;
+                                for(let task of tasks){
+                                    let wasTaskAllocated = false;
+                                    for(let date_entry of allocated_tasks){
+                                        if(date_entry.date === task.allocated_date){
+                                            date_entry.tasks.push(task)
+                                            wasTaskAllocated = true
+                                            break;
+                                        }
+                                    }
+
+                                    if(!wasTaskAllocated){
+                                        unallocated_tasks.push(task)
                                     }
                                 }
-
-                                if(!wasTaskAllocated){
-                                    unallocated_tasks.push(task)
-                                }
-                            }
-                            this.setState({
-                                unallocated_tasks: unallocated_tasks,
-                                allocated_tasks: allocated_tasks
+                                this.setState({
+                                    unallocated_tasks: unallocated_tasks,
+                                    allocated_tasks: allocated_tasks,
+                                    isLoading: false
+                                })
                             })
-                        })
+                        }
                     }
-                }
-            ).catch((err)=>{
-                console.log("Error when populatingTaskSet", err)
-                alert("Error")
-            })
+                ).catch((err)=>{
+                    console.log("Error when populatingTaskSet", err)
+                    this.setState({
+                        isLoading: false
+                    })
+                    alert("Error")
+                })
+            }
         })
     }
 
@@ -572,8 +584,8 @@ class HomeScreen extends React.Component{
             <Container style={{overflow:"hidden", height: Dimensions.get('window').height, flexDirection: "column"}}>
                 <Header style={{backgroundColor: '#061328'}}>
                     <Body style={{justifyContent:"center"}}>
-                        <Title style={{color:"#fff"}}>Header</Title>
-                        <TouchableOpacity style={{position:"absolute", right:10}}>
+                        <Title style={{position:"absolute", left: 10, color:"#fff"}}>{(new Date()).toLocaleDateString()}</Title>
+                        <TouchableOpacity onPress={()=>this.props.navigation.navigate("settings")} style={{position:"absolute", right:10}}>
                             <Icon style={{color:"white"}} name="settings"/>
                         </TouchableOpacity>
                     </Body>
@@ -596,6 +608,7 @@ class HomeScreen extends React.Component{
 
                         <TaskCarousel
                             ref = {this.carousel}
+                            isLoading = {this.state.isLoading}
                             selected_date = {this.state.selected_date}
                             handleDateSelection={this._onDateSelection} 
                             task_data={this.state.allocated_tasks} />
@@ -615,8 +628,8 @@ class HomeScreen extends React.Component{
                         </Button> */}
                        
                         
-                        <Button style={{borderRadius:100, width:50, height:50, backgroundColor:"white"}} onPress={this._openDrawer}>
-                            <Icon style={{ backgroundColor:"black", fontSize:20}}  type="Entypo" name="blackboard"/>
+                        <Button style={{justifyContent:"center", alignItems:"center", borderRadius:100,backgroundColor:"white"}} onPress={this._openDrawer}>
+                            <Icon style={{color:"black"}}  type="Entypo" name="blackboard"/>
                         </Button>
                     {/* </FooterTab> */}
                 </Footer>

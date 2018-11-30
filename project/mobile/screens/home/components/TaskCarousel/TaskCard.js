@@ -35,7 +35,7 @@ export default class TaskCard extends React.Component{
                         doubleTapHandler = {()=>{updateStatus(this.props.task_id, !this.props.isCompleted)}}>
                         <Card>
                             <CardItem bordered>
-                                <View style={{width:"100%", flexDirection:"row", justifyContent: "space-between"}}>
+                                <View style={{width:"100%", flexDirection:"row", alignItems: "center", justifyContent: "space-between"}}>
                                     <Text style={this.props.isCompleted ? strike_through_style : {} }>{this.props.title || "Task"}</Text>
                                     {
                                     this.props.details && <TouchableOpacity onPress={this.toggleCard}>

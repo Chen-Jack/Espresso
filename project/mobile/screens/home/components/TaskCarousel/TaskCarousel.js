@@ -6,7 +6,9 @@ import {Dimensions, TouchableOpacity} from 'react-native'
 import TaskList from './TaskList'
 import {Embassy} from '../TravelingList'
 import UserTaskConsumer from './../../UserTaskContext'
-
+import Loader from './LoadingCarouselView'
+import {PopupMenu} from './../PopupMenu'
+import Modal from 'react-native-modal'
 
 
 export default class TaskCarousel extends React.Component{
@@ -254,9 +256,13 @@ export default class TaskCarousel extends React.Component{
         return <View style={{overflow: "hidden", margin: 20, height: "85%", width: "85%", backgroundColor: "#ddd", borderRadius: 10, alignSelf:"center"}}>
             <View style={{flexDirection:"row", width:"100%", backgroundColor:"#222", alignItems: "center", justifyContent:"space-between"}}>
                 <Text style={{borderTopLeftRadius: 10, borderTopRightRadius: 10, padding: 10, fontSize: 16, color: "white"}}> {tasks_of_the_day.date || "Date"} </Text>
-                <TouchableOpacity style={{marginRight: 15}}>
-                    <Icon style={{color:"white"}} name="more"/>
-                </TouchableOpacity>
+
+
+            
+                <PopupMenu/>
+
+                
+
             </View>
             <TaskList initialize={index===this.STARTING_INDEX ? this._initializeLayout : null} ref={(ref)=>{this[`task_${index}`] = ref}} index = {index} data = {tasks_of_the_day}/>
         </View>
@@ -282,30 +288,33 @@ export default class TaskCarousel extends React.Component{
 
         return (
             <UserTaskConsumer>
-            { ({setTaskDate}) => <View 
-                ref = {this.wrapper}
-                onLayout = {this._onLayout}
-                style={{overflow: "hidden", flex: 1, flexDirection:"column",  marginBottom: 105, backgroundColor: "#2460c1"}}>
-                <Carousel
-                    ref = {this.carousel}
-                    reallocateTaskDate = {setTaskDate}
-                    onSnapToItem = {this._onSnapHandler}
-                    useScrollView = {true}
-                    lockScrollWhileSnapping = {true}
-                    showsHorizontalScrollIndicator = {true}
-                    scrollEnabled = {this.state.canScroll}
-                    data={this.props.task_data}
-                    renderItem={this._renderTaskList}
-                    sliderWidth={Dimensions.get('window').width}
-                    itemWidth={Dimensions.get('window').width}
-                />
-            </View>}
+                { ({setTaskDate}) => <View 
+                    ref = {this.wrapper}
+                    onLayout = {this._onLayout}
+                    style={{overflow: "hidden", flex: 1, flexDirection:"column",  marginBottom: 105, backgroundColor: "#2460c1"}}>
+                    {
+                        this.props.isLoading ? <Loader/> :<Carousel
+                            ref = {this.carousel}
+                            reallocateTaskDate = {setTaskDate}
+                            onSnapToItem = {this._onSnapHandler}
+                            useScrollView = {true}
+                            lockScrollWhileSnapping = {true}
+                            showsHorizontalScrollIndicator = {true}
+                            scrollEnabled = {this.state.canScroll}
+                            data={this.props.task_data}
+                            renderItem={this._renderTaskList}
+                            sliderWidth={Dimensions.get('window').width}
+                            itemWidth={Dimensions.get('window').width}
+                             />
+                    }
+                </View>}
             </UserTaskConsumer>
         )
     }
 }
 
 TaskCarousel.propTypes = {
+    isLoading : PropTypes.bool.isRequired,
     task_data : PropTypes.array.isRequired,
     handleDateSelection : PropTypes.func
 }
