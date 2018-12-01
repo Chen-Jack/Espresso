@@ -11,6 +11,7 @@ import UserTaskContext, {UserTaskProvider} from './UserTaskContext'
 import update from 'immutability-helper'
 import { Embassy } from './components/TravelingList';
 import Task from './../../Task'
+import {getDay} from './../../utility'
 
 
 
@@ -33,6 +34,7 @@ class HomeScreen extends React.Component{
         this.carousel = React.createRef()
         this.calendar = React.createRef()
 
+        this.today = new Date()
 
         this.manager = {
             updateStatus : this.updateCompletionStatusOfState,
@@ -607,7 +609,7 @@ class HomeScreen extends React.Component{
             <Container style={{overflow:"hidden", height: Dimensions.get('window').height, flexDirection: "column"}}>
                 <Header style={{backgroundColor: '#061328'}}>
                     <Body style={{justifyContent:"center"}}>
-                        <Title style={{position:"absolute", left: 10, color:"#fff"}}>{(new Date()).toLocaleDateString()}</Title>
+                        <Title style={{position:"absolute", left: 10, color:"#fff"}}>{`${getDay(this.today)} ${this.today.toLocaleDateString()}`}</Title>
                         <TouchableOpacity onPress={()=>this.props.navigation.navigate("settings")} style={{position:"absolute", right:10}}>
                             <Icon style={{color:"white"}} name="settings"/>
                         </TouchableOpacity>

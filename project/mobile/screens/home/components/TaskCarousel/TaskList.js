@@ -4,10 +4,13 @@ import TaskCard from './TaskCard'
 import PropTypes from 'prop-types'
 import {PopupMenu} from './../PopupMenu'
 import { Button } from 'native-base';
+import {getDay} from './../../../../utility'
 
 const TaskListHeader = ({isEditMode, options, date})=>{
     return <View style={{flexDirection:"row", width:"100%", backgroundColor:"#222", alignItems: "center", justifyContent:"space-between"}}>
-        <Text style={{borderTopLeftRadius: 10, borderTopRightRadius: 10, padding: 10, fontSize: 16, color: "white"}}> {date || "Date"} </Text>
+        <Text style={{borderTopLeftRadius: 10, borderTopRightRadius: 10, padding: 10, fontSize: 16, color: "white"}}> 
+            {`${getDay((date))} ${date || "Date"}`} 
+        </Text>
         <PopupMenu popupOptions = {options} isEditMode={isEditMode} date={date}/>
     </View>
 }
