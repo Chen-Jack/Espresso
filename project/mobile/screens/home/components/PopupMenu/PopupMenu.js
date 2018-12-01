@@ -5,6 +5,26 @@ import Modal from 'react-native-modal'
 import PropTypes from 'prop-types'
 import MenuOptions from './MenuOptions'
 
+const MenuButton = ({openMenu})=>{
+    return <TouchableOpacity onPress={openMenu} style={{marginRight: 15}}>
+        <Icon style={{color:"white"}} name="more"/>
+    </TouchableOpacity>
+}
+
+const ExitEditModeButton = ({options})=>{
+    let handler = ()=>{}
+    for(let option of options){
+        if(option.title === "Edit"){
+            handler = option.handler
+        }
+    }
+    console.log("handler", handler);
+    return <TouchableOpacity onPress={()=>handler()} style={{marginRight: 15}}>
+        <Icon type="Foundation" style={{color:"white"}} name="check"/>
+    </TouchableOpacity>  
+}
+
+
 export default class TaskPopupMenu extends React.Component{
     constructor(props) {
         super(props)
@@ -81,30 +101,32 @@ export default class TaskPopupMenu extends React.Component{
     render(){
         return <View ref={this.menu}>
 
-                <TouchableOpacity  onPress={(evt)=>this.toggleMenu(evt)} style={{marginRight: 15}}>
-                    <Icon style={{color:"white"}} name="more"/>
-                </TouchableOpacity>
+            { 
+                this.props.isEditMode ? 
+                <ExitEditModeButton options = {this.props.popupOptions}/> : <MenuButton openMenu={this.toggleMenu}/>
+            }
 
-                <View ref={this.options} >
-                    <Modal
-                        style = {{margin:0,position:"absolute", width:"100%", height:"100%"}}
-                        backdropOpacity = {0.2}
-                        onBackdropPress={this.toggleMenu}
-                        visible = {this.state.isVisible}>
+            <View ref={this.options} >
+                <Modal
+                    style = {{margin:0,position:"absolute", width:"100%", height:"100%"}}
+                    backdropOpacity = {0.2}
+                    onBackdropPress={this.toggleMenu}
+                    visible = {this.state.isVisible}>
 
-                        <View style={{margin: 0, height:100, width:100, position:"absolute", justifyContent:"center", alignItems:"center", top:0, left:0, backgroundColor:"white"}}>
-                            <MenuOptions toggleMenu={this.toggleMenu} options={this.props.popupOptions}/>
-                        </View>
+                    <View style={{margin: 0, position:"absolute", justifyContent:"center", alignItems:"center", top:0, left:0, backgroundColor:"white"}}>
+                        <MenuOptions toggleMenu={this.toggleMenu} options={this.props.popupOptions}/>
+                    </View>
 
-                    </Modal>
-                </View>
+                </Modal>
             </View>
+        </View>
            
     }
 }
 
 TaskPopupMenu.propTypes = {
     date : PropTypes.string.isRequired,
+    isEditMode: PropTypes.bool.isRequired,
     popupOptions : PropTypes.arrayOf(
         PropTypes.shape({
             title : PropTypes.string.isRequired,

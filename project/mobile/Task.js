@@ -87,7 +87,19 @@ export default class Task{
     //     }
     // }
 
-    
+    static deleteTask(task_id, cb=()=>{}){
+        AsyncStorage.getItem("espresso_app", (err,app)=>{
+            if(err){
+                cb(err)
+            }
+            const app_data = JSON.parse(app)
+            const tasks = app_data.tasks
+            delete tasks[task_id]
+            AsyncStorage.setItem("espresso_app", JSON.stringify(app_data), (err)=>{
+                cb(err)
+            })
+        })
+    }
 
     static allocateTask(task_id, date, cb=()=>{}){
        AsyncStorage.getItem("espresso_app", (err,app)=>{

@@ -1,33 +1,92 @@
 import React from 'react'
-import {Card, CardItem, Text, Body,Button, View, Badge, Icon} from 'native-base'
-import {TouchableOpacity} from 'react-native'
+import {Card, CardItem, Text, Body,Button, View, Badge, Icon,Input} from 'native-base'
+import {TouchableOpacity, Alert, TextInput} from 'react-native'
 import {Draggable} from './../TravelingList'
+import Modal from 'react-native-modal'
 import PropTypes from 'prop-types'
 import UserTaskContext from '../../UserTaskContext'
 import Collapsible from 'react-native-collapsible';
 
-class EditButtons extends React.Component{
+class EditButton extends React.Component{
+    constructor(props) {
+        super(props)
+
+        this.state = {
+            isEditing : false
+        }
+    }
+
+    togglePrompt = ()=>{
+        this.setState({
+            isEditing: !this.state.isEditing
+        })
+    }
     render(){
-        return <View style={{flexDirection:"row"}}>
-            <TouchableOpacity>
+        return <View>
+            <TouchableOpacity onPress={this.togglePrompt}>
                 <Icon style={{fontSize:20, marginHorizontal: 5}} type={"FontAwesome"} name="pencil"/>
             </TouchableOpacity>
 
-            <TouchableOpacity>
-                <Icon style={{fontSize:20, marginHorizontal: 5}} name="trash"/>
-            </TouchableOpacity>
+            <Modal onBackdropPress={this.togglePrompt} style={{justifyContent:"center", alignItems:"center"}} isVisible={this.state.isEditing}>
+                <View style={{padding: 10, backgroundColor:"#ddd"}}>
+                    <Input placeholder={"Title"} value={"test"}/>
+                    <Input placeholder={"Details (Optional)"} value={"details"}/>
+                    <Button> <Text>Update</Text> </Button>
+                </View>
+            </Modal>
         </View>
     }
 }
 
-const CardOptions = ({details, isEditMode, isCollapsed})=>{
+class DeleteButton extends React.Component{
+    constructor(props) {
+        super(props)
+
+       
+    }
+
+    triggleDeletePrompt = (deleteHandler)=>{
+        Alert.alert('Delete Card', "Are you sure?", 
+        [
+            {text: "Cancel", onPress:()=>{}, style:"cancel"},
+            {text:"Delete", onPress:()=>{deleteHandler(this.props.task_id)}}
+        ])
+    }
+
+    render(){
+        return <UserTaskContext.Consumer>
+            { ({deleteTask})=> <View>
+                <TouchableOpacity onPress={()=>this.triggleDeletePrompt(deleteTask)}>
+                    <Icon style={{fontSize:20, marginHorizontal: 5}} name="trash"/>
+                </TouchableOpacity>
+                </View>
+            }
+        </UserTaskContext.Consumer>
+    }
+}
+
+DeleteButton.propTypes = {
+    task_id : PropTypes.string.isRequired
+}
+
+class EditButtons extends React.Component{
+    render(){
+        return <View style={{flexDirection:"row"}}>
+            <EditButton task_id = {this.props.task_id}/>
+
+            <DeleteButton task_id = {this.props.task_id}/>
+        </View>
+    }
+}
+
+const CardOptions = ({task_id, details, isEditMode, isCollapsed, toggleDetails})=>{
     if(isEditMode){
         return <View style={{flexDirection:"row",alignItems:"center"}}>
-            <EditButtons/>
+            <EditButtons task_id = {task_id}/>
         </View>
     }
     else if(details){
-        return <TouchableOpacity onPress={this.toggleCard}>
+        return <TouchableOpacity onPress={toggleDetails}>
             {isCollapsed ? <Icon name="arrow-dropdown"/> : <Icon name="arrow-dropup"/>}  
         </TouchableOpacity>
     }
@@ -68,8 +127,8 @@ export default class TaskCard extends React.Component{
                         <Card>
                             <CardItem bordered>
                                 <View style={{width:"100%", flexDirection:"row", alignItems: "center", justifyContent: "space-between"}}>
-                                    <Text style={this.props.isCompleted ? strike_through_style : {} }>{this.props.title || "Task"}</Text>
-                                    <CardOptions isCollapsed = {this.state.isCollapsed} details={this.props.details} isEditMode = {this.props.isEditMode}/>
+                                    <Text style={[{width:"80%"}, this.props.isCompleted ? strike_through_style : {}] }>{this.props.title || "Task"}</Text>
+                                    <CardOptions style={{width:"20%"}}task_id= {this.props.task_id} toggleDetails={this.toggleCard} isCollapsed = {this.state.isCollapsed} details={this.props.details} isEditMode = {this.props.isEditMode}/>
                                 </View>
                             </CardItem>
 

@@ -314,7 +314,72 @@ class HomeScreen extends React.Component{
     }
 
     deleteTask = (task_id, cb=()=>{})=>{
+        console.log("DELETING", task_id);
+        const original_allocated_state = this.state.allocated_tasks
+        const original_unallocated_state = this.state.unallocated_tasks
 
+        let day_index_original = null
+        let task_index_original = null
+        
+        //Search through allocated tasks
+        for(let day_index in this.state.allocated_tasks){
+            let day_tasks = this.state.allocated_tasks[day_index].tasks
+            
+            for(let task_index in day_tasks){
+                if(day_tasks[task_index].task_id === task_id){
+                    day_index_original = day_index
+                    task_index_original = task_index
+
+                    const new_state = update(this.state.allocated_tasks, {
+                        [day_index_original] : {
+                            tasks : {
+                                $splice: [[task_index_original, 1]]
+                            }
+                        }
+                    })
+
+                    this.setState({
+                        allocated_tasks : new_state
+                    })
+                    break;
+                }
+            }   
+
+            if(task_index_original && day_index_original){
+                break;
+            }        
+        }
+
+        //Search through unallocated tasks if still not found
+        if(!task_index_original && !task_index_original){
+            for(let task of this.state.unallocated_tasks){
+                if(task.task_id === task_id){
+                    const new_state = update(this.state.unallocated_tasks, {
+                        $splice : [[task_index_original, 1]]
+                    })
+                    this.setState({
+                        unallocated_tasks : new_state
+                    })
+                }
+            }
+        }      
+
+
+
+        Task.deleteTask(task_id, (err)=>{
+            if(err){
+                this.setState({
+                    unallocated_tasks : original_unallocated_state,
+                    allocated_tasks : original_allocated_state
+                })
+            }
+            else{
+                Toast.show({
+                    text: `Task was deleted`,
+                    buttonText: 'Ok'
+                })
+            }
+        })
     }
 
 
@@ -340,7 +405,7 @@ class HomeScreen extends React.Component{
             tasks : Array
         }
        */
-        const day_variance = 14; //How many days of tasks you will show.
+        const day_variance = 28; //How many days of tasks you will show.
         const seconds_per_day = 86400;
         let task_set = [];
 
@@ -474,8 +539,8 @@ class HomeScreen extends React.Component{
                     </Body>
                 </Header>
 
-                <Content style={{height: Dimensions.get('window').height, width: Dimensions.get('window').width, backgroundColor: "#fff"}} scrollEnabled = {false}>
-                    <View style={{height: Dimensions.get('window').height, width: Dimensions.get('window').width}}>
+                <Content style={{ height: Dimensions.get('window').height, width: Dimensions.get('window').width, backgroundColor: "#fff"}} scrollEnabled = {false}>
+                    <View style={{paddingBottom:50,height: Dimensions.get('window').height, width: Dimensions.get('window').width}}>
                   
                     
 
@@ -485,7 +550,7 @@ class HomeScreen extends React.Component{
                             onDayPress={(day)=>{
                                 this._onDateSelection(day.dateString)}}
                             markedDates={{
-                                // [this.state.selected_date]: {selected: true, selectedColor: 'red'},
+                                [this.state.selected_date]: {selected: true, selectedColor: 'red'},
                                 ...this._generateCalendarMarkers()
                             }}/>
                         {/* <Button onPress={()=>{console.log(this.state)}}>
