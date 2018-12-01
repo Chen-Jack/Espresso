@@ -14,11 +14,15 @@ export default class TaskPopupMenu extends React.Component{
             location : {x:0, y:0},
             isVisible : false
         }
+
+     
     }
 
     componentWillUnmount(){
         console.log("Popupmenu unmounted");
     }
+
+    
     toggleMenu = ()=>{
         if(!this.state.isVisible){
             this.menu.current.measure((x,y,width,height,pageX,pageY)=>{
@@ -54,7 +58,7 @@ export default class TaskPopupMenu extends React.Component{
                             visible = {this.state.isVisible}>
 
                             <View style={{margin: 0, position:"absolute", justifyContent:"center", alignItems:"center", top:this.state.location.y, left:this.state.location.x-100, width: 100, backgroundColor:"white"}}>
-                                <MenuOptions/>
+                                <MenuOptions handlers={this.handlers}/>
                             </View>
 
                     </Modal>

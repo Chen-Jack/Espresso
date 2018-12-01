@@ -259,7 +259,7 @@ export default class TaskCarousel extends React.Component{
 
 
             
-                <PopupMenu/>
+                <PopupMenu date={this.props.task_data[index].date}/>
 
                 
 
@@ -291,7 +291,7 @@ export default class TaskCarousel extends React.Component{
                 { ({setTaskDate}) => <View 
                     ref = {this.wrapper}
                     onLayout = {this._onLayout}
-                    style={{overflow: "hidden", flex: 1, flexDirection:"column",  marginBottom: 105, backgroundColor: "#2460c1"}}>
+                    style={{overflow: "hidden", flexDirection:"column", flex: 1 , width:"100%", marginBottom: 50, backgroundColor: "#2460c1"}}>
                     {
                         this.props.isLoading ? <Loader/> :<Carousel
                             ref = {this.carousel}

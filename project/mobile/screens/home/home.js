@@ -7,9 +7,10 @@ import { Calendar } from 'react-native-calendars';
 import {TaskCarousel} from './components/TaskCarousel'
 import {TaskCreationPrompt} from './components/TaskForm'
 import {TaskDrawer} from './components/TaskDrawer'
-import {UserTaskProvider} from './UserTaskContext'
+import UserTaskContext, {UserTaskProvider} from './UserTaskContext'
 import update from 'immutability-helper'
 import { Embassy } from './components/TravelingList';
+import Task from './../../Task'
 
 
 
@@ -27,7 +28,7 @@ class HomeScreen extends React.Component{
             unallocated_tasks : [],
             allocated_tasks : [],
             selected_date: new Date().toISOString().substring(0,10),
-            promptTaskCreation: false
+            promptTaskCreation: false,
         }   
 
         this.carousel = React.createRef()
@@ -40,7 +41,8 @@ class HomeScreen extends React.Component{
             deallocateTask : this.deallocateTask,
             allocateTask : this.allocateTask,
             createTask : this.createTask,
-            deleteTask : this.deleteTask
+            deleteTask : this.deleteTask,
+            populateTaskSet : this._populateTaskSet
         }
 
         //Give the Embassy access to the same context manager
@@ -290,71 +292,33 @@ class HomeScreen extends React.Component{
     }
 
     createTask = (task_id, creator_id, creation_time, title, details, cb=()=>{})=>{
-        // const original_state = this.unallocated_tasks
+        console.log("Create Task!!!!");
+        const original_state = this.unallocated_tasks
 
-        // const new_task = {
-        //     allocated_date : null,
-        //     completed: false,
-        //     created_at : creation_time,
-        //     creator_id : creator_id,
-        //     details : details,
-        //     id: task_id,
-        //     title : title,
-        // }
-        // const new_state = update(this.state.unallocated_tasks, {
-        //     $unshift : [new_task]
-        // })
+        const new_task = {
+            allocated_date : null,
+            completed: false,
+            created_at : creation_time,
+            creator_id : creator_id,
+            details : details,
+            id: task_id,
+            title : title,
+        }
+        const new_state = update(this.state.unallocated_tasks, {
+            $unshift : [new_task]
+        })
 
-        // this.setState({
-        //     unallocated_tasks : new_state
-        // })
-
-        // this._createTaskServerSide(title, details, (err)=>{
-        //     if(err){
-        //         this.setState({
-        //             unallocated_tasks: original_state
-        //         })
-        //     }
-        // })
+        this.setState({
+            unallocated_tasks : new_state
+        })
     }
 
     deleteTask = (task_id, cb=()=>{})=>{
 
     }
 
-    _createTaskServerSide = (title, details, cb = ()=>{})=>{
-        AsyncStorage.getItem("session_token", (err, session_token)=>{
-            const data = {
-                task_title: title,
-                task_details: details
-            }
-            fetch("http://localhost:3000/create-task", {
-                method: 'POST',
-                headers: {
-                    "Authorization": `Bearer ${session_token}`,
-                    "Content-Type": "application/json; charset=utf-8",
-                },
-                body : JSON.stringify(data)
-            }).then(
-                (res)=>{
-                    if(res.ok){
-                        
-                        cb()
-                    }
-
-                    else{
-                        cb("Res not ok")
-                    }
-                }
-            ).catch((err)=>{
-                console.log("Error when creating task", err)
-                cb(err)
-                alert("Error")
-            })
-        })
-    }
-
     _updateTaskStatusServerSide = (task_id, new_status, cb=()=>{})=>{
+        console.log("k");
         AsyncStorage.getItem("session_token", (err, session_token)=>{
             const data = {
                 task_id: task_id,
@@ -462,60 +426,95 @@ class HomeScreen extends React.Component{
     }
 
     _populateTaskSet = ()=>{
-        AsyncStorage.getItem("session_token", (err, session_token)=>{
+        Task.getAllTasks((err, tasks)=>{
             if(err){
+                console.log("Error populating your task set");
                 this.setState({
                     isLoading: false
                 })
             }
             else{
-                fetch("http://localhost:3000/retrieve-tasks-by-user", {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Bearer ${session_token}`
+                const unallocated_tasks = []
+                const allocated_tasks = this._generateEmptyTaskSet()
+
+                for(let task of tasks){
+                    if(task.allocated_date === null){
+                        unallocated_tasks.push(task)
                     }
-                }).then(
-                    (res)=>{
-                        if(res.ok){
-                            res.json().then((tasks)=>{
-                                const unallocated_tasks = []
-
-                                // Generate a new object copy. React will not
-                                // properly call updates on objects due to references.
-                                const allocated_tasks = this._generateEmptyTaskSet()
-
-                                for(let task of tasks){
-                                    let wasTaskAllocated = false;
-                                    for(let date_entry of allocated_tasks){
-                                        if(date_entry.date === task.allocated_date){
-                                            date_entry.tasks.push(task)
-                                            wasTaskAllocated = true
-                                            break;
-                                        }
-                                    }
-
-                                    if(!wasTaskAllocated){
-                                        unallocated_tasks.push(task)
-                                    }
-                                }
-                                this.setState({
-                                    unallocated_tasks: unallocated_tasks,
-                                    allocated_tasks: allocated_tasks,
-                                    isLoading: false
-                                })
-                            })
+                    else{
+                        for(let date_entry of allocated_tasks){
+                            if(date_entry.date === task.allocated_date){
+                                date_entry.tasks.push(task)
+                                break;
+                            }
                         }
                     }
-                ).catch((err)=>{
-                    console.log("Error when populatingTaskSet", err)
-                    this.setState({
-                        isLoading: false
-                    })
-                    alert("Error")
+                }
+
+                this.setState({
+                    unallocated_tasks : unallocated_tasks,
+                    allocated_tasks : allocated_tasks,
+                    isLoading: false
                 })
             }
         })
     }
+
+    // _populateTaskSet = ()=>{
+    //     AsyncStorage.getItem("session_token", (err, session_token)=>{
+    //         if(err){
+    //             this.setState({
+    //                 isLoading: false
+    //             })
+    //         }
+    //         else{
+    //             fetch("http://localhost:3000/retrieve-tasks-by-user", {
+    //                 method: 'POST',
+    //                 headers: {
+    //                     Authorization: `Bearer ${session_token}`
+    //                 }
+    //             }).then(
+    //                 (res)=>{
+    //                     if(res.ok){
+    //                         res.json().then((tasks)=>{
+    //                             const unallocated_tasks = []
+
+    //                             // Generate a new object copy. React will not
+    //                             // properly call updates on objects due to references.
+    //                             const allocated_tasks = this._generateEmptyTaskSet()
+
+    //                             for(let task of tasks){
+    //                                 let wasTaskAllocated = false;
+    //                                 for(let date_entry of allocated_tasks){
+    //                                     if(date_entry.date === task.allocated_date){
+    //                                         date_entry.tasks.push(task)
+    //                                         wasTaskAllocated = true
+    //                                         break;
+    //                                     }
+    //                                 }
+
+    //                                 if(!wasTaskAllocated){
+    //                                     unallocated_tasks.push(task)
+    //                                 }
+    //                             }
+    //                             this.setState({
+    //                                 unallocated_tasks: unallocated_tasks,
+    //                                 allocated_tasks: allocated_tasks,
+    //                                 isLoading: false
+    //                             })
+    //                         })
+    //                     }
+    //                 }
+    //             ).catch((err)=>{
+    //                 console.log("Error when populatingTaskSet", err)
+    //                 this.setState({
+    //                     isLoading: false
+    //                 })
+    //                 alert("Error")
+    //             })
+    //         }
+    //     })
+    // }
 
 
     componentDidMount(){
@@ -580,7 +579,8 @@ class HomeScreen extends React.Component{
     }
 
     render(){
-        return <TaskDrawer ref={(ref)=>{this.drawer = ref}} unallocated_tasks = {this.state.unallocated_tasks}>
+        return <UserTaskContext.Provider value={this.manager}>
+        <TaskDrawer ref={(ref)=>{this.drawer = ref}} unallocated_tasks = {this.state.unallocated_tasks}>
             <Container style={{overflow:"hidden", height: Dimensions.get('window').height, flexDirection: "column"}}>
                 <Header style={{backgroundColor: '#061328'}}>
                     <Body style={{justifyContent:"center"}}>
@@ -591,10 +591,10 @@ class HomeScreen extends React.Component{
                     </Body>
                 </Header>
 
-                <Content style={{backgroundColor: "#fff"}} scrollEnabled = {false}>
+                <Content style={{height: Dimensions.get('window').height, width: Dimensions.get('window').width, backgroundColor: "#fff"}} scrollEnabled = {false}>
                     <View style={{height: Dimensions.get('window').height, width: Dimensions.get('window').width}}>
                   
-                    <UserTaskProvider value={this.manager}>
+                    
 
                         <Calendar
                             style={{paddingVertical: 5}}
@@ -613,7 +613,7 @@ class HomeScreen extends React.Component{
                             handleDateSelection={this._onDateSelection} 
                             task_data={this.state.allocated_tasks} />
 
-                    </UserTaskProvider>
+                    
 
                     </View>
                 </Content>
@@ -635,6 +635,7 @@ class HomeScreen extends React.Component{
                 </Footer>
             </Container>
         </TaskDrawer> 
+        </UserTaskContext.Provider>
     }
 }
 

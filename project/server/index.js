@@ -179,7 +179,9 @@ app.post('/retrieve-tasks-by-user', (req,res)=>{
     if(!payload || !payload.hasOwnProperty('id'))
         return res.status(401).end()
 
-    Task.getTasksCreatedBy(payload.id, (err, tasks)=>{
+    const creator_id = payload.id
+
+    Task.getTasksCreatedBy(creator_id, (err, tasks)=>{
         if(err)
             res.status(400).send(err.message)
         else
@@ -188,6 +190,21 @@ app.post('/retrieve-tasks-by-user', (req,res)=>{
 
 })
 
+
+app.post('/edit-task', (req,res)=>{
+    const payload = extractPayloadFromHeader(req.headers)
+    if(!payload || !payload.hasOwnProperty('id'))
+        return res.status(401).end()
+      
+    const creator_id = payload.id
+    const task_id = req.body.task_id
+    const title = req.body.title
+    const details = req.body.details
+
+    Task.editTask(creator_id,task_id, title,details)
+
+
+})
 
 
 

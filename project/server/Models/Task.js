@@ -28,6 +28,42 @@ class Task{
             })
     }
 
+    static editTask(creator_id, task_id, title, details, cb=()=>{}){
+        if(title && details){
+            const sql_query = `UPDATE task SET title = (?) details = (?) WHERE creator_id = (?) AND id = (?)`
+            db.query(sql_query, [title, details, creator_id, task_id], (err, results, fields)=>{
+                if(err){
+                    console.log("editTask() error(title and details)", err);
+                    return callback(err)
+                }
+                callback()
+            })
+        }
+        else if(title && !details){
+            const sql_query = `UPDATE task SET title = (?) WHERE creator_id = (?) AND id = (?)`
+            db.query(sql_query, [title, creator_id, task_id], (err, results, fields)=>{
+                if(err){
+                    console.log("editTask() error(title ", err);
+                    return callback(err)
+                }
+                callback()
+            })
+        }
+        else if(!title && details){
+            const sql_query = `UPDATE task SET details = (?) WHERE creator_id = (?) AND id = (?)`
+            db.query(sql_query, [details, creator_id, task_id], (err, results, fields)=>{
+                if(err){
+                    console.log("editTask() error(details)", err);
+                    return callback(err)
+                }
+                callback()
+            })
+        }
+        else{
+            return console.log("WHAT< ERROR WITH TASK EDITING")
+        }
+    }
+
     static allocateTask(creator_id, task_id, date, callback=()=>{}){
         console.log("CALLED TASK", creator_id, task_id, date);
         //Date format should be yyyy-mm-dd

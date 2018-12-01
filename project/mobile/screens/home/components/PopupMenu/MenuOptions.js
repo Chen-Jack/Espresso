@@ -10,19 +10,19 @@ export default class MenuOptions extends React.Component{
         return <List style={{width: "100%"}}>
             <ListItem>
                 <TouchableOpacity>
-                    <Text> Option 1</Text>
+                    <Text> Edit </Text>
                 </TouchableOpacity>
             </ListItem>
 
             <ListItem>
                 <TouchableOpacity>
-                    <Text> Option 1</Text>
+                    <Text> Move All To Board </Text>
                 </TouchableOpacity>
             </ListItem>
 
             <ListItem>
                 <TouchableOpacity>
-                    <Text> Option 1</Text>
+                    <Text> Complete All </Text>
                 </TouchableOpacity>
             </ListItem>
              
@@ -31,5 +31,5 @@ export default class MenuOptions extends React.Component{
 }
 
 MenuOptions.propTypes = {
-
+    // handlers
 }

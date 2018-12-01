@@ -3,7 +3,6 @@
 */
 import React from 'react'
 import PropTypes from 'prop-types'
-import {View} from 'react-native'
 
 const UserTaskContext = React.createContext({});
 
@@ -15,28 +14,28 @@ class UserTaskProvider extends React.Component{
     }
 }
 
-class UserTaskConsumer extends React.Component{
-    /*
-    Binds the context into a prop for the children
-    */
+// class UserTaskConsumer extends React.Component{
+//     /*
+//     Binds the context into a prop for the children
+//     */
    
-    render(){
-        return <UserTaskContext.Consumer>
-            { (context)=>{
-                const childWithProp = React.Children.map(this.props.children, (child) => {
-                    return React.cloneElement(child, {task_context: context});
-                });
-                return <View style={{backgroundColor:"red"}}>
-                    {childWithProp}
-                </View>
-            } }
-        </UserTaskContext.Consumer>
-    }
-}
+//     render(){
+//         return <UserTaskContext.Consumer>
+//             { (context)=>{
+//                 const childWithProp = React.Children.map(this.props.children, (child) => {
+//                     return React.cloneElement(child, {task_context: context});
+//                 });
+//                 return <View style={{backgroundColor:"red"}}>
+//                     {childWithProp}
+//                 </View>
+//             } }
+//         </UserTaskContext.Consumer>
+//     }
+// }
 
 UserTaskProvider.propTypes = {
     value : PropTypes.object.isRequired
 }
 export default UserTaskContext
-export {UserTaskProvider, UserTaskConsumer}
+export {UserTaskProvider}
 
