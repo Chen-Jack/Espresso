@@ -6,36 +6,30 @@ import UserTaskContext from './../../UserTaskContext'
 
 export default class MenuOptions extends React.Component{
 
+    _renderItems = ()=>{
+        console.log("options", this.props.options);
+        return this.props.options.map((option, index)=>{
+            console.log("MAPP");
+            return <ListItem key={index}>
+                <TouchableOpacity onPress={()=>option.handler(this.props.toggleMenu)}>
+                    <Text> {option.title} </Text>
+                </TouchableOpacity>
+            </ListItem>
+        })
+    }
     render(){
-        return <UserTaskContext.Consumer>
-            {({deallocateTask})=><View>
-                <List style={{width: "100%"}}>
-                    <ListItem>
-                        <TouchableOpacity>
-                            <Text> Edit List </Text>
-                        </TouchableOpacity>
-                    </ListItem>
-
-                    <ListItem>
-                        <TouchableOpacity onPress={()=>{
-                            
-                        }}>
-                            <Text> Move All To Board </Text>
-                        </TouchableOpacity>
-                    </ListItem>
-
-                    <ListItem>
-                        <TouchableOpacity>
-                            <Text> Clear Completed Items </Text>
-                        </TouchableOpacity>
-                    </ListItem>
-                 </List>
-            </View>
-            }
-            </UserTaskContext.Consumer>
+        return <List style={{width: "100%"}}>
+            {this._renderItems()}
+        </List>
     }
 }
 
 MenuOptions.propTypes = {
-    // handlers
+    toggleMenu : PropTypes.func,
+    options : PropTypes.arrayOf(
+        PropTypes.shape({
+            title : PropTypes.string.isRequired,
+            handler : PropTypes.func.isRequired
+        })
+    ).isRequired
 }

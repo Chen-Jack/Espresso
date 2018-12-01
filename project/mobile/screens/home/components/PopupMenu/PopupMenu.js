@@ -40,6 +40,7 @@ export default class TaskPopupMenu extends React.Component{
                 new Promise((resolve,reject)=>{
                     this.menu.current.measure((x,y,width,height,pageX,pageY)=>{
                         const location = {x :pageX,y:pageY}
+                        console.log("THE LOCATIONIS  ", location);
                         this.setState({
                             location: location
                         }, resolve)
@@ -50,6 +51,7 @@ export default class TaskPopupMenu extends React.Component{
                     if(this.state.dimensions.width === 0 && this.state.dimensions.height === 0){
                         this.options.current.measure((x,y,width,height,pageX,pageY)=>{
                             const dimensions = {width :width,height:height}
+                            console.log("measured to be", dimensions);
                             this.setState({
                                 dimensions: dimensions
                             }, resolve)
@@ -61,12 +63,16 @@ export default class TaskPopupMenu extends React.Component{
             ]).then(()=>{
                 this.setState({
                     isVisible : !this.state.isVisible
+                }, ()=>{
+                    console.log("toggled to", this.state.isVisible);
                 })
             })
         }
         else{
             this.setState({
                 isVisible: !this.state.isVisible
+            }, ()=>{
+                console.log("toggled to", this.state.isVisible);
             })
         }
     }
@@ -79,17 +85,15 @@ export default class TaskPopupMenu extends React.Component{
                     <Icon style={{color:"white"}} name="more"/>
                 </TouchableOpacity>
 
-                <View ref={this.options}>
+                <View ref={this.options} >
                     <Modal
-                        hideModalContentWhileAnimating = {true}
-                        animationIn = {"fadeIn"}
-                        style = {{margin:0,position:"absolute"}}
-                        backdropOpacity = {0}
+                        style = {{margin:0,position:"absolute", width:"100%", height:"100%"}}
+                        backdropOpacity = {0.2}
                         onBackdropPress={this.toggleMenu}
                         visible = {this.state.isVisible}>
 
-                        <View  style={{margin: 0, position:"absolute", justifyContent:"center", alignItems:"center", top:this.state.location.y, left:this.state.location.x-this.state.dimensions.width, backgroundColor:"white"}}>
-                            <MenuOptions handlers={this.handlers}/>
+                        <View style={{margin: 0, height:100, width:100, position:"absolute", justifyContent:"center", alignItems:"center", top:0, left:0, backgroundColor:"white"}}>
+                            <MenuOptions toggleMenu={this.toggleMenu} options={this.props.popupOptions}/>
                         </View>
 
                     </Modal>
@@ -100,5 +104,11 @@ export default class TaskPopupMenu extends React.Component{
 }
 
 TaskPopupMenu.propTypes = {
-    date : PropTypes.string.isRequired
+    date : PropTypes.string.isRequired,
+    popupOptions : PropTypes.arrayOf(
+        PropTypes.shape({
+            title : PropTypes.string.isRequired,
+            handler : PropTypes.func.isRequired
+        })
+    ).isRequired
 }

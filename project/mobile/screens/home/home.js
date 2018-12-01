@@ -18,7 +18,7 @@ import Task from './../../Task'
 class HomeScreen extends React.Component{
     constructor(props) {
         super(props)
-
+        console.disableYellowBox = true;
         this.state = {
             user : {
                 username: ""

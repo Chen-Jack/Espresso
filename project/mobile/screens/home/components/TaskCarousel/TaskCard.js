@@ -6,6 +6,36 @@ import PropTypes from 'prop-types'
 import UserTaskContext from '../../UserTaskContext'
 import Collapsible from 'react-native-collapsible';
 
+class EditButtons extends React.Component{
+    render(){
+        return <View style={{flexDirection:"row"}}>
+            <TouchableOpacity>
+                <Icon style={{fontSize:20, marginHorizontal: 5}} type={"FontAwesome"} name="pencil"/>
+            </TouchableOpacity>
+
+            <TouchableOpacity>
+                <Icon style={{fontSize:20, marginHorizontal: 5}} name="trash"/>
+            </TouchableOpacity>
+        </View>
+    }
+}
+
+const CardOptions = ({details, isEditMode, isCollapsed})=>{
+    if(isEditMode){
+        return <View style={{flexDirection:"row",alignItems:"center"}}>
+            <EditButtons/>
+        </View>
+    }
+    else if(details){
+        return <TouchableOpacity onPress={this.toggleCard}>
+            {isCollapsed ? <Icon name="arrow-dropdown"/> : <Icon name="arrow-dropup"/>}  
+        </TouchableOpacity>
+    }
+    else{
+        return null
+    }
+}
+
 export default class TaskCard extends React.Component{
     constructor(props) {
         super(props)
@@ -20,7 +50,9 @@ export default class TaskCard extends React.Component{
             isCollapsed: !this.state.isCollapsed
         })
     }
-
+    componentDidMount(){
+        console.log("Card Mounting", this.props.task_id, this.props);
+    }
     componentWillUnmount(){
         console.log("TaskCard Unmounting");
     }
@@ -37,11 +69,7 @@ export default class TaskCard extends React.Component{
                             <CardItem bordered>
                                 <View style={{width:"100%", flexDirection:"row", alignItems: "center", justifyContent: "space-between"}}>
                                     <Text style={this.props.isCompleted ? strike_through_style : {} }>{this.props.title || "Task"}</Text>
-                                    {
-                                    this.props.details && <TouchableOpacity onPress={this.toggleCard}>
-                                        {this.state.isCollapsed ? <Icon name="arrow-dropdown"/> : <Icon name="arrow-dropup"/>}  
-                                    </TouchableOpacity>
-                                    }
+                                    <CardOptions isCollapsed = {this.state.isCollapsed} details={this.props.details} isEditMode = {this.props.isEditMode}/>
                                 </View>
                             </CardItem>
 
@@ -69,6 +97,7 @@ TaskCard.propTypes = {
     title: PropTypes.string.isRequired,
     date: PropTypes.string,
     details : PropTypes.string,
+    isEditMode : PropTypes.bool.isRequired,
     isCompleted: PropTypes.oneOfType([
         PropTypes.bool,
         PropTypes.oneOf([0,1]),

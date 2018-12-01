@@ -252,18 +252,10 @@ export default class TaskCarousel extends React.Component{
         this.props.handleDateSelection(iso_date)
     }
 
+
     _renderTaskList = ({item: tasks_of_the_day, index})=>{
+
         return <View style={{overflow: "hidden", margin: 20, height: "85%", width: "85%", backgroundColor: "#ddd", borderRadius: 10, alignSelf:"center"}}>
-            <View style={{flexDirection:"row", width:"100%", backgroundColor:"#222", alignItems: "center", justifyContent:"space-between"}}>
-                <Text style={{borderTopLeftRadius: 10, borderTopRightRadius: 10, padding: 10, fontSize: 16, color: "white"}}> {tasks_of_the_day.date || "Date"} </Text>
-
-
-            
-                <PopupMenu date={this.props.task_data[index].date}/>
-
-                
-
-            </View>
             <TaskList initialize={index===this.STARTING_INDEX ? this._initializeLayout : null} ref={(ref)=>{this[`task_${index}`] = ref}} index = {index} data = {tasks_of_the_day}/>
         </View>
     }

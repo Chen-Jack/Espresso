@@ -2,11 +2,19 @@ import React from 'react'
 import {View, Text, FlatList} from 'react-native'
 import TaskCard from './TaskCard'
 import PropTypes from 'prop-types'
+import {PopupMenu} from './../PopupMenu'
+import { Button } from 'native-base';
 
-const EmptyList = (props)=>{
-    console.log("Empty list created");
-    return <View style={{fontSize: 20, opacity:0.7, height:"100%", width:"100%", backgroundColor: "white", alignItems:"center", justifyContent:"center"}}>
-        <Text>
+const TaskListHeader = ({options, date})=>{
+    return <View style={{flexDirection:"row", width:"100%", backgroundColor:"#222", alignItems: "center", justifyContent:"space-between"}}>
+        <Text style={{borderTopLeftRadius: 10, borderTopRightRadius: 10, padding: 10, fontSize: 16, color: "white"}}> {date || "Date"} </Text>
+        <PopupMenu popupOptions = {options} date={date}/>
+    </View>
+}
+
+const EmptyList = ()=>{
+    return <View style={{opacity:0.7, height:"100%", width:"100%", backgroundColor: "white", alignItems:"center", justifyContent:"center"}}>
+        <Text style={{fontSize: 20}}>
             Looks Empty...
         </Text>
     </View>
@@ -22,13 +30,22 @@ export default class TaskList extends React.Component{
         this.state = {
             isGestureHovering: false,
             canScroll : true,
-            editMode: false
+            isEditMode: false
         }
+        this.popupOptions = [
+            editMode = {
+                title: "Edit",
+                handler: this.toggleEditMode
+            }
+        ]
     }
 
-    toggleEditMode = ()=>{
+    toggleEditMode = (cb=()=>{})=>{
         this.setState({
-            editMode :  !this.state.editMode
+            isEditMode :  !this.state.isEditMode
+        }, ()=>{
+            cb()
+            console.log(`edit mode set to ${this.state.isEditMode}`);
         })
     }
     componentWillUnmount(){
@@ -36,6 +53,7 @@ export default class TaskList extends React.Component{
     }
 
     _renderListItem = ({item,index})=>{
+        console.log("RENDERING LIST ITEM");
         return (
             <TaskCard 
                 parent_list = {this} 
@@ -117,20 +135,23 @@ export default class TaskList extends React.Component{
     render(){
         let focus_style = {backgroundColor: (this.state.isGestureHovering ? "yellow" : null)}
         let landable_style = {flex: 1, ...focus_style}
-
         return <View 
                 onLayout={this.onLayoutHandler}
                 ref={this.list} 
                 style={{flex: 1}}>
-
+                
+                {this.props.data.date !== null ? <TaskListHeader options={this.popupOptions} date={this.props.data.date}/> : null}
                 { this.props.data.tasks.length === 0 ?     
-                    <EmptyList/> :   
-                    <FlatList
-                        scrollEnabled = {this.state.canScroll}
-                        index = {this.props.index}
-                        data = {this.props.data.tasks}
-                        renderItem = {this._renderListItem}
-                        style={landable_style}/>
+                    <EmptyList/> :  
+                    <View style={{width:"100%", height:"100%"}}>
+                        <FlatList
+                            style={{width:"100%", height:"100%"}}
+                            scrollEnabled = {this.state.canScroll}
+                            index = {this.props.index}
+                            data = {this.props.data.tasks}
+                            renderItem = {this._renderListItem}
+                            style={landable_style}/>
+                    </View>
                 }
 
         </View>
