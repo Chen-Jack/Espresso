@@ -41,7 +41,7 @@ class HomeScreen extends React.Component{
             allocateTask : this.allocateTask,
             createTask : this.createTask,
             deleteTask : this.deleteTask,
-            populateTaskSet : this._populateTaskSet
+            editTask: this.editTask
         }
 
         //Give the Embassy access to the same context manager
@@ -382,7 +382,82 @@ class HomeScreen extends React.Component{
         })
     }
 
+    editTask = (task_id, new_title, new_details, cb=()=>{})=>{
+        console.log("Editing Task");
+        const original_allocated_state = this.state.allocated_tasks
+        const original_unallocated_state = this.state.unallocated_tasks
 
+        let day_index_original = null
+        let task_index_original = null
+        
+        //Search through allocated tasks
+        for(let day_index in this.state.allocated_tasks){
+            let day_tasks = this.state.allocated_tasks[day_index].tasks
+            
+            for(let task_index in day_tasks){
+                if(day_tasks[task_index].task_id === task_id){
+                    day_index_original = day_index
+                    task_index_original = task_index
+
+                    const new_state = update(this.state.allocated_tasks, {
+                        [day_index_original] : {
+                            tasks : {
+                                [task_index_original]: {
+                                    title : {$set : new_title},
+                                    details : {$set : new_details} 
+                                }
+                            }
+                        }
+                    })
+
+                    this.setState({
+                        allocated_tasks : new_state
+                    })
+                    break;
+                }
+            }   
+
+            if(task_index_original && day_index_original){
+                break;
+            }        
+        }
+
+        //Search through unallocated tasks if still not found
+        if(!task_index_original && !task_index_original){
+            for(let task_index in this.state.unallocated_tasks){
+                const task = this.state.unallocated_tasks[task_index]
+                if(task.task_id === task_id){
+                    const new_state = update(this.state.unallocated_tasks, {
+                        [task_index] : {
+                            title: {$set : new_title},
+                            details : {$set : new_details}
+                        }
+                    })
+                    this.setState({
+                        unallocated_tasks : new_state
+                    })
+                }
+            }
+        }      
+
+        Task.editTask(task_id, new_title, new_details, (err)=>{
+            if(err){
+                cb(err)
+                this.setState({
+                    unallocated_tasks : original_unallocated_state,
+                    allocated_tasks : original_allocated_state
+                })
+            }
+            else{
+                Toast.show({
+                    text: `Updated your task`,
+                    buttonText: 'Ok'
+                })
+                cb()
+            }
+        })
+
+    }
 
     _onDateSelection=(isodate)=>{
         this.setState({

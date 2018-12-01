@@ -51,41 +51,21 @@ export default class Task{
        })
     }
 
-    // static editTask(creator_id, task_id, title, details, cb=()=>{}){
-    //     if(title && details){
-    //         const sql_query = `UPDATE task SET title = (?) details = (?) WHERE creator_id = (?) AND id = (?)`
-    //         db.query(sql_query, [title, details, creator_id, task_id], (err, results, fields)=>{
-    //             if(err){
-    //                 console.log("editTask() error(title and details)", err);
-    //                 return callback(err)
-    //             }
-    //             callback()
-    //         })
-    //     }
-    //     else if(title && !details){
-    //         const sql_query = `UPDATE task SET title = (?) WHERE creator_id = (?) AND id = (?)`
-    //         db.query(sql_query, [title, creator_id, task_id], (err, results, fields)=>{
-    //             if(err){
-    //                 console.log("editTask() error(title ", err);
-    //                 return callback(err)
-    //             }
-    //             callback()
-    //         })
-    //     }
-    //     else if(!title && details){
-    //         const sql_query = `UPDATE task SET details = (?) WHERE creator_id = (?) AND id = (?)`
-    //         db.query(sql_query, [details, creator_id, task_id], (err, results, fields)=>{
-    //             if(err){
-    //                 console.log("editTask() error(details)", err);
-    //                 return callback(err)
-    //             }
-    //             callback()
-    //         })
-    //     }
-    //     else{
-    //         return console.log("WHAT< ERROR WITH TASK EDITING")
-    //     }
-    // }
+    static editTask(task_id, new_title, new_details, cb=()=>{}){
+        console.log(`Editing for ${task_id} ${new_title} ${new_details}`);
+        AsyncStorage.getItem("espresso_app", (err,app)=>{
+            if(err){
+                cb(err)
+            }
+            const app_data = JSON.parse(app)
+            const tasks = app_data.tasks
+            tasks[task_id].title = new_title
+            tasks[task_id].details = new_details
+            AsyncStorage.setItem("espresso_app", JSON.stringify(app_data), (err)=>{
+                cb(err)
+            })
+        })
+    }
 
     static deleteTask(task_id, cb=()=>{}){
         AsyncStorage.getItem("espresso_app", (err,app)=>{

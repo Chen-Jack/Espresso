@@ -286,6 +286,7 @@ export default class TaskCarousel extends React.Component{
                     style={{overflow: "hidden", flexDirection:"column", flex: 1 , width:"100%", marginBottom: 50, paddingBottom:10, backgroundColor: "#2460c1"}}>
                     {
                         this.props.isLoading ? <Loader/> :<Carousel
+                            firstItem={14}
                             ref = {this.carousel}
                             reallocateTaskDate = {setTaskDate}
                             onSnapToItem = {this._onSnapHandler}

@@ -6,8 +6,9 @@ import Modal from 'react-native-modal'
 import PropTypes from 'prop-types'
 import UserTaskContext from '../../UserTaskContext'
 import Collapsible from 'react-native-collapsible';
+import {TaskEditForm} from './../TaskForm'
 
-class EditButton extends React.Component{
+class EditTaskButton extends React.Component{
     constructor(props) {
         super(props)
 
@@ -28,11 +29,7 @@ class EditButton extends React.Component{
             </TouchableOpacity>
 
             <Modal onBackdropPress={this.togglePrompt} style={{justifyContent:"center", alignItems:"center"}} isVisible={this.state.isEditing}>
-                <View style={{padding: 10, backgroundColor:"#ddd"}}>
-                    <Input placeholder={"Title"} value={"test"}/>
-                    <Input placeholder={"Details (Optional)"} value={"details"}/>
-                    <Button> <Text>Update</Text> </Button>
-                </View>
+                <TaskEditForm task_id={this.props.task.task_id} title={this.props.task.title} details={this.props.task.details} onFormFinishedSubmition={this.togglePrompt}/>
             </Modal>
         </View>
     }
@@ -65,24 +62,22 @@ class DeleteButton extends React.Component{
     }
 }
 
-DeleteButton.propTypes = {
-    task_id : PropTypes.string.isRequired
-}
 
 class EditButtons extends React.Component{
     render(){
         return <View style={{flexDirection:"row"}}>
-            <EditButton task_id = {this.props.task_id}/>
+            <EditTaskButton task={this.props.task}/>
 
-            <DeleteButton task_id = {this.props.task_id}/>
+            <DeleteButton task_id = {this.props.task.task_id}/>
         </View>
     }
 }
 
-const CardOptions = ({task_id, details, isEditMode, isCollapsed, toggleDetails})=>{
+const CardOptions = ({task, task_id, details, isEditMode, isCollapsed, toggleDetails})=>{
+    
     if(isEditMode){
         return <View style={{flexDirection:"row",alignItems:"center"}}>
-            <EditButtons task_id = {task_id}/>
+            <EditButtons task={task}/>
         </View>
     }
     else if(details){
@@ -102,7 +97,6 @@ export default class TaskCard extends React.Component{
         this.state={
             isCollapsed : true
         }
-
     }
     toggleCard = ()=>{
         this.setState({
@@ -116,6 +110,12 @@ export default class TaskCard extends React.Component{
         console.log("TaskCard Unmounting");
     }
     render(){
+        const task = {
+            task_id : this.props.task_id,
+            title : this.props.title,
+            details: this.props.details
+        }
+
         let strike_through_style = {textDecorationLine: 'line-through', textDecorationStyle: 'solid'}
         return (
             <UserTaskContext.Consumer>
@@ -128,7 +128,7 @@ export default class TaskCard extends React.Component{
                             <CardItem bordered>
                                 <View style={{width:"100%", flexDirection:"row", alignItems: "center", justifyContent: "space-between"}}>
                                     <Text style={[{width:"80%"}, this.props.isCompleted ? strike_through_style : {}] }>{this.props.title || "Task"}</Text>
-                                    <CardOptions style={{width:"20%"}}task_id= {this.props.task_id} toggleDetails={this.toggleCard} isCollapsed = {this.state.isCollapsed} details={this.props.details} isEditMode = {this.props.isEditMode}/>
+                                    <CardOptions style={{width:"20%"}} task={task} toggleDetails={this.toggleCard} isCollapsed = {this.state.isCollapsed} details={this.props.details} isEditMode = {this.props.isEditMode}/>
                                 </View>
                             </CardItem>
 
