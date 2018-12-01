@@ -10,8 +10,11 @@ export default class TaskPopupMenu extends React.Component{
         super(props)
 
         this.menu = React.createRef()
+        this.options = React.createRef()
+
         this.state = {
             location : {x:0, y:0},
+            dimensions : {width: 0, height: 0},
             isVisible : false
         }
 
@@ -22,16 +25,42 @@ export default class TaskPopupMenu extends React.Component{
         console.log("Popupmenu unmounted");
     }
 
+    menuOptionsLayout = ({nativeEvent: { layout: {x, y, width, height}}})=>{
+        console.log("layout called");
+        const dimensions = {width: width, height: height}
+        this.setState({
+            dimensions: dimensions
+        })
+    }
     
     toggleMenu = ()=>{
+        console.log("refs are",this.options, this.menu.current);
         if(!this.state.isVisible){
-            this.menu.current.measure((x,y,width,height,pageX,pageY)=>{
-                const location = {x :pageX,y:pageY}
+            Promise.all([
+                new Promise((resolve,reject)=>{
+                    this.menu.current.measure((x,y,width,height,pageX,pageY)=>{
+                        const location = {x :pageX,y:pageY}
+                        this.setState({
+                            location: location
+                        }, resolve)
+                    })
+                }),
+                new Promise((resolve,reject)=>{
+                    //If the dimensions havent been measured yet
+                    if(this.state.dimensions.width === 0 && this.state.dimensions.height === 0){
+                        this.options.current.measure((x,y,width,height,pageX,pageY)=>{
+                            const dimensions = {width :width,height:height}
+                            this.setState({
+                                dimensions: dimensions
+                            }, resolve)
+                        })
+                    }
+                    else
+                        resolve()
+                })
+            ]).then(()=>{
                 this.setState({
-                    location: location,
                     isVisible : !this.state.isVisible
-                }, ()=>{
-                    console.log("Menu is now", this.state.isVisible, "at", this.state.location);
                 })
             })
         }
@@ -50,16 +79,18 @@ export default class TaskPopupMenu extends React.Component{
                     <Icon style={{color:"white"}} name="more"/>
                 </TouchableOpacity>
 
-                <View>
+                <View ref={this.options}>
                     <Modal
-                            style = {{margin:0,position:"absolute", width: 100}}
-                            backdropOpacity = {0}
-                            onBackdropPress={this.toggleMenu}
-                            visible = {this.state.isVisible}>
+                        hideModalContentWhileAnimating = {true}
+                        animationIn = {"fadeIn"}
+                        style = {{margin:0,position:"absolute"}}
+                        backdropOpacity = {0}
+                        onBackdropPress={this.toggleMenu}
+                        visible = {this.state.isVisible}>
 
-                            <View style={{margin: 0, position:"absolute", justifyContent:"center", alignItems:"center", top:this.state.location.y, left:this.state.location.x-100, width: 100, backgroundColor:"white"}}>
-                                <MenuOptions handlers={this.handlers}/>
-                            </View>
+                        <View  style={{margin: 0, position:"absolute", justifyContent:"center", alignItems:"center", top:this.state.location.y, left:this.state.location.x-this.state.dimensions.width, backgroundColor:"white"}}>
+                            <MenuOptions handlers={this.handlers}/>
+                        </View>
 
                     </Modal>
                 </View>

@@ -5,7 +5,7 @@ import RegistrationScreen from './screens/registration'
 import HomeScreen from './screens/home/home'
 import LoginScreen from './screens/login';
 import SandBox from './screens/sandbox'
-import SettingScreen from './screens/sandbox'
+import SettingScreen from './screens/settings'
 
 const StackNavigation = createStackNavigator({
     home: HomeScreen,

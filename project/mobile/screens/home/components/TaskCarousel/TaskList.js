@@ -5,9 +5,9 @@ import PropTypes from 'prop-types'
 
 const EmptyList = (props)=>{
     console.log("Empty list created");
-    return <View style={{height:"100%", width:"100%", backgroundColor: "white", alignItems:"center", justifyContent:"center"}}>
+    return <View style={{fontSize: 20, opacity:0.7, height:"100%", width:"100%", backgroundColor: "white", alignItems:"center", justifyContent:"center"}}>
         <Text>
-            You have nothing to do.
+            Looks Empty...
         </Text>
     </View>
 }
@@ -21,10 +21,16 @@ export default class TaskList extends React.Component{
 
         this.state = {
             isGestureHovering: false,
-            canScroll : true
+            canScroll : true,
+            editMode: false
         }
     }
 
+    toggleEditMode = ()=>{
+        this.setState({
+            editMode :  !this.state.editMode
+        })
+    }
     componentWillUnmount(){
         console.log("TaskList unmounting");
     }
@@ -33,10 +39,11 @@ export default class TaskList extends React.Component{
         return (
             <TaskCard 
                 parent_list = {this} 
-                task_id={item.id} 
+                task_id={item.task_id} 
                 title={item.title} 
                 date={item.allocated_date} 
                 details={item.details} 
+                isEditMode = {this.state.isEditMode}
                 isCompleted={item.completed}/>
         )  
     }
@@ -99,12 +106,12 @@ export default class TaskList extends React.Component{
 
     onLayoutHandler = ()=>{
         if(this.props.initialize)
-        this.measureLayout((layout)=>{
-            console.log("uhhh", this.props.initialize);
-            if(this.props.initialize){
-                this.props.initialize(this, layout, this.props.index)
-            }
-        })
+            this.measureLayout((layout)=>{
+                console.log("uhhh", this.props.initialize);
+                if(this.props.initialize){
+                    this.props.initialize(this, layout, this.props.index)
+                }
+            })
     }
 
     render(){

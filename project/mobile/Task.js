@@ -4,9 +4,8 @@ import {AsyncStorage} from 'react-native'
 
 export default class Task{
 
-    static updateStatus(task_id, status, cb=()=>{}){
-        
-        status = (status ? 1 : 0) // Format it to 0,1 incase status is another falsy value
+    static updateStatus(task_id, new_status, cb=()=>{}){
+        new_status = (new_status ? true : false) //Convert all falsy statements to bools
 
         AsyncStorage.getItem("espresso_app", (err, app)=>{
             if(err)
@@ -14,19 +13,20 @@ export default class Task{
 
             const app_data = JSON.parse(app)
             const tasks = app_data.tasks
-            tasks[task_id].status = status
+            tasks[task_id].completed = new_status
 
-            AsyncStorage.setItem("espresso_app", JSON.stringify(tasks),(err)=>{
-                if(err)
+            AsyncStorage.setItem("espresso_app", JSON.stringify(app_data),(err)=>{
+                if(err){
                     return cb(err)
+                }
 
-                console.log("Status Updated");
+                console.log("Status Updated to", app_data);
                 cb()
             })
         })
     }
 
-    static create(title="", details="", callback){
+    static createTask(title="", details="", cb=()=>{}){
        const new_task = {
            task_id : uuid(),
            title : title,
@@ -34,18 +34,19 @@ export default class Task{
            completed: false,
            allocated_date: null
        }
-
+       console.log("Creating a new task", new_task);
        AsyncStorage.getItem("espresso_app", (err, app)=>{
            if(err){
                 cb(err)
            }
            const app_data = JSON.parse(app)
            const tasks = app_data.tasks
-           tasks.push(new_task)
+           console.log("Tasks is,,,", tasks);
+           tasks[new_task.task_id] = new_task
 
-           AsyncStorage.setItem("espress_app", JSON.stringify(app_data), (err)=>{
+           AsyncStorage.setItem("espresso_app", JSON.stringify(app_data), (err)=>{
                console.log("Created Task");
-               cb(null, new_task)
+               cb(err, new_task)
            })
        })
     }
@@ -86,34 +87,35 @@ export default class Task{
     //     }
     // }
 
-    // static allocateTask(creator_id, task_id, date, callback=()=>{}){
-    //     console.log("CALLED TASK", creator_id, task_id, date);
-    //     //Date format should be yyyy-mm-dd
-    //     const sql_query = `UPDATE task SET allocated_date = (?) WHERE creator_id = (?) AND id = (?)`
+    
 
-    //     db.query(sql_query, [date, creator_id, task_id], (err, results, fields)=>{
-    //         if(err){
-    //             console.log("allocateTask() error", err);
-    //             return callback(err)
-    //         }
-    //         console.log("RESULTS OF allocateTask was", results);
-    //         callback()
+    static allocateTask(task_id, date, cb=()=>{}){
+       AsyncStorage.getItem("espresso_app", (err,app)=>{
+           if(err){
+               cb(err)
+           }
+           const app_data = JSON.parse(app)
+           const tasks = app_data.tasks
+           tasks[task_id].allocated_date = date
+           AsyncStorage.setItem("espresso_app", JSON.stringify(app_data), (err)=>{
+               cb(err)
+           })
+       })
+    }
+
+    // static getAllTasks(cb=()=>{}){
+    //     AsyncStorage.getItem("espresso_app", (err, app)=>{
+    //         if(err)
+    //             return cb(err)
+
+    //         const app_data = JSON.parse(app)
+    //         console.log("App data is", app_data);
+    //         if(app_data)
+    //             return cb(null, app_data.tasks)
+    //         else
+    //             return cb(null, [])
     //     })
     // }
-
-    static getAllTasks(cb=()=>{}){
-        AsyncStorage.getItem("espresso_app", (err, app)=>{
-            if(err)
-                return cb(err)
-
-            const app_data = JSON.parse(app)
-            console.log("App data is", app_data);
-            if(app_data)
-                return cb(null, app_data.tasks)
-            else
-                return cb(null, null)
-        })
-    }
 
 
 }
