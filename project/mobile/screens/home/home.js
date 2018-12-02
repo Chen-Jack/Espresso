@@ -89,7 +89,7 @@ class HomeScreen extends React.Component{
         if(!found){
             for(let i in this.state.unallocated_tasks){
                 if(this.state.unallocated_tasks[i].task_id === task_id){
-                    new_state = update(this.state.unallocated_tasks, {[i] : {isCompleted: {$set, new_status}}})
+                    new_state = update(this.state.unallocated_tasks, {[i] : {completed: {$set : new_status}}})
                     
                     original_state = this.state.unallocated_tasks
                     this.setState({
@@ -665,9 +665,9 @@ class HomeScreen extends React.Component{
                                 [this.state.selected_date]: {selected: true, selectedColor: 'red'},
                                 ...this._generateCalendarMarkers()
                             }}/>
-                        <Button onPress={()=>{console.log(this.state)}}>
+                        {/* <Button onPress={()=>{console.log(this.state)}}>
                             <Text>State </Text>
-                        </Button>
+                        </Button> */}
                         <TaskCarousel
                             ref = {this.carousel}
                             isLoading = {this.state.isLoading}
@@ -681,16 +681,14 @@ class HomeScreen extends React.Component{
                 </Content>
 
                 <Footer style={{backgroundColor: "#222", width:Dimensions.get('window').width, height: 50, padding:0, margin: 0}} >
-                    {/* <FooterTab style={{padding:0,margin:0, flexDirection: "row", width:"100%", justifyContent:"center"}}> */}
+                    <FooterTab style={{padding:0,margin:0, flexDirection: "row", width:"100%", justifyContent:"center"}}>
                         
-                        {/* <TaskCreationPrompt /> */}
 
-                       
                         
-                        <Button style={{justifyContent:"center", alignItems:"center", borderRadius:100,backgroundColor:"white"}} onPress={this._openDrawer}>
-                            <Icon style={{color:"black"}}  type="Entypo" name="blackboard"/>
+                        <Button style={{justifyContent:"center", alignItems:"center", borderRadius:100,backgroundColor:"none"}} onPress={this._openDrawer}>
+                            <Icon style={{color:"white"}}  type="Entypo" name="blackboard"/>
                         </Button>
-                    {/* </FooterTab> */}
+                    </FooterTab>
                 </Footer>
             </Container>
         </TaskDrawer> 

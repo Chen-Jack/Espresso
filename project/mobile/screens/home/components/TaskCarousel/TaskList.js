@@ -3,15 +3,18 @@ import {View, Text, FlatList} from 'react-native'
 import TaskCard from './TaskCard'
 import PropTypes from 'prop-types'
 import {PopupMenu} from './../PopupMenu'
-import {Button, Icon } from 'native-base';
+import {Button, Icon, Badge} from 'native-base';
 import {getDay} from './../../../../utility'
 import UserTaskContext from './../../UserTaskContext'
 
 const TaskListHeader = ({task_length, isEditMode, options, date})=>{
     return <View style={{flexDirection:"row", width:"100%", backgroundColor:"#222", alignItems: "center", justifyContent:"space-between"}}>
-        <Text style={{borderTopLeftRadius: 10, borderTopRightRadius: 10, padding: 10, fontSize: 16, color: "white"}}> 
-            {`${getDay((date))} | ${date || "Date"}`} 
-        </Text>
+        <View style={{flexDirection:"row", justifyContent:"center", alignItems:"center"}}>
+            <Text style={{borderTopLeftRadius: 10, borderTopRightRadius: 10, padding: 10, fontSize: 16, color: "white"}}> 
+                {`${getDay((date))} | ${date || "Date"}`} 
+            </Text>
+            <Text style={{color:"yellow"}}> {task_length} / 5 </Text>
+        </View>
         {task_length > 0 && <PopupMenu popupOptions = {options} isEditMode={isEditMode} date={date}/>}
     </View>
 }
