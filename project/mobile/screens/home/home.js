@@ -43,7 +43,8 @@ class HomeScreen extends React.Component{
             allocateTask : this.allocateTask,
             createTask : this.createTask,
             deleteTask : this.deleteTask,
-            editTask: this.editTask
+            editTask: this.editTask,
+            deallocateTasksFromDate : this.deallocateTasksFromDate
         }
 
         //Give the Embassy access to the same context manager
@@ -169,7 +170,63 @@ class HomeScreen extends React.Component{
        
     }
 
+    deallocateTasksFromDate = (target_date, cb=()=>{})=>{
+        console.log("deallocating all tasks on date", target_date);
+        const original_allocated_state = this.state.allocated_tasks
+        const original_unallocated_state = this.state.unallocated_tasks
+
+        const original_task_array = []
+        let original_date_index = null;
+
+        //Search through your state to know what indexes to update
+        for(let day_index in this.state.allocated_tasks){
+            let date = this.state.allocated_tasks[day_index].date
+            let day_tasks = this.state.allocated_tasks[day_index].tasks
+            if(date === target_date){
+                original_date_index = day_index
+                original_task_array.push(...day_tasks)
+            }
+        }
+
+        const new_allocated_state = update(this.state.allocated_tasks, 
+            {
+                [original_date_index] : { // Remove Item from Old Date
+                    tasks: {
+                        $set: []
+                    }
+                }
+            }
+        );
+
+        const new_unallocated_state = update(this.state.unallocated_tasks, {
+            $push : original_task_array
+        })
+
+        this.setState({
+            allocated_tasks : new_allocated_state,
+            unallocated_tasks : new_unallocated_state
+        }, ()=>{
+            Toast.show({
+                text: 'All of your tasks were moved back to your board!',
+                buttonText: 'Got it'
+              })
+        })
+
+        
+        Task.allocateMultipleTasks(original_task_array.map(task=>task.task_id, null, (err)=>{
+            if(err){
+                console.log("ERROR DEALLOCATING EVERYTHING");
+                this.setState({
+                    allocateTask: original_allocated_state,
+                    unallocated_tasks: original_unallocated_state
+                })
+            }
+        }))
+        
+    }
+
     deallocateTask = (task_id, cb=()=>{}) => {
+        console.log("deallocating");
         const original_allocated_state = this.state.allocated_tasks
         const original_unallocated_state = this.state.unallocated_tasks
 
@@ -183,7 +240,7 @@ class HomeScreen extends React.Component{
             
             for(let task_index in day_tasks){
                 if(day_tasks[task_index].id === task_id){
-                    Object.assign(original_task ,day_tasks[task_index])
+                    Object.assign(original_task , day_tasks[task_index])
                     day_index_original = day_index
                     task_index_original = task_index
                 }
@@ -214,16 +271,8 @@ class HomeScreen extends React.Component{
               })
         })
 
-        this._updateTaskDateServerSide(task_id, null, (err)=>{
-            if(err){
-                this.setState({
-                    allocated_tasks : original_allocated_state,
-                    unallocated_tasks : original_unallocated_state
-                }, ()=>{
-                    console.log("Error with updating task date", err);
-                    alert("Error with api call")
-                })
-            }
+        Task.allocateTask(task_id, null, (err)=>{
+        
         })
     }
 
@@ -616,9 +665,9 @@ class HomeScreen extends React.Component{
                                 [this.state.selected_date]: {selected: true, selectedColor: 'red'},
                                 ...this._generateCalendarMarkers()
                             }}/>
-                        {/* <Button onPress={()=>{console.log(this.state)}}>
+                        <Button onPress={()=>{console.log(this.state)}}>
                             <Text>State </Text>
-                        </Button> */}
+                        </Button>
                         <TaskCarousel
                             ref = {this.carousel}
                             isLoading = {this.state.isLoading}
@@ -636,9 +685,6 @@ class HomeScreen extends React.Component{
                         
                         {/* <TaskCreationPrompt /> */}
 
-                        {/* <Button onPress = {this._logout}> 
-                            <Text style={{color:"white"}}> Logout</Text>
-                        </Button> */}
                        
                         
                         <Button style={{justifyContent:"center", alignItems:"center", borderRadius:100,backgroundColor:"white"}} onPress={this._openDrawer}>

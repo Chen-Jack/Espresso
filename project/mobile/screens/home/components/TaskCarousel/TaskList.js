@@ -3,7 +3,7 @@ import {View, Text, FlatList} from 'react-native'
 import TaskCard from './TaskCard'
 import PropTypes from 'prop-types'
 import {PopupMenu} from './../PopupMenu'
-import {Button } from 'native-base';
+import {Button, Icon } from 'native-base';
 import {getDay} from './../../../../utility'
 import UserTaskContext from './../../UserTaskContext'
 
@@ -17,7 +17,8 @@ const TaskListHeader = ({task_length, isEditMode, options, date})=>{
 }
 
 const EmptyList = ()=>{
-    return <View style={{opacity:0.7, height:"100%", width:"100%", backgroundColor: "white", alignItems:"center", justifyContent:"center"}}>
+    return <View style={{opacity:0.4, flex:1, backgroundColor: "white", alignItems:"center", justifyContent:"center"}}>
+        <Icon type="Entypo" name="document" />
         <Text style={{justifyContent:"center", alignItems:"center", fontSize: 20}}>
             Looks Empty...
         </Text>
@@ -46,19 +47,16 @@ export default class TaskList extends React.Component{
                 handler: this.toggleEditMode
             },
             dumpItems = {
-                title: "Move All To Board",
+                title: "Clear",
                 handler : this.deallocateAllTasks
             }
         ]
-        console.log("lets see", this.popupOptions[1]);
     }
 
     deallocateAllTasks = ()=>{
         console.log("deallocating all tasks", this.props.data.tasks)
-        for(let task of this.props.data.tasks){
-            console.log("Task", task);
-            // this.list.current.props.deallocateTask(task.task_id)
-        }
+        this.list.current.props.deallocateTasksFromDate(this.props.data.date)
+        
     }
 
     toggleEditMode = (cb=()=>{})=>{
@@ -157,8 +155,8 @@ export default class TaskList extends React.Component{
         let focus_style = {backgroundColor: (this.state.isGestureHovering ? "yellow" : null)}
         let landable_style = {flex: 1, ...focus_style}
         return <UserTaskContext.Consumer>
-            {({deallocateTask})=><View 
-                deallocateTask = {deallocateTask}
+            {({deallocateTasksFromDate})=><View 
+                deallocateTasksFromDate = {deallocateTasksFromDate}
                 onLayout={this.onLayoutHandler}
                 ref={this.list} 
                 style={{flex: 1}}>

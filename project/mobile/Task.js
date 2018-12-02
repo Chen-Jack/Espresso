@@ -81,6 +81,23 @@ export default class Task{
         })
     }
 
+    static allocateMultipleTasks(task_id_arr, date, cb=()=>{}){
+        AsyncStorage.getItem("espresso_app", (err,app)=>{
+            if(err){
+                cb(err)
+            }
+            const app_data = JSON.parse(app)
+            const tasks = app_data.tasks
+            for(let task_id of task_id_arr){
+                tasks[task_id].allocated_date = date
+            }
+            AsyncStorage.setItem("espresso_app", JSON.stringify(app_data), (err)=>{
+                cb(err)
+            })
+        })
+    }
+
+
     static allocateTask(task_id, date, cb=()=>{}){
        AsyncStorage.getItem("espresso_app", (err,app)=>{
            if(err){

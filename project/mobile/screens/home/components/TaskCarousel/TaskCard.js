@@ -82,7 +82,7 @@ const CardOptions = ({task, task_id, details, isEditMode, isCollapsed, toggleDet
     }
     else if(details){
         return <TouchableOpacity onPress={toggleDetails}>
-            {isCollapsed ? <Icon name="arrow-dropdown"/> : <Icon name="arrow-dropup"/>}  
+            {isCollapsed ? <Icon type="Entypo" name="chevron-small-down"/> : <Icon type="Entypo" name="chevron-small-up"/>}  
         </TouchableOpacity>
     }
     else{

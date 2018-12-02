@@ -20,7 +20,7 @@ const ExitEditModeButton = ({options})=>{
     }
     console.log("handler", handler);
     return <TouchableOpacity onPress={()=>handler()} style={{marginRight: 15}}>
-        <Icon type="FontAwesome" style={{color:"white"}} name="check"/>
+        <Icon type="MaterialIcons" style={{color:"white"}} name="done"/>
     </TouchableOpacity>  
 }
 
