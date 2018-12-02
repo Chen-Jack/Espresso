@@ -7,15 +7,24 @@ import {Button, Icon, Badge} from 'native-base';
 import {getDay} from './../../../../utility'
 import UserTaskContext from './../../UserTaskContext'
 
-const TaskListHeader = ({task_length, isEditMode, options, date})=>{
+const CompletionStatusText = ({task_list})=>{
+    let curr = 0;
+    for(task of task_list){
+        if(task.completed) curr ++
+    }
+    let max = task_list.length
+    return (max > 0) ? <Text style={{color:"yellow"}}>  {curr} / {max} </Text> : null
+}
+
+const TaskListHeader = ({task_list, isEditMode, options, date})=>{
     return <View style={{flexDirection:"row", width:"100%", backgroundColor:"#222", alignItems: "center", justifyContent:"space-between"}}>
         <View style={{flexDirection:"row", justifyContent:"center", alignItems:"center"}}>
             <Text style={{borderTopLeftRadius: 10, borderTopRightRadius: 10, padding: 10, fontSize: 16, color: "white"}}> 
                 {`${getDay((date))} | ${date || "Date"}`} 
             </Text>
-            <Text style={{color:"yellow"}}> {task_length} / 5 </Text>
+            <CompletionStatusText task_list={task_list} />
         </View>
-        {task_length > 0 && <PopupMenu popupOptions = {options} isEditMode={isEditMode} date={date}/>}
+        {task_list.length > 0 && <PopupMenu popupOptions = {options} isEditMode={isEditMode} date={date}/>}
     </View>
 }
 
@@ -164,7 +173,7 @@ export default class TaskList extends React.Component{
                 ref={this.list} 
                 style={{flex: 1}}>
                 
-                {this.props.data.date !== null ? <TaskListHeader task_length={this.props.data.tasks.length} isEditMode={this.state.isEditMode} options={this.popupOptions} date={this.props.data.date}/> : null}
+                {this.props.data.date !== null ? <TaskListHeader task_list={this.props.data.tasks} isEditMode={this.state.isEditMode} options={this.popupOptions} date={this.props.data.date}/> : null}
                 { this.props.data.tasks.length === 0 ?     
                     <EmptyList/> :  
                     <View style={{width:"100%", height:"100%"}}>

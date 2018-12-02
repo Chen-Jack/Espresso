@@ -685,7 +685,7 @@ class HomeScreen extends React.Component{
                         
 
                         
-                        <Button style={{justifyContent:"center", alignItems:"center", borderRadius:100,backgroundColor:"none"}} onPress={this._openDrawer}>
+                        <Button style={{justifyContent:"center", alignItems:"center", borderRadius:100}} onPress={this._openDrawer}>
                             <Icon style={{color:"white"}}  type="Entypo" name="blackboard"/>
                         </Button>
                     </FooterTab>
