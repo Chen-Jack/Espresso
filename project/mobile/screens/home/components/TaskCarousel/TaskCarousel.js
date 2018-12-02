@@ -255,7 +255,7 @@ export default class TaskCarousel extends React.Component{
 
     _renderTaskList = ({item: tasks_of_the_day, index})=>{
 
-        return <View style={{overflow: "hidden", margin: 20, height: "85%", width: "85%", backgroundColor: "#ddd", borderRadius: 10, alignSelf:"center"}}>
+        return <View style={{ margin: 20, height: "85%", width: "85%", backgroundColor: "#ddd", borderRadius: 10, alignSelf:"center"}}>
             <TaskList initialize={index===this.STARTING_INDEX ? this._initializeLayout : null} ref={(ref)=>{this[`task_${index}`] = ref}} index = {index} data = {tasks_of_the_day}/>
         </View>
     }

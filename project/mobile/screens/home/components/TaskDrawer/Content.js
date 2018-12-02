@@ -6,17 +6,23 @@ import {Icon, Button, Thumbnail, Image} from 'native-base'
 import {TaskCreationPrompt} from './../TaskForm'
 import {PopupMenu} from './../PopupMenu'
 
-const UnallocatedTasksHeader = ()=>{
+const UnallocatedTasksHeader = ({task_list})=>{
+    const menuOptions = [{
+        title : "Edit",
+        handler : function(){}
+    }]
+
     return <View style={{
             backgroundColor: "#222", 
             height: 35, width:"100%", 
             flexDirection:"row", 
-            justifyContent:"flex-end", 
+            justifyContent:"space-between", 
             alignItems:"center", 
             borderTopLeftRadius : 10, 
             borderTopRightRadius : 10}}>
 
-            <PopupMenu/>
+            <Text style={{color:"white", marginHorizontal: 10}}> {task_list.length} tasks </Text>
+            <PopupMenu isEditMode={false} popupOptions={menuOptions}/>
 
         </View>
 }
@@ -118,7 +124,6 @@ export default class DrawerContent extends React.Component{
     }
 
     render(){
-
         return (
         <View style={{backgroundColor: "#ddd", height: Dimensions.get('window').height, width: "100%"}}>
 
@@ -129,7 +134,7 @@ export default class DrawerContent extends React.Component{
                 ref = {this.list}
                 style={{padding: 5, flex: 1}}>
 
-                <UnallocatedTasksHeader/>
+                <UnallocatedTasksHeader task_list={this.props.task_data}/>
                 <TaskList
                     ref={(ref)=>{this.list}}
                     data = {{

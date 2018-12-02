@@ -13,7 +13,9 @@ const CompletionStatusText = ({task_list})=>{
         if(task.completed) curr ++
     }
     let max = task_list.length
-    return (max > 0) ? <Text style={{color:"yellow"}}>  {curr} / {max} </Text> : null
+
+    let style = (curr === max) ? {color : "lightgreen"} : {color : "yellow"}
+    return (max > 0) ? <Text style={style}>  {curr} / {max} </Text> : null
 }
 
 const TaskListHeader = ({task_list, isEditMode, options, date})=>{
