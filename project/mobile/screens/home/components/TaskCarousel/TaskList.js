@@ -6,12 +6,12 @@ import {PopupMenu} from './../PopupMenu'
 import { Button } from 'native-base';
 import {getDay} from './../../../../utility'
 
-const TaskListHeader = ({isEditMode, options, date})=>{
+const TaskListHeader = ({task_length, isEditMode, options, date})=>{
     return <View style={{flexDirection:"row", width:"100%", backgroundColor:"#222", alignItems: "center", justifyContent:"space-between"}}>
         <Text style={{borderTopLeftRadius: 10, borderTopRightRadius: 10, padding: 10, fontSize: 16, color: "white"}}> 
             {`${getDay((date))} ${date || "Date"}`} 
         </Text>
-        <PopupMenu popupOptions = {options} isEditMode={isEditMode} date={date}/>
+        {task_length > 0 && <PopupMenu popupOptions = {options} isEditMode={isEditMode} date={date}/>}
     </View>
 }
 
@@ -143,7 +143,7 @@ export default class TaskList extends React.Component{
                 ref={this.list} 
                 style={{flex: 1}}>
                 
-                {this.props.data.date !== null ? <TaskListHeader isEditMode={this.state.isEditMode} options={this.popupOptions} date={this.props.data.date}/> : null}
+                {this.props.data.date !== null ? <TaskListHeader task_length={this.props.data.tasks.length} isEditMode={this.state.isEditMode} options={this.popupOptions} date={this.props.data.date}/> : null}
                 { this.props.data.tasks.length === 0 ?     
                     <EmptyList/> :  
                     <View style={{width:"100%", height:"100%"}}>

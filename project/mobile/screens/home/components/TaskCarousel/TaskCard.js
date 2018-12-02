@@ -116,6 +116,8 @@ export default class TaskCard extends React.Component{
             details: this.props.details
         }
 
+        console.log("Details is", task);
+
         let strike_through_style = {textDecorationLine: 'line-through', textDecorationStyle: 'solid'}
         return (
             <UserTaskContext.Consumer>

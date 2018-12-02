@@ -532,7 +532,6 @@ class HomeScreen extends React.Component{
     }
 
 
-
     componentDidMount(){
         this._initalizeApp()
     }
@@ -564,20 +563,6 @@ class HomeScreen extends React.Component{
             }
         })
     }
-
-    // _logout = ()=>{
-    //     AsyncStorage.removeItem("session_token", (err)=>{
-    //         this.props.navigation.navigate('landing')
-    //     })
-    // }
-
-    // _isLoggedIn = ()=>{
-    //     AsyncStorage.getItem("session_token", (err , session_token)=>{
-    //         if(err || !session_token){
-    //             this.props.navigation.navigate('landing')
-    //         }
-    //     })
-    // }
 
     _promptTaskCreation = ()=>{
         this.setState({promptTaskCreation: true})

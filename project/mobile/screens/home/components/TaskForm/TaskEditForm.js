@@ -12,6 +12,7 @@ export default class TaskEditForm extends React.Component{
             task_title: this.props.title,
             task_detail: this.props.details
         }
+        console.log("taskeditform", this.props.title, this.props.details);
     }
 
     _submitForm = (editTask)=>{
@@ -32,7 +33,7 @@ export default class TaskEditForm extends React.Component{
                 })}
                 <Text> Update Task </Text>
                 <Textarea placeholder="Title" value = {this.state.task_title} onChangeText={(txt)=>this.setState({task_title: txt})}/>
-                <Textarea placeholder="Details (Optional)" value = {this.state.details}  onChangeText={(txt)=>this.setState({task_detail: txt})}/>
+                <Textarea placeholder="Details (Optional)" value = {this.state.task_detail}  onChangeText={(txt)=>this.setState({task_detail: txt})}/>
                 <Button onPress={()=>this._submitForm(editTask)}>
                     <Text>Submit</Text>
                 </Button>   
