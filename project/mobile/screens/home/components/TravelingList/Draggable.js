@@ -1,6 +1,6 @@
 import Embassy from './Embassy'
 import React from 'react'
-import ReactNative, { Modal, View, Text, TouchableHighlight, PanResponder, Animated, FlatList} from 'react-native'
+import ReactNative, { Modal, View, Text, TouchableHighlight, PanResponder, Animated, FlatList, Dimensions} from 'react-native'
 import PropTypes from 'prop-types'
 
 export default class Draggable extends React.Component{
@@ -177,6 +177,13 @@ export default class Draggable extends React.Component{
                                 duration: this.animation_speed,              
                             }
                         ),
+                        // Animated.timing(
+                        //     this.state.pan,
+                        //     {
+                        //         toValue: {x: Dimensions.get('window').height/2, y:-1000},
+                        //         duration: 500
+                        //     }
+                        // )
                         Animated.timing(
                             this.state.scale,
                             {
@@ -198,6 +205,7 @@ export default class Draggable extends React.Component{
                         x : e.nativeEvent.pageX,
                         y: e.nativeEvent.pageY
                     }
+                    
                     Embassy.onFinishTraveling(coordinates)
                     this.gesture_started = false
                 }

@@ -18,7 +18,7 @@ export default class MenuOptions extends React.Component{
         })
     }
     render(){
-        return <List style={{width: "100%"}}>
+        return <List style={{width: 100}}>
             {this._renderItems()}
         </List>
     }

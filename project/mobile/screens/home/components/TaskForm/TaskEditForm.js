@@ -2,6 +2,7 @@ import React from 'react'
 import UserTaskContext from './../../UserTaskContext'
 import PropTypes from 'prop-types'
 import {View, Button, Textarea, Text} from 'native-base'
+import {Dimension} from 'react-native'
 
 
 export default class TaskEditForm extends React.Component{
@@ -25,7 +26,7 @@ export default class TaskEditForm extends React.Component{
     render(){
         return <UserTaskContext.Consumer>
         {({editTask})=>{
-            return <View style={{padding: 20 , backgroundColor: "white"}}>
+            return <View style={{width: "75%", height:"50%",padding: 20 , backgroundColor: "white"}}>
                 {this.state.form_errors.map((err)=>{
                     return <View>
                         <Text> {err} </Text>

@@ -113,7 +113,7 @@ export default class TaskPopupMenu extends React.Component{
                     onBackdropPress={this.toggleMenu}
                     visible = {this.state.isVisible}>
 
-                    <View style={{margin: 0, position:"absolute", justifyContent:"center", alignItems:"center", top:0, left:0, backgroundColor:"white"}}>
+                    <View style={{margin: 0, position:"absolute", justifyContent:"center", alignItems:"center", top:this.state.location.y, left:this.state.location.x-100, backgroundColor:"white"}}>
                         <MenuOptions toggleMenu={this.toggleMenu} options={this.props.popupOptions}/>
                     </View>
 

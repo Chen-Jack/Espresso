@@ -3,13 +3,14 @@ import {View, Text, FlatList} from 'react-native'
 import TaskCard from './TaskCard'
 import PropTypes from 'prop-types'
 import {PopupMenu} from './../PopupMenu'
-import { Button } from 'native-base';
+import {Button } from 'native-base';
 import {getDay} from './../../../../utility'
+import UserTaskContext from './../../UserTaskContext'
 
 const TaskListHeader = ({task_length, isEditMode, options, date})=>{
     return <View style={{flexDirection:"row", width:"100%", backgroundColor:"#222", alignItems: "center", justifyContent:"space-between"}}>
         <Text style={{borderTopLeftRadius: 10, borderTopRightRadius: 10, padding: 10, fontSize: 16, color: "white"}}> 
-            {`${getDay((date))} ${date || "Date"}`} 
+            {`${getDay((date))} | ${date || "Date"}`} 
         </Text>
         {task_length > 0 && <PopupMenu popupOptions = {options} isEditMode={isEditMode} date={date}/>}
     </View>
@@ -17,7 +18,7 @@ const TaskListHeader = ({task_length, isEditMode, options, date})=>{
 
 const EmptyList = ()=>{
     return <View style={{opacity:0.7, height:"100%", width:"100%", backgroundColor: "white", alignItems:"center", justifyContent:"center"}}>
-        <Text style={{fontSize: 20}}>
+        <Text style={{justifyContent:"center", alignItems:"center", fontSize: 20}}>
             Looks Empty...
         </Text>
     </View>
@@ -35,12 +36,29 @@ export default class TaskList extends React.Component{
             canScroll : true,
             isEditMode: false
         }
+       
+    }
+
+    componentDidMount(){
         this.popupOptions = [
             editMode = {
                 title: "Edit",
                 handler: this.toggleEditMode
+            },
+            dumpItems = {
+                title: "Move All To Board",
+                handler : this.deallocateAllTasks
             }
         ]
+        console.log("lets see", this.popupOptions[1]);
+    }
+
+    deallocateAllTasks = ()=>{
+        console.log("deallocating all tasks", this.props.data.tasks)
+        for(let task of this.props.data.tasks){
+            console.log("Task", task);
+            // this.list.current.props.deallocateTask(task.task_id)
+        }
     }
 
     toggleEditMode = (cb=()=>{})=>{
@@ -138,7 +156,9 @@ export default class TaskList extends React.Component{
     render(){
         let focus_style = {backgroundColor: (this.state.isGestureHovering ? "yellow" : null)}
         let landable_style = {flex: 1, ...focus_style}
-        return <View 
+        return <UserTaskContext.Consumer>
+            {({deallocateTask})=><View 
+                deallocateTask = {deallocateTask}
                 onLayout={this.onLayoutHandler}
                 ref={this.list} 
                 style={{flex: 1}}>
@@ -156,8 +176,8 @@ export default class TaskList extends React.Component{
                             style={landable_style}/>
                     </View>
                 }
-
-        </View>
+            </View>}
+        </UserTaskContext.Consumer>
     }
 }
 

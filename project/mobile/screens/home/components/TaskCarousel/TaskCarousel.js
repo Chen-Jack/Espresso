@@ -20,7 +20,7 @@ export default class TaskCarousel extends React.Component{
             task_cards_references : []
         }
 
-        this.STARTING_INDEX = 0;
+        this.STARTING_INDEX = 14;
 
         this.carousel = React.createRef()
         this.wrapper = React.createRef()
@@ -283,10 +283,10 @@ export default class TaskCarousel extends React.Component{
                 { ({setTaskDate}) => <View 
                     ref = {this.wrapper}
                     onLayout = {this._onLayout}
-                    style={{overflow: "hidden", flexDirection:"column", flex: 1 , width:"100%", marginBottom: 50, paddingBottom:10, backgroundColor: "#2460c1"}}>
+                    style={{ flexDirection:"column", flex: 1 , width:"100%", marginBottom: 50, paddingBottom:10, backgroundColor: "#2460c1"}}>
                     {
                         this.props.isLoading ? <Loader/> :<Carousel
-                            firstItem={14}
+                            firstItem={this.STARTING_INDEX}
                             ref = {this.carousel}
                             reallocateTaskDate = {setTaskDate}
                             onSnapToItem = {this._onSnapHandler}
