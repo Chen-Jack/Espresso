@@ -1,5 +1,5 @@
 import React from 'react'
-import UserTaskContext from './../../UserTaskContext'
+import {UserTaskContext} from './../../Context'
 import PropTypes from 'prop-types'
 import {View, Button, Textarea, Text} from 'native-base'
 import {Dimension} from 'react-native'

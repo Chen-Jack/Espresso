@@ -5,10 +5,11 @@ import {View, Text, Button, Icon} from 'native-base'
 import {Dimensions, TouchableOpacity} from 'react-native'
 import TaskList from './TaskList'
 import {Embassy} from '../TravelingList'
-import UserTaskConsumer from './../../UserTaskContext'
+import {UserTaskContet} from './../../Context'
 import Loader from './LoadingCarouselView'
 import {PopupMenu} from './../PopupMenu'
 import Modal from 'react-native-modal'
+import UserTaskContext from '../../Context/UserTaskContext';
 
 
 export default class TaskCarousel extends React.Component{
@@ -279,7 +280,7 @@ export default class TaskCarousel extends React.Component{
     render(){
 
         return (
-            <UserTaskConsumer>
+            <UserTaskContext.Consumer>
                 { ({setTaskDate}) => <View 
                     ref = {this.wrapper}
                     onLayout = {this._onLayout}
@@ -301,7 +302,7 @@ export default class TaskCarousel extends React.Component{
                              />
                     }
                 </View>}
-            </UserTaskConsumer>
+            </UserTaskContext.Consumer>
         )
     }
 }

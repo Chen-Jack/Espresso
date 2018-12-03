@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 import {PopupMenu} from './../PopupMenu'
 import {Button, Icon, Badge} from 'native-base';
 import {getDay} from './../../../../utility'
-import UserTaskContext from './../../UserTaskContext'
+import {UserTaskContext} from './../../Context'
 
 const CompletionStatusText = ({task_list})=>{
     let curr = 0;

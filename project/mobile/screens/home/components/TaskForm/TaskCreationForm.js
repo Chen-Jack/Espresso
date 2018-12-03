@@ -2,7 +2,7 @@ import React from 'react'
 import {View, Textarea, Text, Button} from 'native-base'
 import {AsyncStorage} from 'react-native'
 import PropTypes from 'prop-types'
-import UserTaskContext from './../../UserTaskContext'
+import {UserTaskContext} from './../../Context'
 
 export default class TaskCreationForm extends React.Component{
     constructor(props) {

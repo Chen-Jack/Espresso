@@ -4,7 +4,7 @@ import {TouchableOpacity, Alert, TextInput} from 'react-native'
 import {Draggable} from './../TravelingList'
 import Modal from 'react-native-modal'
 import PropTypes from 'prop-types'
-import UserTaskContext from '../../UserTaskContext'
+import {UserTaskContext} from '../../Context'
 import Collapsible from 'react-native-collapsible';
 import {TaskEditForm} from './../TaskForm'
 

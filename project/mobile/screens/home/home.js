@@ -7,14 +7,11 @@ import { Calendar } from 'react-native-calendars';
 import {TaskCarousel} from './components/TaskCarousel'
 import {TaskCreationPrompt} from './components/TaskForm'
 import {TaskDrawer} from './components/TaskDrawer'
-import UserTaskContext, {UserTaskProvider} from './UserTaskContext'
+import {UserTaskContext, EditModeContext} from './Context'
 import update from 'immutability-helper'
 import { Embassy } from './components/TravelingList';
 import Task from './../../Task'
 import {getDay} from './../../utility'
-
-
-
 
 class HomeScreen extends React.Component{
     constructor(props) {
@@ -29,12 +26,18 @@ class HomeScreen extends React.Component{
             allocated_tasks : [],
             selected_date: new Date().toISOString().substring(0,10),
             promptTaskCreation: false,
+            isEditMode: false
         }   
 
         this.carousel = React.createRef()
         this.calendar = React.createRef()
 
         this.today = new Date()
+
+        this.editContext = {
+            isEditMode : this.state.isEditMode,
+            toggleEditMode : this.toggleEditMode
+        }
 
         this.manager = {
             updateStatus : this.updateCompletionStatusOfState,
@@ -59,6 +62,17 @@ class HomeScreen extends React.Component{
 
     static getTaskManager = ()=>{
         return this.manager
+    }
+
+    toggleEditMode = ()=>{
+        this.setState({
+            isEditMode : !this.state.isEditMode
+        }, ()=>{
+            if(this.state.isEditMode)
+                this.carousel.current.disableCarouselScroll()
+            else
+                this.carousel.current.enableCarouselScroll()
+        })
     }
 
     updateCompletionStatusOfState = (task_id, new_status, cb=()=>{})=>{
@@ -640,58 +654,57 @@ class HomeScreen extends React.Component{
 
     render(){
         return <UserTaskContext.Provider value={this.manager}>
-        <TaskDrawer ref={(ref)=>{this.drawer = ref}} unallocated_tasks = {this.state.unallocated_tasks}>
-            <Container style={{overflow:"hidden", height: Dimensions.get('window').height, flexDirection: "column"}}>
-                <Header style={{backgroundColor: '#061328'}}>
-                    <Body style={{justifyContent:"center"}}>
-                        <Title style={{position:"absolute", left: 10, color:"#fff"}}>{`${getDay(this.today)} | ${this.today.toLocaleDateString()}`}</Title>
-                        <TouchableOpacity onPress={()=>this.props.navigation.navigate("settings")} style={{position:"absolute", right:10}}>
-                            <Icon style={{color:"white"}} name="settings"/>
-                        </TouchableOpacity>
-                    </Body>
-                </Header>
+            <EditModeContext.Provider value={this.editContext}>
+                <TaskDrawer ref={(ref)=>{this.drawer = ref}} unallocated_tasks = {this.state.unallocated_tasks}>
+                    <Container style={{overflow:"hidden", height: Dimensions.get('window').height, flexDirection: "column"}}>
+                        <Header style={{backgroundColor: '#061328'}}>
+                            <Body style={{justifyContent:"center"}}>
+                                <Title style={{position:"absolute", left: 10, color:"#fff"}}>{`${getDay(this.today)} | ${this.today.toLocaleDateString()}`}</Title>
+                                <TouchableOpacity onPress={()=>this.props.navigation.navigate("settings")} style={{position:"absolute", right:10}}>
+                                    <Icon style={{color:"white"}} name="settings"/>
+                                </TouchableOpacity>
+                            </Body>
+                        </Header>
 
-                <Content style={{ height: Dimensions.get('window').height, width: Dimensions.get('window').width, backgroundColor: "#fff"}} scrollEnabled = {false}>
-                    <View style={{paddingBottom:50,height: Dimensions.get('window').height, width: Dimensions.get('window').width}}>
-                  
-                    
-
-                        <Calendar
-                            style={{paddingVertical: 5}}
-                            markingType={'multi-dot'}
-                            onDayPress={(day)=>{
-                                this._onDateSelection(day.dateString)}}
-                            markedDates={{
-                                [this.state.selected_date]: {selected: true, selectedColor: 'red'},
-                                ...this._generateCalendarMarkers()
-                            }}/>
-                        {/* <Button onPress={()=>{console.log(this.state)}}>
-                            <Text>State </Text>
-                        </Button> */}
-                        <TaskCarousel
-                            ref = {this.carousel}
-                            isLoading = {this.state.isLoading}
-                            selected_date = {this.state.selected_date}
-                            handleDateSelection={this._onDateSelection} 
-                            task_data={this.state.allocated_tasks} />
-
-
-
-                    </View>
-                </Content>
-
-                <Footer style={{backgroundColor: "#222", width:Dimensions.get('window').width, height: 50, padding:0, margin: 0}} >
-                    <FooterTab style={{padding:0,margin:0, flexDirection: "row", width:"100%", justifyContent:"center"}}>
+                        <Content style={{ height: Dimensions.get('window').height, width: Dimensions.get('window').width, backgroundColor: "#fff"}} scrollEnabled = {false}>
+                            <View style={{paddingBottom:50,height: Dimensions.get('window').height, width: Dimensions.get('window').width}}>
                         
+                                <Calendar
+                                    hideExtraDays={true}
+                                    style={{paddingVertical: 5}}
+                                    markingType={'multi-dot'}
+                                    onDayPress={(day)=>{
+                                        this._onDateSelection(day.dateString)}}
+                                    markedDates={{
+                                        [this.state.selected_date]: {selected: true, selectedColor: 'red'},
+                                        ...this._generateCalendarMarkers()
+                                    }}/>
+                                {/* <Button onPress={()=>{console.log(this.state)}}>
+                                    <Text>State </Text>
+                                </Button> */}
+                                <TaskCarousel
+                                    ref = {this.carousel}
+                                    isLoading = {this.state.isLoading}
+                                    selected_date = {this.state.selected_date}
+                                    handleDateSelection={this._onDateSelection} 
+                                    task_data={this.state.allocated_tasks} />
 
-                        
-                        <Button style={{justifyContent:"center", alignItems:"center", borderRadius:100}} onPress={this._openDrawer}>
-                            <Icon style={{color:"white"}}  type="Entypo" name="blackboard"/>
-                        </Button>
-                    </FooterTab>
-                </Footer>
-            </Container>
-        </TaskDrawer> 
+                            </View>
+                        </Content>
+
+                        <Footer style={{backgroundColor: "#222", width:Dimensions.get('window').width, height: 50, padding:0, margin: 0}} >
+                            <FooterTab style={{padding:0,margin:0, flexDirection: "row", width:"100%", justifyContent:"center"}}>
+                                
+
+                                
+                                <Button style={{justifyContent:"center", alignItems:"center", borderRadius:100}} onPress={this._openDrawer}>
+                                    <Icon style={{color:"white"}}  type="Entypo" name="blackboard"/>
+                                </Button>
+                            </FooterTab>
+                        </Footer>
+                    </Container>
+                </TaskDrawer> 
+            </EditModeContext.Provider>
         </UserTaskContext.Provider>
     }
 }
