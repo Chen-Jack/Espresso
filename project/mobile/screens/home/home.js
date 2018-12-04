@@ -7,7 +7,7 @@ import { Calendar } from 'react-native-calendars';
 import {TaskCarousel} from './components/TaskCarousel'
 import {TaskCreationPrompt} from './components/TaskForm'
 import {TaskDrawer} from './components/TaskDrawer'
-import {UserTaskContext, EditModeContext} from './Context'
+import {UserTaskContext,EditModeContext} from './Context'
 import update from 'immutability-helper'
 import { Embassy } from './components/TravelingList';
 import Task from './../../Task'
@@ -68,6 +68,7 @@ class HomeScreen extends React.Component{
         this.setState({
             isEditMode : !this.state.isEditMode
         }, ()=>{
+            console.log("TOGGLED THE CONTEXT EDITMODE TO", this.state.isEditMode);
             if(this.state.isEditMode)
                 this.carousel.current.disableCarouselScroll()
             else

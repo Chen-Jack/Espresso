@@ -4,7 +4,7 @@ import {TouchableOpacity, Alert, TextInput} from 'react-native'
 import {Draggable} from './../TravelingList'
 import Modal from 'react-native-modal'
 import PropTypes from 'prop-types'
-import {UserTaskContext} from '../../Context'
+import {UserTaskContext, EditModeContext} from '../../Context'
 import Collapsible from 'react-native-collapsible';
 import {TaskEditForm} from './../TaskForm'
 
@@ -38,22 +38,20 @@ class EditTaskButton extends React.Component{
 class DeleteButton extends React.Component{
     constructor(props) {
         super(props)
-
-       
     }
 
-    triggleDeletePrompt = (deleteHandler)=>{
+    triggleDeletePrompt = (deleteTaskHandler)=>{
         Alert.alert('Delete Card', "Are you sure?", 
         [
             {text: "Cancel", onPress:()=>{}, style:"cancel"},
-            {text:"Delete", onPress:()=>{deleteHandler(this.props.task_id)}}
+            {text:"Delete", onPress:()=>{deleteTaskHandler(this.props.task_id)}}
         ])
     }
 
     render(){
         return <UserTaskContext.Consumer>
             { ({deleteTask})=> <View>
-                <TouchableOpacity onPress={()=>this.triggleDeletePrompt(deleteTask)}>
+                <TouchableOpacity onPress={this.triggleDeletePrompt.bind(this,deleteTask)}>
                     <Icon style={{fontSize:20, marginHorizontal: 5}} name="trash"/>
                 </TouchableOpacity>
                 </View>
@@ -63,21 +61,20 @@ class DeleteButton extends React.Component{
 }
 
 
-class EditButtons extends React.Component{
+class Options extends React.Component{
     render(){
         return <View style={{flexDirection:"row"}}>
             <EditTaskButton task={this.props.task}/>
-
             <DeleteButton task_id = {this.props.task.task_id}/>
         </View>
     }
 }
 
-const CardOptions = ({task, task_id, details, isEditMode, isCollapsed, toggleDetails})=>{
+const CardOptions = ({task, details, isEditMode, isCollapsed, toggleDetails})=>{
     
     if(isEditMode){
         return <View style={{flexDirection:"row",alignItems:"center"}}>
-            <EditButtons task={task}/>
+            <Options task={task}/>
         </View>
     }
     else if(details){
@@ -115,22 +112,27 @@ export default class TaskCard extends React.Component{
             title : this.props.title,
             details: this.props.details
         }
-
-        console.log("Details is", task);
-
+        
         let strike_through_style = {textDecorationLine: 'line-through', textDecorationStyle: 'solid'}
         return (
-            <UserTaskContext.Consumer>
+            <EditModeContext.Consumer>
+            {({isEditMode, toggleEditMode})=><UserTaskContext.Consumer>
                 {({updateStatus})=>{
                     return <Draggable 
                         origin_list = {this.props.parent_list} 
                         source = {this}
                         doubleTapHandler = {()=>{updateStatus(this.props.task_id, !this.props.isCompleted)}}>
+
                         <Card>
                             <CardItem bordered>
                                 <View style={{width:"100%", flexDirection:"row", alignItems: "center", justifyContent: "space-between"}}>
                                     <Text style={[{width:"80%"}, this.props.isCompleted ? strike_through_style : {}] }>{this.props.title || "Task"}</Text>
-                                    <CardOptions style={{width:"20%"}} task={task} toggleDetails={this.toggleCard} isCollapsed = {this.state.isCollapsed} details={this.props.details} isEditMode = {this.props.isEditMode}/>
+                                    <CardOptions style={{width:"20%"}} 
+                                        task={task} 
+                                        toggleDetails={this.toggleCard} 
+                                        isCollapsed = {this.state.isCollapsed} 
+                                        details={this.props.details} 
+                                        isEditMode = {isEditMode}/>
                                 </View>
                             </CardItem>
 
@@ -143,12 +145,13 @@ export default class TaskCard extends React.Component{
                                     </Body>
                                 </CardItem>
                             </Collapsible>
-
-
                         </Card>
+
                     </Draggable>
                 }}
-            </UserTaskContext.Consumer>)
+            </UserTaskContext.Consumer>
+            }
+            </EditModeContext.Consumer>)
     }
 }
 
@@ -158,7 +161,6 @@ TaskCard.propTypes = {
     title: PropTypes.string.isRequired,
     date: PropTypes.string,
     details : PropTypes.string,
-    isEditMode : PropTypes.bool.isRequired,
     isCompleted: PropTypes.oneOfType([
         PropTypes.bool,
         PropTypes.oneOf([0,1]),

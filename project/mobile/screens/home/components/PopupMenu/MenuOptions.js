@@ -4,6 +4,10 @@ import {List, Text, ListItem, View} from 'native-base'
 import {TouchableOpacity} from 'react-native'
 
 export default class MenuOptions extends React.Component{
+    constructor(props) {
+        super(props)
+        console.log("RECEIVED", this.onChooseOption, this.props.options, );
+    }
 
     _renderItems = ()=>{
         console.log("options", this.props.options);
@@ -23,7 +27,7 @@ export default class MenuOptions extends React.Component{
 }
 
 MenuOptions.propTypes = {
-    toggleMenu : PropTypes.func,
+    onChooseOption : PropTypes.func,
     options : PropTypes.arrayOf(
         PropTypes.shape({
             title : PropTypes.string.isRequired,

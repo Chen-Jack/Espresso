@@ -257,7 +257,10 @@ export default class TaskCarousel extends React.Component{
     _renderTaskList = ({item: tasks_of_the_day, index})=>{
 
         return <View style={{ margin: 20, height: "85%", width: "85%", backgroundColor: "#ddd", borderRadius: 10, alignSelf:"center"}}>
-            <TaskList initialize={index===this.STARTING_INDEX ? this._initializeLayout : null} ref={(ref)=>{this[`task_${index}`] = ref}} index = {index} data = {tasks_of_the_day}/>
+            <TaskList initialize={(index===this.STARTING_INDEX) ? this._initializeLayout : null} 
+                ref={(ref)=>{this[`task_${index}`] = ref}} 
+                index = {index} 
+                data = {tasks_of_the_day}/>
         </View>
     }
 
@@ -266,7 +269,6 @@ export default class TaskCarousel extends React.Component{
         ref.measureLayout((layout)=>{
             this.focused_list = ref
             this.focused_list_layout = layout
-            // console.log("focused layout is now", this.focused_list_layout);
          })
     }
 
@@ -286,7 +288,7 @@ export default class TaskCarousel extends React.Component{
                     onLayout = {this._onLayout}
                     style={{ flexDirection:"column", flex: 1 , width:"100%", marginBottom: 50, paddingBottom:10, backgroundColor: "#2460c1"}}>
                     {
-                        this.props.isLoading ? <Loader/> :<Carousel
+                        this.props.isLoading ? <Loader/> : <Carousel
                             firstItem={this.STARTING_INDEX}
                             ref = {this.carousel}
                             reallocateTaskDate = {setTaskDate}

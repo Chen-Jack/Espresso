@@ -4,6 +4,7 @@ import {Icon} from 'native-base'
 import Modal from 'react-native-modal'
 import PropTypes from 'prop-types'
 import MenuOptions from './MenuOptions'
+import {EditModeContext, UserTaskContext} from './../../Context'
 
 const MenuButton = ({openMenu})=>{
     return <TouchableOpacity onPress={openMenu} style={{marginRight: 15}}>
@@ -15,27 +16,16 @@ const MenuButton = ({openMenu})=>{
 class ExitEditModeButton extends React.Component{
     constructor(props) {
         super(props)
-        
-        this.state = {
-            scale : new Animated.Value(0)
-        }
     }
 
     componentDidMount(){
-        Animated.spring(
-            this.state.scale,
-            {
-                toValue: 1,
-                friction: 3
-            }
-        ).start()
 
-        this.handler = ()=>{}
-        for(let option of this.props.options){
-            if(option.title === "Edit"){
-                this.handler = option.handler
-            }
-        }
+        // this.handler = ()=>{}
+        // for(let option of this.props.options){
+        //     if(option.title === "Edit"){
+        //         this.handler = option.handler
+        //     }
+        // }
     }
 
     render(){
@@ -66,26 +56,29 @@ export default class TaskPopupMenu extends React.Component{
      
     }
 
+    componentDidMount(){
+        this.popupOptions = [
+            editMode = {
+                title: "Edit",
+                handler: this.menu.current.props.toggleEditMode
+            },
+            dumpItems = {
+                title: "Clear",
+                handler: this.deallocateAllTasks
+            }
+        ]
+    }
+
     componentWillUnmount(){
         console.log("Popupmenu unmounted");
     }
-
-    menuOptionsLayout = ({nativeEvent: { layout: {x, y, width, height}}})=>{
-        console.log("layout called");
-        const dimensions = {width: width, height: height}
-        this.setState({
-            dimensions: dimensions
-        })
-    }
     
     toggleMenu = ()=>{
-        console.log("refs are",this.options, this.menu.current);
         if(!this.state.isVisible){
             Promise.all([
                 new Promise((resolve,reject)=>{
                     this.menu.current.measure((x,y,width,height,pageX,pageY)=>{
                         const location = {x :pageX,y:pageY}
-                        console.log("THE LOCATIONIS  ", location);
                         this.setState({
                             location: location
                         }, resolve)
@@ -124,46 +117,39 @@ export default class TaskPopupMenu extends React.Component{
 
 
     render(){
-        return <View ref={this.menu}>
+        return <EditModeContext.Consumer>
+            { ({isEditMode, toggleEditMode})=>{return (
+            
+            <View ref={this.menu} toggleEditMode={toggleEditMode}>
 
-            { 
-                this.props.isEditMode ? 
-                <ExitEditModeButton options = {this.props.popupOptions}/> : <MenuButton openMenu={this.toggleMenu}/>
-            }
+                {isEditMode ? <ExitEditModeButton options = {this.props.popupOptions}/> : <MenuButton openMenu={this.toggleMenu}/>}
 
-            <View ref={this.options} >
-                <Modal
-                    style = {{margin:0,position:"absolute", width:"100%", height:"100%"}}
-                    backdropOpacity = {0.2}
-                    onBackdropPress={this.toggleMenu}
-                    visible = {this.state.isVisible}>
+                <View ref={this.options} >
+                    <Modal
+                        style = {{margin:0,position:"absolute", width:"100%", height:"100%"}}
+                        backdropOpacity = {0.2}
+                        onBackdropPress={this.toggleMenu}
+                        visible = {this.state.isVisible}>
 
-                    <View style={{
-                        margin: 0, position:"absolute", 
-                        justifyContent:"center", 
-                        alignItems:"center", 
-                        top:this.state.location.y, 
-                        left:this.state.location.x-100, 
-                        backgroundColor:"white",
-                        shadowOpacity:0.5, shadowColor:"black", 
-                        shadowOffset:{width:5, height:5}, 
-                        shadowRadius:3}}>
-                        <MenuOptions toggleMenu={this.toggleMenu} options={this.props.popupOptions}/>
-                    </View>
+                        <View style={{
+                            margin: 0, position:"absolute", 
+                            justifyContent:"center", 
+                            alignItems:"center", 
+                            top:this.state.location.y, 
+                            left:this.state.location.x-100, 
+                            backgroundColor:"white",
+                            shadowOpacity:0.5, shadowColor:"black", 
+                            shadowOffset:{width:5, height:5}, 
+                            shadowRadius:3}}>
 
-                </Modal>
+                            <MenuOptions onChooseOption={this.toggleMenu} options={this.popupOptions}/>
+                        </View>
+
+                    </Modal>
+                </View>
             </View>
-        </View>
-           
-    }
-}
 
-TaskPopupMenu.propTypes = {
-    isEditMode: PropTypes.bool.isRequired,
-    popupOptions : PropTypes.arrayOf(
-        PropTypes.shape({
-            title : PropTypes.string.isRequired,
-            handler : PropTypes.func.isRequired
-        })
-    ).isRequired
+        )}}
+        </EditModeContext.Consumer>
+    }
 }
