@@ -7,10 +7,10 @@ import {TaskCreationPrompt} from './../TaskForm'
 import {PopupMenu} from './../PopupMenu'
 
 const UnallocatedTasksHeader = ({task_list})=>{
-    const menuOptions = [{
-        title : "Edit",
-        handler : function(){}
-    }]
+    // const menuOptions = [{
+    //     title : "Edit",
+    //     handler : function(){}
+    // }]
 
     return <View style={{
             backgroundColor: "#222", 
@@ -22,7 +22,7 @@ const UnallocatedTasksHeader = ({task_list})=>{
             borderTopRightRadius : 10}}>
 
             <Text style={{color:"white", marginHorizontal: 10}}> {task_list.length} tasks </Text>
-            <PopupMenu isEditMode={false} popupOptions={menuOptions}/>
+            {/* <PopupMenu isEditMode={false} popupOptions={menuOptions}/> */}
 
         </View>
 }

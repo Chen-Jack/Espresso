@@ -40,7 +40,7 @@ class ExitEditModeButton extends React.Component{
 }
 
 
-export default class TaskPopupMenu extends React.Component{
+export default class PopupMenu extends React.Component{
     constructor(props) {
         super(props)
 

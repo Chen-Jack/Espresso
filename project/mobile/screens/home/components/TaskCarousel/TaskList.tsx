@@ -9,7 +9,7 @@ import { UserTaskContext } from './../../Context'
 
 const CompletionStatusText = ({ task_list }) => {
     let curr = 0;
-    for (task of task_list) {
+    for (let task of task_list) {
         if (task.completed) curr++
     }
     let max = task_list.length
@@ -30,7 +30,7 @@ const TaskListHeader = ({ task_list, date }) => {
         </View>
 
         {/* Right Side of Header */}
-        {task_list.length > 0 && <PopupMenu date={date} />}
+        {/* {task_list.length > 0 && <PopupMenu date={date} />} */}
 
     </View>
 }

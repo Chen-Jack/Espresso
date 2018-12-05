@@ -287,8 +287,9 @@ export default class TaskCarousel extends React.Component{
                     ref = {this.wrapper}
                     onLayout = {this._onLayout}
                     style={{ flexDirection:"column", flex: 1 , width:"100%", marginBottom: 50, paddingBottom:10, backgroundColor: "#2460c1"}}>
+                    
                     {
-                        this.props.isLoading ? <Loader/> : <Carousel
+                        (this.props.isLoading) ? <Loader/> : <Carousel
                             firstItem={this.STARTING_INDEX}
                             ref = {this.carousel}
                             reallocateTaskDate = {setTaskDate}
@@ -303,6 +304,7 @@ export default class TaskCarousel extends React.Component{
                             itemWidth={Dimensions.get('window').width}
                              />
                     }
+
                 </View>}
             </UserTaskContext.Consumer>
         )

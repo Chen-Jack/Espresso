@@ -643,7 +643,7 @@ class HomeScreen extends React.Component{
             if(!markers_list[day.date])
                 markers_list[day.date] = {dots: []}
 
-            for(task of day.tasks){
+            for(let task of day.tasks){
                 if(task.completed)
                     markers_list[day.date]["dots"].push({key: task.task_id, color: "blue"})
                 else
@@ -674,12 +674,13 @@ class HomeScreen extends React.Component{
                                     hideExtraDays={true}
                                     style={{paddingVertical: 5}}
                                     markingType={'multi-dot'}
-                                    onDayPress={(day)=>{
-                                        this._onDateSelection(day.dateString)}}
+                                    // onDayPress={(day)=>{
+                                    //     this._onDateSelection(day.dateString)}}
                                     markedDates={{
                                         [this.state.selected_date]: {selected: true, selectedColor: 'red'},
                                         ...this._generateCalendarMarkers()
-                                    }}/>
+                                    }}
+                                    />
                                 {/* <Button onPress={()=>{console.log(this.state)}}>
                                     <Text>State </Text>
                                 </Button> */}
