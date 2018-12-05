@@ -1,19 +1,27 @@
 import uuid from 'uuid/v4';
 import {AsyncStorage} from 'react-native'
 
+interface Task{
+    task_id : string,
+    title: string,
+    details: string | null,
+    completed: boolean,
+    allocated_date : string | null,
+}
 
-export default class Task{
 
-    static updateStatus(task_id, new_status, cb=()=>{}){
+export default class TaskStorage{
+
+    static updateStatus(task_id : string, new_status : boolean, cb = (err ?: any)=>{}){
         new_status = (new_status ? true : false) //Convert all falsy statements to bools
 
         AsyncStorage.getItem("espresso_app", (err, app)=>{
             if(err)
                 return cb(err)
 
-            const app_data = JSON.parse(app)
-            const tasks = app_data.tasks
-            tasks[task_id].completed = new_status
+            const app_data = (JSON.parse(app as string))
+            const task = <Task> app_data.tasks[task_id]
+            task.completed = new_status
 
             AsyncStorage.setItem("espresso_app", JSON.stringify(app_data),(err)=>{
                 if(err){
@@ -26,7 +34,7 @@ export default class Task{
         })
     }
 
-    static createTask(title="", details="", cb=()=>{}){
+    static createTask(title : string = "", details : string="", cb = (err ?: any, new_task ?: Task)=>{}){
        const new_task = {
            task_id : uuid(),
            title : title,
@@ -34,15 +42,13 @@ export default class Task{
            completed: false,
            allocated_date: null
        }
-       console.log("Creating a new task", new_task);
        AsyncStorage.getItem("espresso_app", (err, app)=>{
            if(err){
                 cb(err)
            }
-           const app_data = JSON.parse(app)
+           const app_data = JSON.parse(app as string)
            const tasks = app_data.tasks
-           console.log("Tasks is,,,", tasks);
-           tasks[new_task.task_id] = new_task
+           tasks[new_task.task_id] = <Task> new_task
 
            AsyncStorage.setItem("espresso_app", JSON.stringify(app_data), (err)=>{
                console.log("Created Task");
@@ -51,28 +57,29 @@ export default class Task{
        })
     }
 
-    static editTask(task_id, new_title, new_details, cb=()=>{}){
+
+    static editTask(task_id : string, new_title : string, new_details : string, cb=(err ?: any)=>{}){
         console.log(`Editing for ${task_id} ${new_title} ${new_details}`);
         AsyncStorage.getItem("espresso_app", (err,app)=>{
             if(err){
                 cb(err)
             }
-            const app_data = JSON.parse(app)
-            const tasks = app_data.tasks
-            tasks[task_id].title = new_title
-            tasks[task_id].details = new_details
+            const app_data = JSON.parse(app as string)
+            const task = <Task> app_data.tasks[task_id]
+            task.title = new_title
+            task.details = new_details
             AsyncStorage.setItem("espresso_app", JSON.stringify(app_data), (err)=>{
                 cb(err)
             })
         })
     }
 
-    static deleteTask(task_id, cb=()=>{}){
+    static deleteTask(task_id : string, cb=(err ?: any)=>{}){
         AsyncStorage.getItem("espresso_app", (err,app)=>{
             if(err){
                 cb(err)
             }
-            const app_data = JSON.parse(app)
+            const app_data = JSON.parse(app as string)
             const tasks = app_data.tasks
             delete tasks[task_id]
             AsyncStorage.setItem("espresso_app", JSON.stringify(app_data), (err)=>{
@@ -81,14 +88,14 @@ export default class Task{
         })
     }
 
-    static allocateMultipleTasks(task_id_arr, date, cb=()=>{}){
+    static allocateMultipleTasks(task_id_arr : Array<Task>, date : string, cb=(err?: any)=>{}){
         AsyncStorage.getItem("espresso_app", (err,app)=>{
             if(err){
                 cb(err)
             }
-            const app_data = JSON.parse(app)
+            const app_data = JSON.parse(app as string)
             const tasks = app_data.tasks
-            for(let task_id of task_id_arr){
+            for(let task_id in task_id_arr){
                 tasks[task_id].allocated_date = date
             }
             AsyncStorage.setItem("espresso_app", JSON.stringify(app_data), (err)=>{
@@ -98,14 +105,14 @@ export default class Task{
     }
 
 
-    static allocateTask(task_id, date, cb=()=>{}){
+    static allocateTask(task_id :string, date:string, cb=(err?:any)=>{}){
        AsyncStorage.getItem("espresso_app", (err,app)=>{
            if(err){
                cb(err)
            }
-           const app_data = JSON.parse(app)
-           const tasks = app_data.tasks
-           tasks[task_id].allocated_date = date
+           const app_data = JSON.parse(app as string)
+           const task = <Task> app_data.tasks[task_id]
+           task.allocated_date = date
            AsyncStorage.setItem("espresso_app", JSON.stringify(app_data), (err)=>{
                cb(err)
            })
