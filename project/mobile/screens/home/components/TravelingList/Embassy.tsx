@@ -13,7 +13,7 @@ isGestureOnTop()
 all subscribled events must have (coordinates) as their parameters
 
 */
-import TaskList from './../TaskCarousel/TaskList'
+import {TaskList} from './../TaskList'
 
 export default class Embassy{
     /*

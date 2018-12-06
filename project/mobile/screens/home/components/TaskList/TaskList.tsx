@@ -1,50 +1,31 @@
 import React from 'react'
 import { View, Text, FlatList } from 'react-native'
-import TaskCard from './TaskCard'
+import {TaskCard} from './../TaskCard'
 import PropTypes from 'prop-types'
 import { PopupMenu } from './../PopupMenu'
 import { Button, Icon, Badge } from 'native-base';
 import { getDay } from './../../../../utility'
 import { UserTaskContext } from './../../Context'
+import {TaskSet} from '../../home'
+import CompletionStatusText from './CompletionStatusText'
+import TaskListHeader from './TaskListHeader'
+import EmptyList from './EmptyList'
 
-const CompletionStatusText = ({ task_list }) => {
-    let curr = 0;
-    for (let task of task_list) {
-        if (task.completed) curr++
-    }
-    let max = task_list.length
 
-    let style = (curr === max) ? { color: "lightgreen" } : { color: "yellow" }
-    return (max > 0) ? <Text style={style}>  {curr} / {max} </Text> : null
+
+interface TaskListProps{
+    initialize : ()=>void
+    data : TaskSet
+}
+interface TaskListState{
+    isGestureHovering: boolean,
+    canScroll: boolean
 }
 
-const TaskListHeader = ({ task_list, date }) => {
-    return <View style={{ flexDirection: "row", width: "100%", backgroundColor: "#222", alignItems: "center", justifyContent: "space-between" }}>
+export default class TaskList extends React.Component<TaskListProps, TaskListState> {
+    list : React.RefObject<any>
+    layout: any
 
-        {/* Left Side of Header */}
-        <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
-            <Text style={{ borderTopLeftRadius: 10, borderTopRightRadius: 10, padding: 10, fontSize: 16, color: "white" }}>
-                {`${getDay((date))} | ${date || "Date"}`}
-            </Text>
-            <CompletionStatusText task_list={task_list} />
-        </View>
-
-        {/* Right Side of Header */}
-        {/* {task_list.length > 0 && <PopupMenu date={date} />} */}
-
-    </View>
-}
-
-const EmptyList = () => {
-    return <View style={{ opacity: 0.4, flex: 1, backgroundColor: "white", alignItems: "center", justifyContent: "center" }}>
-        <Icon type="Entypo" name="document" />
-        <Text style={{ justifyContent: "center", alignItems: "center", fontSize: 20 }}>
-            Looks Empty...
-        </Text>
-    </View>
-}
-
-export default class TaskList extends React.Component {
     constructor(props) {
         super(props)
 
@@ -74,6 +55,7 @@ export default class TaskList extends React.Component {
             <TaskCard
                 parent_list={this}
                 task_id={item.task_id}
+                index = {index}
                 title={item.title}
                 date={item.allocated_date}
                 details={item.details}
@@ -186,12 +168,4 @@ export default class TaskList extends React.Component {
             </UserTaskContext.Consumer>
         )
     }
-}
-
-TaskList.propTypes = {
-    initialize: PropTypes.func,
-    data: PropTypes.shape({
-        date: PropTypes.string,
-        tasks: PropTypes.array.isRequired
-    }).isRequired
 }

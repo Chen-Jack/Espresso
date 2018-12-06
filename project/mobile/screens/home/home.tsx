@@ -30,7 +30,8 @@ export interface EditContext{
     isEditMode : boolean,
     toggleEditMode() : void
 }
-interface TaskSet{
+
+export interface TaskSet{
     date: string,
     tasks: Taskable[]
 }
@@ -724,8 +725,8 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
                                     hideExtraDays={true}
                                     style={{paddingVertical: 5}}
                                     markingType={'multi-dot'}
-                                    // onDayPress={(day)=>{
-                                    //     this._onDateSelection(day.dateString)}}
+                                    onDayPress={(day)=>{
+                                        this._onDateSelection(day.dateString)}}
                                     markedDates={{
                                         [this.state.selected_date]: {selected: true, selectedColor: 'red'},
                                         ...this._generateCalendarMarkers()
