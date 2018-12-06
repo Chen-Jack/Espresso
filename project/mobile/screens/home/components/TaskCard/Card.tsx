@@ -53,7 +53,7 @@ export default class TaskCard extends React.Component<TaskCardProps, TaskCardSta
         return (
             <EditModeContext.Consumer>
             {({isEditMode, toggleEditMode})=><UserTaskContext.Consumer>
-                {({updateStatus})=>{
+                {({updateStatus} : any)=>{
                     return <Draggable 
                         origin_list = {this.props.parent_list} 
                         source = {this}

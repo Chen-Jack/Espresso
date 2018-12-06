@@ -8,8 +8,17 @@ import {UserTaskContext, EditModeContext} from '../../Context'
 import Collapsible from 'react-native-collapsible';
 import {TaskEditForm} from './../TaskForm'
 import CardOptions from './CardOptions'
+import {Taskable} from './../../../../Task'
 
-class EditTaskButton extends React.Component{
+interface EditTaskButtonProps{
+    task: Taskable
+}
+
+interface EditTaskButtonState{
+    isEditing: boolean
+}
+
+class EditTaskButton extends React.Component<EditTaskButtonProps, EditTaskButtonState>{
     constructor(props) {
         super(props)
 

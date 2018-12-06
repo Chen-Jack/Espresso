@@ -3,7 +3,37 @@ import React from 'react'
 import ReactNative, { Modal, View, Text, TouchableHighlight, PanResponder, Animated, FlatList, Dimensions} from 'react-native'
 import PropTypes from 'prop-types'
 
-export default class Draggable extends React.Component{
+interface DraggableProps{
+    source : any
+    origin_list: any
+    doubleTapHandler : any
+}
+
+interface DraggableState{
+    pan: Animated.ValueXY
+    focus : boolean ,
+    scale: Animated.Value
+    modal_scale: Animated.Value
+}
+
+export default class Draggable extends React.Component<DraggableProps, DraggableState>{
+    _panResponder : any
+
+    animation_speed : number
+    time_of_last_press : number
+    waiting_for_second_tap : boolean
+    gesture_started: boolean
+
+    default_size : {
+        width: number,
+        height: number
+    }
+
+    ms_to_trigger_double_tap : number
+    ms_to_trigger_long_press : number
+
+    timer_ref : any
+
     constructor(props) {
         super(props)
 
@@ -89,12 +119,12 @@ export default class Draggable extends React.Component{
           ).start();  
 
         this._panResponder = PanResponder.create({
-            onStartShouldSetResponder: (evt, gesture) => true,
+            // onStartShouldSetResponder: (evt, gesture) => true,
             // onStartShouldSetResponderCapture: (evt,gesture)=> true,
             onStartShouldSetPanResponder : (evt, gesture) => true,
             // onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
 
-            onMoveShouldSetResponder: (evt, gestureState) => true,
+            // onMoveShouldSetResponder: (evt, gestureState) => true,
             // onMoveShouldSetResponderCapture : (evt, gesture) => true,
             onMoveShouldSetPanResponder: (evt,gestureState) => true,
             // onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
@@ -155,9 +185,9 @@ export default class Draggable extends React.Component{
             },
 
 
-            onResponderTerminationRequest: (e,gesturestate) => {
-                return false
-            },
+            // onResponderTerminationRequest: (e,gesturestate) => {
+            //     return false
+            // },
 
             onPanResponderTerminationRequest: (evt, gestureState) => false,
 
@@ -251,11 +281,4 @@ export default class Draggable extends React.Component{
                 </Animated.View>
             </View>)
     }
-}
-
-
-Draggable.propType = {
-    source : PropTypes.any.isRequired,
-    origin_list: PropTypes.any.isRequired,
-    doubleTapHandler : PropTypes.func
 }

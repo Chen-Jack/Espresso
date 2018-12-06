@@ -2,6 +2,7 @@ import React from 'react'
 import { View, Text, FlatList } from 'react-native'
 import { getDay } from './../../../../utility'
 import CompletionStatusText from './CompletionStatusText'
+import {PopupMenu} from './../PopupMenu'
 
 
 
@@ -17,7 +18,7 @@ const TaskListHeader = ({ task_list, date }) => {
         </View>
 
         {/* Right Side of Header */}
-        {/* {task_list.length > 0 && <PopupMenu date={date} />} */}
+        {task_list.length > 0 && <PopupMenu date={date} />}
 
     </View>
 }

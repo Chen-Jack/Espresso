@@ -40,6 +40,7 @@ class ExitEditModeButton extends React.Component{
 }
 
 
+
 export default class PopupMenu extends React.Component{
     constructor(props) {
         super(props)
@@ -58,11 +59,11 @@ export default class PopupMenu extends React.Component{
 
     componentDidMount(){
         this.popupOptions = [
-            editMode = {
+            {
                 title: "Edit",
                 handler: this.menu.current.props.toggleEditMode
             },
-            dumpItems = {
+{
                 title: "Clear",
                 handler: this.deallocateAllTasks
             }

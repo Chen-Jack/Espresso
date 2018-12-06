@@ -3,8 +3,13 @@ import {View, TouchableOpacity} from 'react-native'
 import {Icon} from 'native-base'
 import DeleteButton from './DeleteButton'
 import EditTaskButton from './EditTaskButton'
+import {Taskable} from './../../../../Task'
 
-const Options = ({task})=>{
+interface OptionsProps{
+    task: Taskable
+}
+
+const Options : React.FunctionComponent<OptionsProps> = ({task})=>{
     return <View style={{flexDirection:"row"}}>
         <EditTaskButton task={task}/>
         <DeleteButton task_id = {task.task_id}/>
@@ -12,7 +17,15 @@ const Options = ({task})=>{
     
 }
 
-const CardOptions = ({task, details, isEditMode, isCollapsed, toggleDetails})=>{
+interface CardOptionsProps{
+    task: Taskable,
+    details: string,
+    isEditMode: boolean,
+    isCollapsed: boolean,
+    toggleDetails : any
+}
+
+const CardOptions : React.FunctionComponent<CardOptionsProps> = ({task, details, isEditMode, isCollapsed, toggleDetails})=>{
     
     if(isEditMode){
         return <View style={{flexDirection:"row",alignItems:"center"}}>

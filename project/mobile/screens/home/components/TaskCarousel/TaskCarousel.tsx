@@ -146,7 +146,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
 
 
     enableAutoScroller = (direction)=>{
-        const MS_PER_SCROLL = 750
+        const MS_PER_SCROLL = 400
 
         this.autoScrollingTimer = setInterval(() => {
             if(direction === "RIGHT"){
@@ -292,7 +292,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
 
         return (
             <UserTaskContext.Consumer>
-                { ({setTaskDate}) => <View 
+                { ({setTaskDate} : any) => <View 
                     ref = {this.wrapper}
                     onLayout = {this._onLayout}
                     style={{ flexDirection:"column", flex: 1 , width:"100%", marginBottom: 50, paddingBottom:10, backgroundColor: "#2460c1"}}>
