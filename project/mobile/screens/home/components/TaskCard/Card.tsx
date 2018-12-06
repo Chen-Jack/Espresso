@@ -8,24 +8,11 @@ import {UserTaskContext, EditModeContext} from '../../Context'
 import Collapsible from 'react-native-collapsible';
 import {TaskEditForm} from './../TaskForm'
 import CardOptions from './CardOptions'
-import EditTaskButton from './EditTaskButton'
 
-
-
-
-// parent_list: PropTypes.any.isRequired,
-//     task_id: PropTypes.string.isRequired,
-//     title: PropTypes.string.isRequired,
-//     date: PropTypes.string,
-//     details : PropTypes.string,
-//     isCompleted: PropTypes.oneOfType([
-//         PropTypes.bool,
-//         PropTypes.oneOf([0,1]),
-//       ]).isRequired,
-    
 
 interface TaskCardProps{
     parent_list : any,
+    task_id : string,
     title: string,
     date : string | null,
     details: string | null,
@@ -75,7 +62,13 @@ export default class TaskCard extends React.Component<TaskCardProps, TaskCardSta
                         <Card>
                             <CardItem bordered>
                                 <View style={{width:"100%", flexDirection:"row", alignItems: "center", justifyContent: "space-between"}}>
-                                    <Text style={[{width:"80%"}, this.props.isCompleted ? strike_through_style : {}] }>{this.props.title || "Task"}</Text>
+                                    <Text 
+                                        style={
+                                            [{width:"80%"}, this.props.isCompleted && strike_through_style] 
+                                        }>
+                                        {this.props.title || "Task"}
+                                    </Text>
+                                    
                                     <CardOptions style={{width:"20%"}} 
                                         task={task} 
                                         toggleDetails={this.toggleCard} 

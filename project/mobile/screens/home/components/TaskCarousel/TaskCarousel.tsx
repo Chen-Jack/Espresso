@@ -5,14 +5,37 @@ import {View, Text, Button, Icon} from 'native-base'
 import {Dimensions, TouchableOpacity} from 'react-native'
 import {TaskList} from '../TaskList'
 import {Embassy} from '../TravelingList'
-import {UserTaskContet} from './../../Context'
+import {UserTaskContext} from './../../Context'
 import Loader from './LoadingCarouselView'
-import {PopupMenu} from './../PopupMenu'
-import Modal from 'react-native-modal'
-import UserTaskContext from '../../Context/UserTaskContext';
+import {TaskCard} from './../TaskCard'
+import {Layout} from '../../../../utility'
+import {Taskable} from './../../../../Task'
+import {TaskSet} from './../../home'
 
+interface TaskCarouselProps{
+    isLoading : boolean
+    task_data : TaskSet[]
+    handleDateSelection : any
+}
 
-export default class TaskCarousel extends React.Component{
+interface TaskCarouselState{
+    canScroll: boolean,
+    task_cards_references : TaskCard[]
+}
+
+export default class TaskCarousel extends React.Component<TaskCarouselProps, TaskCarouselState>{
+    STARTING_INDEX : number
+    carousel: React.RefObject<Carousel>
+    wrapper: any
+    layout: any
+
+    focused_list_from_gesture_start: any
+    focused_list: any
+    focused_list_layout : Layout
+
+    //A setinterval timer for when the gesture is ontop of the edge
+    autoScrollingTimer : any 
+
     constructor(props) {
         super(props)
 
@@ -26,15 +49,6 @@ export default class TaskCarousel extends React.Component{
         this.carousel = React.createRef()
         this.wrapper = React.createRef()
 
-        this.layout = null;
-
-        this.focused_list_from_gesture_start = null;
-
-        this.focused_list = null;
-        this.focused_list_layout = null;
-        
-        //A setinterval timer for when the gesture is ontop of the edge
-        this.autoScrollingTimer = null; 
 
         //There will be a collection of references to each task_list.
         //The references are assigned when the list is rendered.
@@ -43,7 +57,6 @@ export default class TaskCarousel extends React.Component{
     componentWillUnmount(){
         console.log("Carousel Unmounting");
     }
-
 
 
     _getReference = (index)=>{
@@ -73,11 +86,6 @@ export default class TaskCarousel extends React.Component{
     }
 
     _onSnapHandler = (index)=>{
-        console.log("Snapped");
-        this.setState({
-            isScrolling : false
-        })
-
         this._handleNewDateSelection(index)
 
         this.focused_list && this.focused_list.onGestureLoseFocus()
@@ -121,7 +129,8 @@ export default class TaskCarousel extends React.Component{
     _onCardMoved = (coordinates)=>{
         //Subscribed Event Handler
        const direction = this.whichEdgeIsGestureOn(coordinates)
-       if(this.autoScrollingTimer === null && (direction === "LEFT" || direction === "RIGHT")){
+       console.log("DIRECTION WAS", direction);
+       if(!this.autoScrollingTimer && (direction === "LEFT" || direction === "RIGHT")){
             this.enableAutoScroller(direction)         
        }
        else if(this.autoScrollingTimer && direction === "NONE"){
@@ -257,7 +266,7 @@ export default class TaskCarousel extends React.Component{
     _renderTaskList = ({item: tasks_of_the_day, index})=>{
 
         return <View style={{ margin: 20, height: "85%", width: "85%", backgroundColor: "#ddd", borderRadius: 10, alignSelf:"center"}}>
-            <TaskList initialize={(index===this.STARTING_INDEX) ? this._initializeLayout : null} 
+            <TaskList initialize={(index === this.STARTING_INDEX) ? this._initializeLayout : null} 
                 ref={(ref)=>{this[`task_${index}`] = ref}} 
                 index = {index} 
                 data = {tasks_of_the_day}/>
@@ -309,10 +318,4 @@ export default class TaskCarousel extends React.Component{
             </UserTaskContext.Consumer>
         )
     }
-}
-
-TaskCarousel.propTypes = {
-    isLoading : PropTypes.bool.isRequired,
-    task_data : PropTypes.array.isRequired,
-    handleDateSelection : PropTypes.func
 }

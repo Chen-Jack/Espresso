@@ -1,21 +1,19 @@
 import React from 'react'
-import { View, Text, FlatList } from 'react-native'
+import { View, FlatList } from 'react-native'
 import {TaskCard} from './../TaskCard'
-import PropTypes from 'prop-types'
-import { PopupMenu } from './../PopupMenu'
-import { Button, Icon, Badge } from 'native-base';
-import { getDay } from './../../../../utility'
 import { UserTaskContext } from './../../Context'
 import {TaskSet} from '../../home'
-import CompletionStatusText from './CompletionStatusText'
 import TaskListHeader from './TaskListHeader'
 import EmptyList from './EmptyList'
 
 
 
 interface TaskListProps{
-    initialize : ()=>void
-    data : TaskSet
+    // Initialize is a callback that TaskList will call if it possesses the starting index
+    // This is used to initize the layout of the initial task list.
+    initialize : any | null  
+    data : TaskSet,
+    index: number
 }
 interface TaskListState{
     isGestureHovering: boolean,
@@ -122,7 +120,6 @@ export default class TaskList extends React.Component<TaskListProps, TaskListSta
     onLayoutHandler = () => {
         if (this.props.initialize){
             this.measureLayout((layout) => {
-                console.log("uhhh", this.props.initialize);
                 if (this.props.initialize) {
                     this.props.initialize(this, layout, this.props.index)
                 }

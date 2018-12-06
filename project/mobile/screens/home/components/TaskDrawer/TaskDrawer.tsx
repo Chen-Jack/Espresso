@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import Content from './Content'
 import {Embassy} from './../TravelingList'
 import {Taskable} from './../../../../Task'
+import {Layout} from './../../../../utility'
 
 interface DrawerState{
     visible: boolean
@@ -13,12 +14,7 @@ interface DrawerProps{
     unallocated_tasks : Taskable[]
 }
 
-interface Layout{
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-}
+
 
 export default class TaskDrawer extends React.Component<DrawerProps, DrawerState>{
     layout : Layout

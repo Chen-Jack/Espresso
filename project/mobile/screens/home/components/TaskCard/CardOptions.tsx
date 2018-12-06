@@ -2,14 +2,14 @@ import React from 'react'
 import {View, TouchableOpacity} from 'react-native'
 import {Icon} from 'native-base'
 import DeleteButton from './DeleteButton'
+import EditTaskButton from './EditTaskButton'
 
-class Options extends React.Component{
-    render(){
-        return <View style={{flexDirection:"row"}}>
-            <EditTaskButton task={this.props.task}/>
-            <DeleteButton task_id = {this.props.task.task_id}/>
-        </View>
-    }
+const Options = ({task})=>{
+    return <View style={{flexDirection:"row"}}>
+        <EditTaskButton task={task}/>
+        <DeleteButton task_id = {task.task_id}/>
+    </View>
+    
 }
 
 const CardOptions = ({task, details, isEditMode, isCollapsed, toggleDetails})=>{
