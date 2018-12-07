@@ -14,6 +14,26 @@ all subscribled events must have (coordinates) as their parameters
 
 */
 import {TaskList} from './../TaskList'
+import {ManagerContext} from './../../home'
+import {Coordinate} from './../../../../utility'
+
+export interface Landable{
+    onGestureLoseFocus : ()=>void,
+    onGestureFocus  : ()=>void,
+    onGestureStay : ()=>void,
+    onHandleReleaseGesture : ()=>void
+}
+
+export interface LandableContainer{
+    getList() : Landable | null
+    isGestureOnTop(coordinates : Coordinate) : any
+}
+
+interface Subscribeable{
+    
+}
+
+
 
 export default class Embassy{
     /*
@@ -22,21 +42,22 @@ export default class Embassy{
     A class to act as a middleman between all the landables. Not intended to be 
     instantiated. Every instantiated landable should let the Embassy know.
     */
-    static manager = null;
+    static manager : ManagerContext;
 
-    static registeredLandables = []; //Can either be a TaskList, or a container containing TaskLists
-    static onStartEvents = [];
-    static onMoveEvents = [];
-    static onReleaseEvents = [];
+    static registeredLandables : Array<Landable | LandableContainer> = []; //Can either be a TaskList, or a container containing TaskLists
+    static onStartEvents : Subscribeable[] = [];
+    static onMoveEvents : Subscribeable[]  = [];
+    static onReleaseEvents : Subscribeable[] = [];
 
-    static traveler = null;
-    static traveler_origin_list = null;
+    static traveler : any = null;
+    static traveler_origin_list : Landable | null;
 
-    static active_list = null; //React reference to the active TaskList
+    static active_list : Landable | null; //React reference to the active TaskList
 
-    static setManager = (manager)=>{
+    static setManager = (manager : ManagerContext)=>{
         Embassy.manager = manager;
     }
+
     static resetTravelDetails = ()=>{
         /*
         Clears all the Embassy's variables
@@ -47,20 +68,20 @@ export default class Embassy{
             Embassy.active_list = null;
         }
     }
-    static setStartingDetails = (traveler, origin)=>{
+    static setStartingDetails = (traveler, origin : Landable | null)=>{
         Embassy.traveler = traveler
         Embassy.traveler_origin_list = origin
     }
     static getTraveler = ()=>{
         return Embassy.traveler
     }
-    static registerLandable = (ref)=>{
+    static registerLandable = (ref : Landable | LandableContainer)=>{
         if(ref){
             Embassy.registeredLandables.push(ref)
         }
 
     }
-    static unregisterLandable = (ref)=>{
+    static unregisterLandable = (ref : Landable | LandableContainer)=>{
         /*
         This function takes a react reference
         Returns true on successful deletion. False when item is not in the array
@@ -117,7 +138,7 @@ export default class Embassy{
             console.log("Incorrect handler passed into Embassy.addOnReleaseHandler");
         }
     }
-    static findList = (coordinates) => {
+    static findList = (coordinates : Coordinate) => {
         /*
         Gets a reference of the TaskList that the gesture is ontop of.
         */
@@ -125,8 +146,9 @@ export default class Embassy{
             if(landable.isGestureOnTop(coordinates)){
                 if(landable instanceof TaskList)
                     return landable
-                else
-                    return landable.getList()
+                else{
+                    return (landable as LandableContainer).getList()
+                }
             }
         }
         return null

@@ -17,6 +17,7 @@ interface TaskCardProps{
     date : string | null,
     details: string | null,
     isCompleted : boolean | number
+    index ?: number
 }
 
 interface TaskCardState{

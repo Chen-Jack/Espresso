@@ -63,7 +63,7 @@ export default class PopupMenu extends React.Component{
                 title: "Edit",
                 handler: this.menu.current.props.toggleEditMode
             },
-{
+            {
                 title: "Clear",
                 handler: this.deallocateAllTasks
             }

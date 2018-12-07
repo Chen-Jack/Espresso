@@ -1,21 +1,22 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import Carousel from 'react-native-snap-carousel'
 import {View, Text, Button, Icon} from 'native-base'
 import {Dimensions, TouchableOpacity} from 'react-native'
 import {TaskList} from '../TaskList'
-import {Embassy} from '../TravelingList'
+import {Embassy, LandableContainer} from '../TravelingList'
 import {UserTaskContext} from './../../Context'
 import Loader from './LoadingCarouselView'
 import {TaskCard} from './../TaskCard'
-import {Layout} from '../../../../utility'
+import {Layout, Coordinate} from '../../../../utility'
 import {Taskable} from './../../../../Task'
 import {TaskSet} from './../../home'
+import Landable from '../TravelingList/Landable';
 
 interface TaskCarouselProps{
     isLoading : boolean
     task_data : TaskSet[]
-    handleDateSelection : any
+    handleDateSelection : any,
+    // selected_date: string
 }
 
 interface TaskCarouselState{
@@ -23,15 +24,15 @@ interface TaskCarouselState{
     task_cards_references : TaskCard[]
 }
 
-export default class TaskCarousel extends React.Component<TaskCarouselProps, TaskCarouselState>{
+export default class TaskCarousel extends React.Component<TaskCarouselProps, TaskCarouselState> implements LandableContainer{
     STARTING_INDEX : number
     carousel: React.RefObject<Carousel>
     wrapper: any
     layout: any
 
-    focused_list_from_gesture_start: any
-    focused_list: any
-    focused_list_layout : Layout
+    focused_list_from_gesture_start: TaskList | null
+    focused_list: TaskList | null
+    focused_list_layout : Layout | null
 
     //A setinterval timer for when the gesture is ontop of the edge
     autoScrollingTimer : any 
@@ -49,6 +50,10 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
         this.carousel = React.createRef()
         this.wrapper = React.createRef()
 
+        this.focused_list_from_gesture_start = null;
+        this.focused_list = null
+        this.focused_list_layout = null
+
 
         //There will be a collection of references to each task_list.
         //The references are assigned when the list is rendered.
@@ -59,11 +64,11 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
     }
 
 
-    _getReference = (index)=>{
+    _getReference = (index : number)=>{
         return this[`task_${index}`]
     }
 
-    getList = ()=>{
+    getList = () : Landable | null =>{
         return this.focused_list
     }
 
@@ -85,7 +90,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
 
     }
 
-    _onSnapHandler = (index)=>{
+    _onSnapHandler = (index : number)=>{
         this._handleNewDateSelection(index)
 
         this.focused_list && this.focused_list.onGestureLoseFocus()
@@ -126,7 +131,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
         cb()
     }
     
-    _onCardMoved = (coordinates)=>{
+    _onCardMoved = (coordinates : Coordinate)=>{
         //Subscribed Event Handler
        const direction = this.whichEdgeIsGestureOn(coordinates)
        console.log("DIRECTION WAS", direction);
@@ -171,7 +176,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
 
   
 
-    whichEdgeIsGestureOn = (coordinates)=>{
+    whichEdgeIsGestureOn = (coordinates : Coordinate)=>{
         /*
         Checks to see if the given coordinates should trigger a carousel scroll
         */
@@ -189,11 +194,11 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
 
 
 
-    isGestureOnTop = (location)=>{
+    isGestureOnTop = (gesture_coordinates : Coordinate)=>{
         /*
         Checks if the given coordinates are ontop of the focused landable
         */
-        if(!location.x || !location.y){
+        if(!gesture_coordinates.x || !gesture_coordinates.y){
             console.log("You forgot params");
             return false
         }
@@ -206,8 +211,8 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
         const x1 = this.focused_list_layout.x + this.focused_list_layout.width 
         const y1 = this.focused_list_layout.y + this.focused_list_layout.height
 
-        const isWithinX = (x0 < location.x ) && (location.x < x1)
-        const isWithinY = (y0 < location.y) && (location.y < y1)
+        const isWithinX = (x0 < gesture_coordinates.x ) && (gesture_coordinates.x < x1)
+        const isWithinY = (y0 < gesture_coordinates.y) && (gesture_coordinates.y < y1)
 
         if( isWithinX && isWithinY ){
             return true
@@ -218,7 +223,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
         
     }
 
-    enableCarouselScroll = (coordinates, cb=()=>{})=>{
+    enableCarouselScroll = (coordinates : Coordinate, cb=()=>{})=>{
         //Subscribed Event Handler
         this.setState({
             canScroll: true
@@ -249,7 +254,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
     }
 
 
-    updateToDate = (date)=>{
+    updateToDate = (date : string)=>{
         const index = this.props.task_data.findIndex((task)=>{
             return task.date === date ? true : false
         })
@@ -257,23 +262,23 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
             this.carousel.current.snapToItem(index)
     }
 
-    _handleNewDateSelection = (data_index)=>{
+    _handleNewDateSelection = (data_index : number)=>{
         const iso_date = this.props.task_data[data_index].date;
         this.props.handleDateSelection(iso_date)
     }
 
 
-    _renderTaskList = ({item: tasks_of_the_day, index})=>{
+    _renderTaskList = ({item: task_set, index} : {item: TaskSet, index: number})=>{
 
         return <View style={{ margin: 20, height: "85%", width: "85%", backgroundColor: "#ddd", borderRadius: 10, alignSelf:"center"}}>
             <TaskList initialize={(index === this.STARTING_INDEX) ? this._initializeLayout : null} 
                 ref={(ref)=>{this[`task_${index}`] = ref}} 
                 index = {index} 
-                data = {tasks_of_the_day}/>
+                data = {task_set}/>
         </View>
     }
 
-    updateFocusedListLayout = (index)=>{
+    updateFocusedListLayout = (index : number)=>{
         const ref = this._getReference(index)
         ref.measureLayout((layout)=>{
             this.focused_list = ref
@@ -281,7 +286,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
          })
     }
 
-    _initializeLayout = (list, layout, index)=>{
+    _initializeLayout = (list : TaskList, layout : Layout)=>{
         console.log("Initialized Carousel's first Item");
         this.focused_list = list
         this.focused_list_layout = layout

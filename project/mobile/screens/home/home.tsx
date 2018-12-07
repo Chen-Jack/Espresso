@@ -7,7 +7,7 @@ import { Calendar } from 'react-native-calendars';
 import {TaskCarousel} from './components/TaskCarousel'
 import {TaskCreationPrompt} from './components/TaskForm'
 import {TaskDrawer} from './components/TaskDrawer'
-import {UserTaskContext,EditModeContext} from './Context'
+import {UserTaskContext, EditModeContext} from './Context'
 import update from 'immutability-helper'
 import { Embassy } from './components/TravelingList';
 import TaskStorage, {Taskable} from './../../Task'

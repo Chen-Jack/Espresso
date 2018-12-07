@@ -2,9 +2,11 @@ import React from 'react'
 import { View, FlatList } from 'react-native'
 import {TaskCard} from './../TaskCard'
 import { UserTaskContext } from './../../Context'
-import {TaskSet} from '../../home'
+import {TaskSet, ManagerContext} from '../../home'
 import TaskListHeader from './TaskListHeader'
 import EmptyList from './EmptyList'
+import { Landable } from '../TravelingList';
+import {Layout} from './../../../../utility'
 
 
 
@@ -20,11 +22,11 @@ interface TaskListState{
     canScroll: boolean
 }
 
-export default class TaskList extends React.Component<TaskListProps, TaskListState> {
+export default class TaskList extends React.Component<TaskListProps, TaskListState> implements Landable {
     list : React.RefObject<any>
     layout: any
-
-    constructor(props) {
+    
+    constructor(props : TaskListProps) {
         super(props)
 
         this.list = React.createRef()
@@ -48,7 +50,7 @@ export default class TaskList extends React.Component<TaskListProps, TaskListSta
         console.log("TaskList unmounting");
     }
 
-    _renderListItem = ({ item, index }) => {
+    _renderListItem = ({ item, index } : {item: any, index: number}) => {
         return (
             <TaskCard
                 parent_list={this}
@@ -75,14 +77,14 @@ export default class TaskList extends React.Component<TaskListProps, TaskListSta
         })
     }
 
-    measureLayout = (cb = () => { }) => {
-        this.list.current.measure((x, y, width, height, pageX, pageY) => {
+    measureLayout = (cb : any = () => { }) => {
+        this.list.current.measure((x, y, width :number, height:number, pageX: number, pageY: number) => {
             const layout = {
                 x: pageX,
                 y: pageY,
                 width: width,
                 height: height
-            }
+            } 
             this.layout = layout
             cb(layout)
         })
@@ -93,9 +95,9 @@ export default class TaskList extends React.Component<TaskListProps, TaskListSta
         return this.props.data.date || null
     }
 
-    toggleScroll = (status = null) => {
+    toggleScroll = (status : boolean | undefined) => {
         this.setState({
-            canScroll: status ? status : !this.state.canScroll
+            canScroll: (status !== undefined) ? status : !this.state.canScroll
         })
     }
 
@@ -116,10 +118,11 @@ export default class TaskList extends React.Component<TaskListProps, TaskListSta
     onHandleReleaseGesture = () => {
         console.log(`${this.props.data.date} captured the released gesture`);
     }
+    
 
     onLayoutHandler = () => {
         if (this.props.initialize){
-            this.measureLayout((layout) => {
+            this.measureLayout((layout : Layout) => {
                 if (this.props.initialize) {
                     this.props.initialize(this, layout, this.props.index)
                 }
@@ -129,10 +132,10 @@ export default class TaskList extends React.Component<TaskListProps, TaskListSta
 
     render() {
         let focus_style = { backgroundColor: (this.state.isGestureHovering ? "yellow" : null) }
-        let landable_style = { flex: 1, ...focus_style }
+        let landable_style = { flex: 1, ...focus_style, width: "100%", height: "100%" }
         return (
             <UserTaskContext.Consumer>
-                {({ deallocateTasksFromDate }) => {
+                {({ deallocateTasksFromDate } : any) => {
                     return (<View
                                 deallocateTasksFromDate={deallocateTasksFromDate}
                                 onLayout={this.onLayoutHandler}
@@ -151,7 +154,6 @@ export default class TaskList extends React.Component<TaskListProps, TaskListSta
                                     <EmptyList /> :
                                     <View style={{ width: "100%", height: "100%" }}>
                                         <FlatList
-                                            style={{ width: "100%", height: "100%" }}
                                             scrollEnabled={this.state.canScroll}
                                             index={this.props.index}
                                             data={this.props.data.tasks}

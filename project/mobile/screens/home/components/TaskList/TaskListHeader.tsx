@@ -5,8 +5,7 @@ import CompletionStatusText from './CompletionStatusText'
 import {PopupMenu} from './../PopupMenu'
 
 
-
-const TaskListHeader = ({ task_list, date }) => {
+const TaskListHeader = ({ task_list, date } : {task_list : any , date:string}) => {
     return <View style={{ flexDirection: "row", width: "100%", backgroundColor: "#222", alignItems: "center", justifyContent: "space-between" }}>
 
         {/* Left Side of Header */}
