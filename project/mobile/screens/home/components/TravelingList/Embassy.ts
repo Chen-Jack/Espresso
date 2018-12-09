@@ -26,6 +26,7 @@ export interface Landable{
     getDate : ()=>string
 }
 
+
 export interface Travelable{
     getID : ()=> string
 }
