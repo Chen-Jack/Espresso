@@ -1,7 +1,7 @@
 //The home page for an account
 
 import React from 'react'
-import {Title, Header, Body,Footer, FooterTab, Container, Content, Text, Button, Toast, Icon} from 'native-base'
+import {Title, Header, Body,Footer, FooterTab, Container, Content, Button, Toast, Icon} from 'native-base'
 import {AsyncStorage, View, Dimensions, TouchableOpacity } from 'react-native'
 import { Calendar } from 'react-native-calendars';
 import {TaskCarousel} from './components/TaskCarousel'
@@ -10,10 +10,8 @@ import {TaskDrawer} from './components/TaskDrawer'
 import {UserTaskContext, EditModeContext} from './Context'
 import update from 'immutability-helper'
 import { Embassy } from './components/TravelingList';
-import TaskStorage, {Taskable} from './../../Task'
+import TaskStorage, {Taskable, TaskSet} from './../../Task'
 import {getDay} from './../../utility'
-
-
 
 export interface ManagerContext{
     updateStatus : any,
@@ -28,13 +26,10 @@ export interface ManagerContext{
 
 export interface EditContext{
     isEditMode : boolean,
-    toggleEditMode() : void
+    toggleEditMode : ()=>void
 }
 
-export interface TaskSet{
-    date: string,
-    tasks: Taskable[]
-}
+
 interface HomeScreenState{
     user : any,
 
@@ -60,7 +55,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
     manager: ManagerContext
     carousel: React.RefObject<TaskCarousel>
     calendar: React.RefObject<Calendar>
-    drawer: TaskDrawer
+    drawer: TaskDrawer | null
     
 
     constructor(props : any) {
@@ -81,6 +76,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
 
         this.carousel = React.createRef()
         this.calendar = React.createRef()
+        this.drawer = null
 
         this.today = new Date()
 
@@ -98,7 +94,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
             deleteTask : this.deleteTask,
             editTask: this.editTask,
             deallocateTasksFromDate : this.deallocateTasksFromDate
-        }
+        } 
 
         //Give the Embassy access to the same context manager
         Embassy.setManager(this.manager) 

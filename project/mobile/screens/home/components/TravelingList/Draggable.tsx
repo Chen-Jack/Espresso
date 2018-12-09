@@ -1,12 +1,14 @@
 import Embassy from './Embassy'
-import React from 'react'
-import ReactNative, { Modal, View, Text, TouchableHighlight, PanResponder, Animated, FlatList, Dimensions} from 'react-native'
-import PropTypes from 'prop-types'
+import React, { SyntheticEvent } from 'react'
+import ReactNative, { Modal, View, PanResponder, Animated, PanResponderInstance, NativeSyntheticEvent, GestureResponderEvent, PanResponderGestureState} from 'react-native'
+import { Coordinate } from '../../../../utility';
+import { TaskCard } from '../TaskCard';
+import { TaskList } from '../TaskList';
 
 interface DraggableProps{
-    source : any
-    origin_list: any
-    doubleTapHandler : any
+    source : TaskCard
+    origin_list: TaskList
+    doubleTapHandler : ()=>void
 }
 
 interface DraggableState{
@@ -17,12 +19,12 @@ interface DraggableState{
 }
 
 export default class Draggable extends React.Component<DraggableProps, DraggableState>{
-    _panResponder : any
+    _panResponder : PanResponderInstance | undefined
 
     animation_speed : number
     time_of_last_press : number
     waiting_for_second_tap : boolean
-    gesture_started: boolean
+    gesture_started: boolean  //a variable to know allow/know if the gesture has officially started
 
     default_size : {
         width: number,
@@ -32,15 +34,15 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
     ms_to_trigger_double_tap : number
     ms_to_trigger_long_press : number
 
-    timer_ref : any
+    timer_ref : any //Ref to keep track of long press
 
-    constructor(props) {
+    constructor(props : DraggableProps) {
         super(props)
 
         this.state = {
             pan: new Animated.ValueXY(),
             focus : false ,
-            scale: new Animated.Value(0), //Start initial scale as 0,
+            scale: new Animated.Value(0),
             modal_scale: new Animated.Value(1)
         }
 
@@ -51,20 +53,20 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
         this.ms_to_trigger_double_tap = 350;
 
         this.ms_to_trigger_long_press = 200; 
-        this.timer_ref = null   //Ref to keep track of long press
-        this.gesture_started = false //a variable to know allow/know if the gesture has officially started
+        this.timer_ref = null   
+        this.gesture_started = false
 
         this.default_size = {width:0, height:0}
     }
 
-    _onLayoutHandler = (e)=>{
+    _onLayoutHandler = (e : any)=>{
         this.default_size = {
             width: e.nativeEvent.layout.width,
             height: e.nativeEvent.layout.height
         }
     }
 
-    long_press_callback = (e, gestureState)=>{
+    long_press_callback = (e : SyntheticEvent, gestureState : PanResponderGestureState)=>{
             
         this.setState({
             focus: true
@@ -102,7 +104,7 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
         const coordinates = {
             x : e.nativeEvent.pageX,
             y: e.nativeEvent.pageY
-        }
+        } as Coordinate
 
         Embassy.onStartTraveling(coordinates, this.props.source, this.props.origin_list)
         
@@ -121,12 +123,12 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
         this._panResponder = PanResponder.create({
             // onStartShouldSetResponder: (evt, gesture) => true,
             // onStartShouldSetResponderCapture: (evt,gesture)=> true,
-            onStartShouldSetPanResponder : (evt, gesture) => true,
+            onStartShouldSetPanResponder : () => true,
             // onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
 
             // onMoveShouldSetResponder: (evt, gestureState) => true,
             // onMoveShouldSetResponderCapture : (evt, gesture) => true,
-            onMoveShouldSetPanResponder: (evt,gestureState) => true,
+            onMoveShouldSetPanResponder: () => true,
             // onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
 
             onPanResponderGrant: (e, gestureState) => {
@@ -189,10 +191,10 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
             //     return false
             // },
 
-            onPanResponderTerminationRequest: (evt, gestureState) => false,
+            onPanResponderTerminationRequest: () => false,
 
 
-            onPanResponderRelease: (e, gestureState) => {
+            onPanResponderRelease: (e) => {
                 if(!this.gesture_started){
                     //Released too early before actually starting gesture
                     clearTimeout(this.timer_ref)
@@ -246,15 +248,6 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
 
     componentWillUnmount(){
         console.log("Draggable Unmounting");
-        // Animated.timing(                  // Animate over time
-        //     this.state.scale,            // The animated value to drive
-        //     {
-        //       toValue: 0,                   // Animate to opacity: 1 (opaque)
-        //       duration: 1000,              // Make it take a while
-        //     }
-        //   ).start();  
-
-        
     }
 
     render(){

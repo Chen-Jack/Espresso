@@ -16,23 +16,21 @@ all subscribled events must have (coordinates) as their parameters
 import {TaskList} from './../TaskList'
 import {ManagerContext} from './../../home'
 import {Coordinate} from './../../../../utility'
+import {TaskCard} from './../TaskCard'
 
 export interface Landable{
     onGestureLoseFocus : ()=>void,
     onGestureFocus  : ()=>void,
     onGestureStay : ()=>void,
-    onHandleReleaseGesture : ()=>void
+    onHandleReleaseGesture : ()=>void,
 }
 
 export interface LandableContainer{
-    getList() : Landable | null
-    isGestureOnTop(coordinates : Coordinate) : any
+    getList : ()=> Landable | null
+    isGestureOnTop : (coordinates : Coordinate)=> boolean
 }
 
-interface Subscribeable{
-    
-}
-
+export type Subscribeable = (coordinates : Coordinate, cb ?: (err: any)=>void )=>void
 
 
 export default class Embassy{
@@ -68,7 +66,7 @@ export default class Embassy{
             Embassy.active_list = null;
         }
     }
-    static setStartingDetails = (traveler, origin : Landable | null)=>{
+    static setStartingDetails = (traveler : any, origin : Landable | null)=>{
         Embassy.traveler = traveler
         Embassy.traveler_origin_list = origin
     }
@@ -97,7 +95,7 @@ export default class Embassy{
         }
         return false
     }
-    static addOnStartHandlers = (handlers) => {
+    static addOnStartHandlers = (handlers : Subscribeable[] | Subscribeable) => {
         // All handlers must have two params, coordinates and a callback
         if(Array.isArray(handlers)){
             for(let func of handlers){
@@ -111,7 +109,7 @@ export default class Embassy{
             console.log("Incorrect handler passed into Embassy.addOnStartHandler");
         }
     }
-    static addOnMoveHandlers = (handlers) => {
+    static addOnMoveHandlers = (handlers : Subscribeable[] | Subscribeable) => {
         
         if(Array.isArray(handlers)){
             for(let func of handlers){
@@ -125,7 +123,7 @@ export default class Embassy{
             console.log("Incorrect handler passed into Embassy.addOnMoveHandler");
         }
     }
-    static addOnReleaseHandlers = (handlers) => {
+    static addOnReleaseHandlers = (handlers : Subscribeable[] | Subscribeable) => {
         if(Array.isArray(handlers)){
             for(let func of handlers){
                 Embassy.onReleaseEvents.push(func)
@@ -181,7 +179,7 @@ export default class Embassy{
         Embassy.active_list = new_list
         return Embassy.active_list
     }
-    static onStartTraveling = (coordinates, traveler, origin_list)=>{
+    static onStartTraveling = (coordinates : Coordinate, traveler : TaskCard, origin_list : TaskList)=>{
         /*
         Should be called by the draggable that initates the travel
         The traveler and the origin_list are the references to the
@@ -210,7 +208,7 @@ export default class Embassy{
             event(coordinates)
         }
     }
-    static onTravel = (coordinates)=>{
+    static onTravel = (coordinates : Coordinate)=>{
         /*
         Call back to only be used by the traveling Draggable
         */

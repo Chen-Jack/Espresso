@@ -9,6 +9,10 @@ export interface Taskable{
     allocated_date : string | null,
 }
 
+export interface TaskSet{
+    date: string,
+    tasks: Taskable[]
+}
 
 export default class TaskStorage{
 

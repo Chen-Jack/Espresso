@@ -1,12 +1,8 @@
 import React from 'react'
-import {Card, CardItem, Text, Body,Button, View, Badge, Icon,Input} from 'native-base'
-import {TouchableOpacity, Alert, TextInput} from 'react-native'
+import {Card, CardItem, Text, Body, View} from 'native-base'
 import {Draggable} from './../TravelingList'
-import Modal from 'react-native-modal'
-import PropTypes, { string } from 'prop-types'
 import {UserTaskContext, EditModeContext} from '../../Context'
 import Collapsible from 'react-native-collapsible';
-import {TaskEditForm} from './../TaskForm'
 import CardOptions from './CardOptions'
 
 
@@ -25,7 +21,7 @@ interface TaskCardState{
 }
 
 export default class TaskCard extends React.Component<TaskCardProps, TaskCardState>{
-    constructor(props) {
+    constructor(props : TaskCardProps) {
         super(props)
 
         this.state={
