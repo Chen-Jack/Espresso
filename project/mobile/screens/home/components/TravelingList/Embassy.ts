@@ -23,7 +23,14 @@ export interface Landable{
     onGestureFocus  : ()=>void,
     onGestureStay : ()=>void,
     onHandleReleaseGesture : ()=>void,
+    getDate : ()=>string
 }
+
+export interface Travelable{
+    getID : ()=> string
+}
+
+
 
 export interface LandableContainer{
     getList : ()=> Landable | null
@@ -241,11 +248,12 @@ export default class Embassy{
             Transfers the contents from the traveler's origin to the 
             target
         */
-       const task_id = Embassy.getTraveler().props.task_id
-       const old_list_date = Embassy.traveler_origin_list.getDate()
+       console.log("Traveler is", Embassy.getTraveler());
+       const task_id = Embassy.getTraveler().getID()
+       const old_list_date = (Embassy.traveler_origin_list as Landable).getDate()
        const new_list_date = target ? target.getDate() : null
 
-       console.log("Transfering", old_list_date, "--->", new_list_date);
+       console.log("Transfering", task_id, old_list_date, "--->", new_list_date);
        if(new_list_date === null){
         //Deallocate
             console.log("Deallocating");

@@ -2,15 +2,19 @@ import React from 'react'
 import {View, Button, TouchableOpacity, Animated, Dimensions} from 'react-native'
 import Modal from 'react-native-modal'
 import MenuOptions from './MenuOptions'
-import {EditModeContext, UserTaskContext} from './../../Context'
 import { Coordinate , Layout} from '../../../../utility';
 import ExitEditModeButton from './ExitEditModeButton'
 import MenuButton from './MenuButton'
+import {EditModeContext} from './../../Context'
 
+
+export interface Optionable{
+    title: string,
+    handler : (cb :()=>void)=>void
+}
 
 
 interface PopupMenuProps{
-
 }
 
 interface PopupMenuState{
@@ -21,13 +25,14 @@ interface PopupMenuState{
 
 export default class PopupMenu extends React.Component<PopupMenuProps, PopupMenuState>{
     menu : React.RefObject<any>
-    options: React.RefObject<any>
+    popup_content: React.RefObject<any>
+    options : Optionable[]
 
     constructor(props: PopupMenuProps) {
         super(props)
 
         this.menu = React.createRef()
-        this.options = React.createRef()
+        this.popup_content = React.createRef()
 
         this.state = {
             location : {x:0, y:0},
@@ -35,30 +40,35 @@ export default class PopupMenu extends React.Component<PopupMenuProps, PopupMenu
             isVisible : false
         }
 
-     
-    }
-
-    componentDidMount(){
-        this.popupOptions = [
+        this.options  =[
             {
                 title: "Edit",
-                handler: this.menu.current.props.toggleEditMode
+                handler: ()=>{}
             },
             {
-                title: "Clear",
-                handler: this.deallocateAllTasks
-            }
+                title: "2",
+                handler: ()=>{}
+            },
+            {
+                title: "3",
+                handler: ()=>{}
+            },
         ]
+
+    }
+    
+
+    componentDidMount(){
     }
 
     componentWillUnmount(){
         console.log("Popupmenu unmounted");
     }
     
-    toggleMenu = ()=>{
+    toggleMenu = (state?: boolean)=>{
         if(!this.state.isVisible){
             Promise.all([
-                new Promise((resolve,reject)=>{
+                new Promise((resolve)=>{
                     this.menu.current.measure((x,y,width,height,pageX,pageY)=>{
                         const location = {x :pageX,y:pageY}
                         this.setState({
@@ -69,9 +79,14 @@ export default class PopupMenu extends React.Component<PopupMenuProps, PopupMenu
                 new Promise((resolve)=>{
                     //If the dimensions havent been measured yet
                     if(this.state.dimensions.width === 0 && this.state.dimensions.height === 0){
-                        this.options.current.measure((x,y,width,height,pageX,pageY)=>{
-                            const dimensions = {width :width,height:height}
-                            console.log("measured to be", dimensions);
+                        this.popup_content.current.measure((x,y,width,height,pageX,pageY)=>{
+                            const dimensions = {
+                                x: x,
+                                y: y,
+                                width : width,
+                                height: height
+                            } as Layout
+                            // console.log("measured to be", dimensions);
                             this.setState({
                                 dimensions: dimensions
                             }, resolve)
@@ -82,17 +97,13 @@ export default class PopupMenu extends React.Component<PopupMenuProps, PopupMenu
                 })
             ]).then(()=>{
                 this.setState({
-                    isVisible : !this.state.isVisible
-                }, ()=>{
-                    console.log("toggled to", this.state.isVisible);
+                    isVisible : (state) ? state : !this.state.isVisible
                 })
             })
         }
         else{
             this.setState({
                 isVisible: !this.state.isVisible
-            }, ()=>{
-                console.log("toggled to", this.state.isVisible);
             })
         }
     }
@@ -100,38 +111,56 @@ export default class PopupMenu extends React.Component<PopupMenuProps, PopupMenu
 
     render(){
         return <EditModeContext.Consumer>
-            { ({isEditMode, toggleEditMode})=>{return (
-            
-            <View ref={this.menu} toggleEditMode={toggleEditMode}>
+            {
+            ({isEditMode, toggleEditMode} : any)=>{
 
-                {isEditMode ? <ExitEditModeButton options = {this.props.popupOptions}/> : <MenuButton openMenu={this.toggleMenu}/>}
+                // Read from context and bind the context function to the options
+                for(let option of this.options){
+                    if(option.title === "Edit"){
+                        option.handler = toggleEditMode
+                        break;
+                    }
+                }
+                console.log("CONTEXT IS", isEditMode, toggleEditMode);
 
-                <View ref={this.options} >
-                    <Modal
-                        style = {{margin:0,position:"absolute", width:"100%", height:"100%"}}
-                        backdropOpacity = {0.2}
-                        onBackdropPress={this.toggleMenu}
-                        visible = {this.state.isVisible}>
+                return(
+                    <View ref={this.menu}>
+                    {
+                        isEditMode ? 
+                        <ExitEditModeButton onPress={()=>toggleEditMode()}/> : 
+                        <MenuButton onPress={this.toggleMenu.bind(this,true)}/>
+                    }
 
-                        <View style={{
-                            margin: 0, position:"absolute", 
-                            justifyContent:"center", 
-                            alignItems:"center", 
-                            top:this.state.location.y, 
-                            left:this.state.location.x-100, 
-                            backgroundColor:"white",
-                            shadowOpacity:0.5, shadowColor:"black", 
-                            shadowOffset:{width:5, height:5}, 
-                            shadowRadius:3}}>
+                    {/* POPUP MENU CONTENT */}
+                    <View ref={this.popup_content} >
+                        <Modal
+                            animationIn={"fadeIn"}
+                            animationOut={"fadeOut"}
+                            style = {{margin:0,position:"absolute", width:"100%", height:"100%"}}
+                            backdropOpacity = {0.2}
+                            onBackdropPress={this.toggleMenu}
+                            isVisible = {this.state.isVisible}>
 
-                            <MenuOptions onChooseOption={this.toggleMenu} options={this.popupOptions}/>
-                        </View>
+                            <View style={{
+                                margin: 0, 
+                                position:"absolute", 
+                                justifyContent:"center", 
+                                alignItems:"center", 
+                                top:this.state.location.y, 
+                                left:this.state.location.x-100, 
+                                backgroundColor:"white",
+                                shadowOpacity:0.5, shadowColor:"black", 
+                                shadowOffset:{width:5, height:5}, 
+                                shadowRadius:3}}>
 
-                    </Modal>
+                                <MenuOptions onChooseOption={this.toggleMenu} options={this.options}/>
+                            </View>
+
+                        </Modal>
+                    </View>
                 </View>
-            </View>
-
-        )}}
+                )
+            }}
         </EditModeContext.Consumer>
     }
 }

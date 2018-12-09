@@ -25,6 +25,9 @@ export default class TaskCard extends React.Component<TaskCardProps, TaskCardSta
             isCollapsed : true
         }
     }
+    getID = ()=>{
+        return this.props.task.task_id
+    }
     toggleCard = ()=>{
         this.setState({
             isCollapsed: !this.state.isCollapsed
@@ -43,6 +46,7 @@ export default class TaskCard extends React.Component<TaskCardProps, TaskCardSta
             <EditModeContext.Consumer>
             {({isEditMode})=><UserTaskContext.Consumer>
                 {({updateStatus} : any)=>{
+                    console.log("The card is in edit mode? ", isEditMode);
                     return <Draggable 
                         origin_list = {this.props.parent_list} 
                         source = {this}

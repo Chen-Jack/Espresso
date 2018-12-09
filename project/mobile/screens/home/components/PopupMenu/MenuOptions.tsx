@@ -1,33 +1,39 @@
 import React from 'react'
 import {List, Text, ListItem, View} from 'native-base'
 import {TouchableOpacity} from 'react-native'
-
-interface Option{
-    title: string,
-    handler: any
-}
+import {Optionable} from './PopupMenu'
 
 interface MenuOptionsProps{
-    onChooseOption : any
-    options : Option[]
+    onChooseOption : ()=>void
+    options : Optionable[]
 }
 
-
 export default class MenuOptions extends React.Component<MenuOptionsProps>{
-    constructor(props) {
+    constructor(props: MenuOptionsProps) {
         super(props)
-        console.log("RECEIVED OPTIONS", this.props.onChooseOption, this.props.options, );
+        // console.log("RECEIVED OPTIONS", this.props.onChooseOption, this.props.options, );
     }
 
     _renderItems = ()=>{
         console.log("options", this.props.options);
-        return this.props.options.map((option, index)=>{
-            return <ListItem key={index}>
-                <TouchableOpacity onPress={()=>option.handler(this.props.toggleMenu)}>
-                    <Text> {option.title} </Text>
-                </TouchableOpacity>
-            </ListItem>
-        })
+        if(this.props.options){
+            return this.props.options.map((option, index)=>{
+                const handler = ()=>{
+                    option.handler(()=>{
+                        console.log("You chose an option", this.props.onChooseOption);
+                        this.props.onChooseOption()
+                    })
+                }
+                return <ListItem key={index}>
+                    <TouchableOpacity onPress={handler}>
+                        <Text> {option.title} </Text>
+                    </TouchableOpacity>
+                </ListItem>
+            })
+        }
+        else{
+            return null
+        }
     }
     render(){
         return <List style={{width: 100}}>

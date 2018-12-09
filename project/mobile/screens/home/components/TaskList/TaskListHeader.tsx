@@ -4,10 +4,13 @@ import { getDay } from './../../../../utility'
 import CompletionStatusText from './CompletionStatusText'
 import {PopupMenu} from './../PopupMenu'
 import { Taskable } from '../../../../Task';
+import {Optionable} from './../PopupMenu'
 
 interface TaskListHeaderProps{
     task_list : Taskable[] , 
-    date: string}
+    date: string
+}
+    
 
 const TaskListHeader = ({ task_list, date } : TaskListHeaderProps) => {
     return <View style={{ flexDirection: "row", width: "100%", backgroundColor: "#222", alignItems: "center", justifyContent: "space-between" }}>
@@ -21,7 +24,7 @@ const TaskListHeader = ({ task_list, date } : TaskListHeaderProps) => {
         </View>
 
         {/* Right Side of Header */}
-        {task_list.length > 0 && <PopupMenu date={date} />}
+        {task_list.length > 0 && <PopupMenu />}
 
     </View>
 }

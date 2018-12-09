@@ -2,7 +2,7 @@
 
 import React from 'react'
 import {Title, Header, Body,Footer, FooterTab, Container, Content, Button, Toast, Icon} from 'native-base'
-import {AsyncStorage, View, Dimensions, TouchableOpacity } from 'react-native'
+import {AsyncStorage, View, Dimensions, TouchableOpacity, Text } from 'react-native'
 import { Calendar } from 'react-native-calendars';
 import {TaskCarousel} from './components/TaskCarousel'
 import {TaskDrawer} from './components/TaskDrawer'
@@ -11,7 +11,6 @@ import update from 'immutability-helper'
 import { Embassy } from './components/TravelingList';
 import TaskStorage, {Taskable, TaskSet} from './../../Task'
 import {getDay} from './../../utility'
-import Carousel from 'react-native-snap-carousel';
 
 export interface ManagerContext{
     updateStatus : any,
@@ -31,15 +30,13 @@ export interface EditContext{
 
 
 interface HomeScreenState{
-    user : any,
-
     selected_date: string,
-
     unallocated_tasks : Taskable[],
     allocated_tasks: TaskSet[]
     promptTaskCreation : boolean,
     isEditMode: boolean
     isLoading: boolean,
+    editContext : EditContext
 
 }
 
@@ -63,15 +60,16 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         console.disableYellowBox = true;
 
         this.state = {
-            user : {
-                username: ""
-            },
             isLoading : true,
             unallocated_tasks : [],
             allocated_tasks : [],
             selected_date: new Date().toISOString().substring(0,10),
             promptTaskCreation: false,
-            isEditMode: false
+            isEditMode: false,
+            editContext : {
+                isEditMode: false,
+                toggleEditMode : this.toggleEditMode
+            }
         }   
 
         this.carousel = React.createRef()
@@ -80,10 +78,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
 
         this.today = new Date()
 
-        this.editContext = {
-            isEditMode : this.state.isEditMode,
-            toggleEditMode : this.toggleEditMode
-        } as EditContext
+    
 
         this.manager = {
             updateStatus : this.updateCompletionStatusOfState,
@@ -102,12 +97,17 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
     }
 
  
-    toggleEditMode = ()=>{
+    toggleEditMode = (cb ?: (new_status: boolean )=>void)=>{
+        cb && cb(!this.state.isEditMode)
+        const deep_copy = Object.assign({}, this.state.editContext)
+        deep_copy.isEditMode = !this.state.editContext.isEditMode
+
         this.setState({
-            isEditMode : !this.state.isEditMode
+            editContext : deep_copy
         }, ()=>{
-            console.log("TOGGLED THE CONTEXT EDITMODE TO", this.state.isEditMode);
-            if(this.state.isEditMode){
+            console.log("TOGGLED THE CONTEXT EDITMODE TO", this.state.editContext.isEditMode);
+
+            if(this.state.editContext.isEditMode){
                 (this.carousel.current as TaskCarousel).disableCarouselScroll()
             }
             else{
@@ -362,6 +362,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
     }
 
     reallocateTask = (task_id : string, new_date:string,)=>{
+        console.log("Reallocated", task_id, new_date);
         
         // Keep original_state incase of failed API call
         const original_state = this.state.allocated_tasks
@@ -389,6 +390,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
             }   
             
         }
+        console.log("The original task is", original_task);
 
         const updated_task = update(original_task , {allocated_date : {$set : new_date} })
         const new_state = update(this.state.allocated_tasks, 
@@ -708,7 +710,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
 
     render(){
         return <UserTaskContext.Provider value={this.manager}>
-            <EditModeContext.Provider value={this.editContext}>
+            <EditModeContext.Provider value={this.state.editContext}>
                 <TaskDrawer ref={(ref)=>{this.drawer = ref as TaskDrawer}} unallocated_tasks = {this.state.unallocated_tasks}>
                     <Container style={{overflow:"hidden", height: Dimensions.get('window').height, flexDirection: "column"}}>
                         <Header style={{backgroundColor: '#061328'}}>

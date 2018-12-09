@@ -4,7 +4,6 @@ import { View } from 'native-base'
 import { Dimensions } from 'react-native'
 import { TaskList } from '../TaskList'
 import { Embassy, LandableContainer } from '../TravelingList'
-import { UserTaskContext } from './../../Context'
 import Loader from './LoadingCarouselView'
 import { TaskCard } from './../TaskCard'
 import { Layout, Coordinate } from '../../../../utility'
@@ -132,9 +131,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
     }
 
     _onCardMoved: Subscribeable = (coordinates: Coordinate) => {
-        //Subscribed Event Handler
         const direction = this.whichEdgeIsGestureOn(coordinates)
-        console.log("DIRECTION WAS", direction);
         if (!this.autoScrollingTimer && (direction === "LEFT" || direction === "RIGHT")) {
             this.enableAutoScroller(direction)
         }
