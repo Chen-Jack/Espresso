@@ -5,13 +5,13 @@ import {Title, Header, Body,Footer, FooterTab, Container, Content, Button, Toast
 import {AsyncStorage, View, Dimensions, TouchableOpacity } from 'react-native'
 import { Calendar } from 'react-native-calendars';
 import {TaskCarousel} from './components/TaskCarousel'
-import {TaskCreationPrompt} from './components/TaskForm'
 import {TaskDrawer} from './components/TaskDrawer'
 import {UserTaskContext, EditModeContext} from './Context'
 import update from 'immutability-helper'
 import { Embassy } from './components/TravelingList';
 import TaskStorage, {Taskable, TaskSet} from './../../Task'
 import {getDay} from './../../utility'
+import Carousel from 'react-native-snap-carousel';
 
 export interface ManagerContext{
     updateStatus : any,
@@ -83,7 +83,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         this.editContext = {
             isEditMode : this.state.isEditMode,
             toggleEditMode : this.toggleEditMode
-        }
+        } as EditContext
 
         this.manager = {
             updateStatus : this.updateCompletionStatusOfState,
@@ -94,7 +94,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
             deleteTask : this.deleteTask,
             editTask: this.editTask,
             deallocateTasksFromDate : this.deallocateTasksFromDate
-        } 
+        } as ManagerContext
 
         //Give the Embassy access to the same context manager
         Embassy.setManager(this.manager) 
@@ -108,15 +108,15 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         }, ()=>{
             console.log("TOGGLED THE CONTEXT EDITMODE TO", this.state.isEditMode);
             if(this.state.isEditMode){
-                this.carousel.current.disableCarouselScroll()
+                (this.carousel.current as TaskCarousel).disableCarouselScroll()
             }
             else{
-                this.carousel.current.enableCarouselScroll()
+                (this.carousel.current as TaskCarousel).enableCarouselScroll()
             }
         })
     }
 
-    updateCompletionStatusOfState = (task_id:string, new_status:boolean, cb:(err?:any)=>{})=>{
+    updateCompletionStatusOfState = (task_id:string, new_status:boolean, cb ?:(err?:any)=>{})=>{
         const original_allocated_state = this.state.allocated_tasks
         const original_unallocated_state = this.state.unallocated_tasks
   
@@ -170,10 +170,10 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
                     allocated_tasks : original_allocated_state,
                     unallocated_tasks : original_unallocated_state
                 })
-                cb(err)
+                cb && cb(err)
             }
             else{
-                cb()
+                cb && cb()
             }
         })
 
@@ -247,7 +247,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
        
     }
 
-    deallocateTasksFromDate = (target_date : string, cb=()=>{})=>{
+    deallocateTasksFromDate = (target_date : string)=>{
         console.log("deallocating all tasks on date", target_date);
         const original_allocated_state = this.state.allocated_tasks
         const original_unallocated_state = this.state.unallocated_tasks
@@ -304,7 +304,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         
     }
 
-    deallocateTask = (task_id : string, cb=()=>{}) => {
+    deallocateTask = (task_id : string) => {
         console.log("deallocating");
         const original_allocated_state = this.state.allocated_tasks
         const original_unallocated_state = this.state.unallocated_tasks
@@ -351,14 +351,17 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
               })
         })
 
-        TaskStorage.allocateTask(task_id, null)
+        TaskStorage.allocateTask(task_id, null, (err)=>{
+            if(err){
+                this.setState({
+                    allocated_tasks: original_allocated_state,
+                    unallocated_tasks: original_unallocated_state
+                })
+            }
+        })
     }
 
-    reallocateTask = (task_id : string, new_date:string, cb=()=>{})=>{
-        /*
-        Uses an optomistic UX approach. Update the UI before API actually
-        finishes.
-        */
+    reallocateTask = (task_id : string, new_date:string,)=>{
         
         // Keep original_state incase of failed API call
         const original_state = this.state.allocated_tasks
@@ -442,7 +445,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
 
     }
 
-    deleteTask = (task_id : string, cb=()=>{})=>{
+    deleteTask = (task_id : string)=>{
         console.log("DELETING", task_id);
         const original_allocated_state = this.state.allocated_tasks
         const original_unallocated_state = this.state.unallocated_tasks
@@ -511,7 +514,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         })
     }
 
-    editTask = (task_id : string, new_title : string, new_details : string | null, cb=()=>{})=>{
+    editTask = (task_id : string, new_title : string, new_details : string | null)=>{
         console.log("Editing Task");
         const original_allocated_state = this.state.allocated_tasks
         const original_unallocated_state = this.state.unallocated_tasks
@@ -590,7 +593,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         this.setState({
             selected_date: isodate
         }, ()=> {
-            this.carousel.current.updateToDate(this.state.selected_date)
+            (this.carousel.current as TaskCarousel).updateToDate(this.state.selected_date)
         })
     }
 
@@ -651,6 +654,9 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
 
     _initalizeApp = ()=>{
         AsyncStorage.getItem("espresso_app", (err, app)=>{
+            if(err)
+                return alert("PROBLEM INITIALIZING ESPRESSO")
+
             const app_data = JSON.parse(app as string)
             if(!app_data){
                 console.log("Initializing App for the first time");

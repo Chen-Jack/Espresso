@@ -1,11 +1,15 @@
 import React from 'react'
-import { View, Text, FlatList } from 'react-native'
+import { View, Text } from 'react-native'
 import { getDay } from './../../../../utility'
 import CompletionStatusText from './CompletionStatusText'
 import {PopupMenu} from './../PopupMenu'
+import { Taskable } from '../../../../Task';
 
+interface TaskListHeaderProps{
+    task_list : Taskable[] , 
+    date: string}
 
-const TaskListHeader = ({ task_list, date } : {task_list : any , date:string}) => {
+const TaskListHeader = ({ task_list, date } : TaskListHeaderProps) => {
     return <View style={{ flexDirection: "row", width: "100%", backgroundColor: "#222", alignItems: "center", justifyContent: "space-between" }}>
 
         {/* Left Side of Header */}

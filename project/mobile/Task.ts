@@ -37,7 +37,7 @@ export default class TaskStorage{
         })
     }
 
-    static createTask(title : string = "", details : string | null = "", cb ?: (err : any, new_task ?: Taskable) => void){
+    static createTask(title : string = "", details : string | null = "", cb ?: (err : any, new_task : Taskable) => void){
        const new_task = {
            task_id : uuid(),
            title,

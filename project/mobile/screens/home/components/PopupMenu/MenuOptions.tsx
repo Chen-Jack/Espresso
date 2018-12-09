@@ -1,12 +1,22 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import {List, Text, ListItem, View} from 'native-base'
 import {TouchableOpacity} from 'react-native'
 
-export default class MenuOptions extends React.Component{
+interface Option{
+    title: string,
+    handler: any
+}
+
+interface MenuOptionsProps{
+    onChooseOption : any
+    options : Option[]
+}
+
+
+export default class MenuOptions extends React.Component<MenuOptionsProps>{
     constructor(props) {
         super(props)
-        console.log("RECEIVED", this.onChooseOption, this.props.options, );
+        console.log("RECEIVED OPTIONS", this.props.onChooseOption, this.props.options, );
     }
 
     _renderItems = ()=>{
@@ -26,12 +36,3 @@ export default class MenuOptions extends React.Component{
     }
 }
 
-MenuOptions.propTypes = {
-    onChooseOption : PropTypes.func,
-    options : PropTypes.arrayOf(
-        PropTypes.shape({
-            title : PropTypes.string.isRequired,
-            handler : PropTypes.func.isRequired
-        })
-    ).isRequired
-}

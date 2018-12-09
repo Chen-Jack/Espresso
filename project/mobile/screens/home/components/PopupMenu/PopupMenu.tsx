@@ -1,48 +1,29 @@
 import React from 'react'
-import {View, Button, TouchableOpacity, Animated} from 'react-native'
-import {Icon} from 'native-base'
+import {View, Button, TouchableOpacity, Animated, Dimensions} from 'react-native'
 import Modal from 'react-native-modal'
-import PropTypes from 'prop-types'
 import MenuOptions from './MenuOptions'
 import {EditModeContext, UserTaskContext} from './../../Context'
+import { Coordinate , Layout} from '../../../../utility';
+import ExitEditModeButton from './ExitEditModeButton'
+import MenuButton from './MenuButton'
 
-const MenuButton = ({openMenu})=>{
-    return <TouchableOpacity onPress={openMenu} style={{marginRight: 15}}>
-        <Icon style={{color:"white"}} name="more"/>
-    </TouchableOpacity>
+
+
+interface PopupMenuProps{
+
 }
 
-
-class ExitEditModeButton extends React.Component{
-    constructor(props) {
-        super(props)
-    }
-
-    componentDidMount(){
-
-        // this.handler = ()=>{}
-        // for(let option of this.props.options){
-        //     if(option.title === "Edit"){
-        //         this.handler = option.handler
-        //     }
-        // }
-    }
-
-    render(){
-        return <TouchableOpacity 
-            onPress={()=>this.handler()} 
-            style={{marginRight: 15}}>
-                <Animated.View style={{width:50, scaleX: this.state.scale, scaleY: this.state.scale}}>
-                    <Icon type="MaterialIcons" style={{fontSize: 20, color:"white"}} name="done"/>
-                </Animated.View>
-            </TouchableOpacity>  
-    }
+interface PopupMenuState{
+    location : Coordinate,
+    dimensions: Layout,
+    isVisible: boolean
 }
 
+export default class PopupMenu extends React.Component<PopupMenuProps, PopupMenuState>{
+    menu : React.RefObject<any>
+    options: React.RefObject<any>
 
-
-export default class PopupMenu extends React.Component{
-    constructor(props) {
+    constructor(props: PopupMenuProps) {
         super(props)
 
         this.menu = React.createRef()
@@ -50,7 +31,7 @@ export default class PopupMenu extends React.Component{
 
         this.state = {
             location : {x:0, y:0},
-            dimensions : {width: 0, height: 0},
+            dimensions : {x: 0, y: 0, width: 0, height: 0},
             isVisible : false
         }
 
@@ -85,7 +66,7 @@ export default class PopupMenu extends React.Component{
                         }, resolve)
                     })
                 }),
-                new Promise((resolve,reject)=>{
+                new Promise((resolve)=>{
                     //If the dimensions havent been measured yet
                     if(this.state.dimensions.width === 0 && this.state.dimensions.height === 0){
                         this.options.current.measure((x,y,width,height,pageX,pageY)=>{

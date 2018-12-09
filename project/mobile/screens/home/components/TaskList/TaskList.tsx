@@ -2,11 +2,11 @@ import React from 'react'
 import { View, FlatList } from 'react-native'
 import {TaskCard} from './../TaskCard'
 import { UserTaskContext } from './../../Context'
-import {TaskSet, ManagerContext} from '../../home'
 import TaskListHeader from './TaskListHeader'
 import EmptyList from './EmptyList'
 import { Landable } from '../TravelingList';
 import {Layout} from './../../../../utility'
+import {Taskable, TaskSet} from './../../../../Task'
 
 
 
@@ -50,16 +50,12 @@ export default class TaskList extends React.Component<TaskListProps, TaskListSta
         console.log("TaskList unmounting");
     }
 
-    _renderListItem = ({ item, index } : {item: any, index: number}) => {
+    _renderListItem = ({ item, index } : {item: Taskable, index: number}) => {
         return (
             <TaskCard
                 parent_list={this}
-                task_id={item.task_id}
-                index = {index}
-                title={item.title}
-                date={item.allocated_date}
-                details={item.details}
-                isCompleted={item.completed} />
+                task = {item}
+                index = {index} />
         )
     }
 

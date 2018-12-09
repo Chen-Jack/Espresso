@@ -30,7 +30,7 @@ export interface LandableContainer{
     isGestureOnTop : (coordinates : Coordinate)=> boolean
 }
 
-export type Subscribeable = (coordinates : Coordinate, cb ?: (err: any)=>void )=>void
+export type Subscribeable = (coordinates : Coordinate , cb ?: (err: any)=>void )=>void
 
 
 export default class Embassy{

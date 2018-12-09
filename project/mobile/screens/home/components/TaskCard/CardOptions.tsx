@@ -5,11 +5,12 @@ import DeleteButton from './DeleteButton'
 import EditTaskButton from './EditTaskButton'
 import {Taskable} from './../../../../Task'
 
-interface OptionsProps{
+interface EditModeOptionsProps{
     task: Taskable
 }
 
-const Options : React.FunctionComponent<OptionsProps> = ({task})=>{
+const EditModeOptions : React.FunctionComponent<EditModeOptionsProps> = ({task})=>{
+    console.log("Called?");
     return <View style={{flexDirection:"row"}}>
         <EditTaskButton task={task}/>
         <DeleteButton task_id = {task.task_id}/>
@@ -19,17 +20,17 @@ const Options : React.FunctionComponent<OptionsProps> = ({task})=>{
 
 interface CardOptionsProps{
     task: Taskable,
-    details: string,
+    details: string | null,
     isEditMode: boolean,
     isCollapsed: boolean,
     toggleDetails : any
 }
 
 const CardOptions : React.FunctionComponent<CardOptionsProps> = ({task, details, isEditMode, isCollapsed, toggleDetails})=>{
-    
+    console.log("receieved", isEditMode);
     if(isEditMode){
         return <View style={{flexDirection:"row",alignItems:"center"}}>
-            <Options task={task}/>
+            <EditModeOptions task={task}/>
         </View>
     }
     else if(details){

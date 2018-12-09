@@ -1,6 +1,6 @@
 import Embassy from './Embassy'
-import React, { SyntheticEvent } from 'react'
-import ReactNative, { Modal, View, PanResponder, Animated, PanResponderInstance, NativeSyntheticEvent, GestureResponderEvent, PanResponderGestureState} from 'react-native'
+import React from 'react'
+import { Modal, View, PanResponder, Animated, PanResponderInstance, GestureResponderEvent, PanResponderGestureState} from 'react-native'
 import { Coordinate } from '../../../../utility';
 import { TaskCard } from '../TaskCard';
 import { TaskList } from '../TaskList';
@@ -66,7 +66,7 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
         }
     }
 
-    long_press_callback = (e : SyntheticEvent, gestureState : PanResponderGestureState)=>{
+    long_press_callback = (e : GestureResponderEvent, gestureState : PanResponderGestureState)=>{
             
         this.setState({
             focus: true
@@ -236,7 +236,7 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
                     const coordinates = {
                         x : e.nativeEvent.pageX,
                         y: e.nativeEvent.pageY
-                    }
+                    } as Coordinate
                     
                     Embassy.onFinishTraveling(coordinates)
                     this.gesture_started = false

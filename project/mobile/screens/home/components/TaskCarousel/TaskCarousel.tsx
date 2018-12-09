@@ -101,7 +101,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
 
     }
 
-    disableAllListScroll: Subscribeable = (_: Coordinate) => {
+    disableAllListScroll: Subscribeable = () => {
         //Subscribed Event Handler
         for (let i = 0; i < this.props.task_data.length; i++) {
             const ref = this._getReference(i)
@@ -109,7 +109,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
         }
     }
 
-    enableAllListScroll: Subscribeable = (_: Coordinate) => {
+    enableAllListScroll: Subscribeable = () => {
         //Subscribed Event Handler
         for (let i = 0; i < this.props.task_data.length; i++) {
             const ref = this._getReference(i)
@@ -118,7 +118,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
     }
 
 
-    _onCardPickedUp: Subscribeable = (coordinates: Coordinate) => {
+    _onCardPickedUp: Subscribeable = (coordinates: Coordinate ) => {
         //Subscribed Event Handler
         this.focused_list_from_gesture_start = this.focused_list
 
@@ -144,7 +144,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
     }
 
 
-    _onCardReleased: Subscribeable = (_: Coordinate) => {
+    _onCardReleased: Subscribeable = () => {
         //Subscribed Event Handler
         this.disableAutoScroller()
     }
@@ -222,13 +222,13 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
 
     }
 
-    enableCarouselScroll: Subscribeable = (_: Coordinate) => {
+    enableCarouselScroll: Subscribeable = () => {
         this.setState({
             canScroll: true
         })
     }
 
-    disableCarouselScroll: Subscribeable = (_: Coordinate) => {
+    disableCarouselScroll: Subscribeable = () => {
         this.setState({
             canScroll: false
         })
