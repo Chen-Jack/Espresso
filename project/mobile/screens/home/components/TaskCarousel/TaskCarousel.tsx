@@ -25,7 +25,7 @@ interface TaskCarouselState {
 
 export default class TaskCarousel extends React.Component<TaskCarouselProps, TaskCarouselState> implements LandableContainer {
     STARTING_INDEX: number
-    carousel: React.RefObject<Carousel>
+    carousel: React.RefObject<TaskCarousel>
     wrapper: React.RefObject<View>
     layout: Layout
 

@@ -88,7 +88,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
             createTask : this.createTask,
             deleteTask : this.deleteTask,
             editTask: this.editTask,
-            deallocateTasksFromDate : this.deallocateTasksFromDate
+            deallocateTasksFromDate : this.deallocateAllTasksFromDate
         } as ManagerContext
 
         //Give the Embassy access to the same context manager
@@ -179,7 +179,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
 
     }
 
-    allocateTask = (task_id : string, new_date:string, cb=()=>{})=>{
+    allocateTask = (task_id : string, new_date:string)=>{
         const original_allocated_state = this.state.allocated_tasks
         const original_unallocated_state = this.state.unallocated_tasks
 
@@ -190,8 +190,8 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
             completed: false,
             allocated_date : null
         };
-        let day_index_updated : number = -1;
-        let task_index_original : number = -1;
+        let day_index_updated : number | null = null;
+        let task_index_original : number | null = null;
 
         // Search through your state to know what indexes to update
         for(let task_index in this.state.unallocated_tasks){
@@ -247,13 +247,13 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
        
     }
 
-    deallocateTasksFromDate = (target_date : string)=>{
+    deallocateAllTasksFromDate = (target_date : string, cb ?: ()=>void)=>{
         console.log("deallocating all tasks on date", target_date);
         const original_allocated_state = this.state.allocated_tasks
         const original_unallocated_state = this.state.unallocated_tasks
 
         const original_task_array : Taskable[] = []
-        let original_date_index : number = -1;
+        let original_date_index : number | null = null;
 
         // Search through your state to know what indexes to update
         for(let day_index in this.state.allocated_tasks){
@@ -283,6 +283,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
             allocated_tasks : new_allocated_state,
             unallocated_tasks : new_unallocated_state
         }, ()=>{
+            cb && cb()
             Toast.show({
                 text: 'All of your tasks were moved back to your board!',
                 buttonText: 'Got it'
@@ -452,8 +453,8 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         const original_allocated_state = this.state.allocated_tasks
         const original_unallocated_state = this.state.unallocated_tasks
 
-        let day_index_original :number = -1
-        let task_index_original : number = -1
+        let day_index_original :number | null = null;
+        let task_index_original : number | null = null
         
         // Search through allocated tasks
         for(let day_index in this.state.allocated_tasks){
@@ -479,13 +480,13 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
                 }
             }   
 
-            if(task_index_original && day_index_original){
+            if(task_index_original!== null && day_index_original!== null){
                 break;
             }        
         }
 
         //Search through unallocated tasks if still not found
-        if(!task_index_original && !task_index_original){
+        if(task_index_original=== null && task_index_original === null){
             for(let task of this.state.unallocated_tasks){
                 if(task.task_id === task_id){
                     const new_state = update(this.state.unallocated_tasks, {
@@ -516,22 +517,23 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         })
     }
 
-    editTask = (task_id : string, new_title : string, new_details : string | null)=>{
-        console.log("Editing Task");
+    editTask = (task_id : string, new_title : string, new_details : string | null, cb ?: ()=>void )=>{
+        console.log("Editing Task to", new_title, new_details);
         const original_allocated_state = this.state.allocated_tasks
         const original_unallocated_state = this.state.unallocated_tasks
 
-        let day_index_original : number = -1
-        let task_index_original : number = -1
+        let day_index_original : number | null = null;
+        let task_index_original : number | null = null;
         
         //Search through allocated tasks
         for(let day_index in this.state.allocated_tasks){
-            let day_tasks = this.state.allocated_tasks[day_index].tasks
+            let day_tasks = (this.state.allocated_tasks[day_index] as TaskSet).tasks
             
             for(let task_index in day_tasks){
                 if(day_tasks[task_index].task_id === task_id){
                     day_index_original = Number(day_index)
                     task_index_original = Number(task_index)
+                    
 
                     const new_state = update(this.state.allocated_tasks, {
                         [day_index_original] : {
@@ -543,21 +545,21 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
                             }
                         }
                     })
-
+                    console.log("found!!!, state now", new_state);
                     this.setState({
                         allocated_tasks : new_state
-                    })
+                    }, cb)
                     break;
                 }
             }   
 
-            if(task_index_original && day_index_original){
+            if(task_index_original!== null && day_index_original!==null){
                 break;
             }        
         }
 
         //Search through unallocated tasks if still not found
-        if(!task_index_original && !task_index_original){
+        if(task_index_original === null && task_index_original===null){
             for(let task_index in this.state.unallocated_tasks){
                 const task = this.state.unallocated_tasks[task_index]
                 if(task.task_id === task_id){
@@ -569,7 +571,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
                     })
                     this.setState({
                         unallocated_tasks : new_state
-                    })
+                    }, cb)
                 }
             }
         }      
@@ -600,7 +602,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
     }
 
 
-   _generateEmptyTaskSet  = () : Array<TaskSet> =>{
+   _generateEmptyTaskSet  = () : TaskSet[] =>{
         const day_variance = 28; //How many days of tasks you will show.
         const seconds_per_day = 86400;
         const task_set = [];

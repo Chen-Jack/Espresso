@@ -24,7 +24,7 @@ const TaskListHeader = ({ task_list, date } : TaskListHeaderProps) => {
         </View>
 
         {/* Right Side of Header */}
-        {task_list.length > 0 && <PopupMenu />}
+        {task_list.length > 0 && <PopupMenu date={date}/>}
 
     </View>
 }

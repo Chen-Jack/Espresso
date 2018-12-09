@@ -17,7 +17,7 @@ interface EditFormState{
 }
 
 export default class TaskEditForm extends React.Component<EditFormProps, EditFormState>{
-    constructor(props) {
+    constructor(props: EditFormProps) {
         super(props)
         this.state = {
             form_errors : [],
@@ -27,10 +27,9 @@ export default class TaskEditForm extends React.Component<EditFormProps, EditFor
         console.log("taskeditform", this.props.title, this.props.details);
     }
 
-    _submitForm = (editTask)=>{
-        editTask(this.props.task_id, this.state.task_title, this.state.task_detail, (err)=>{
-            if(!err) this.props.onFormFinishedSubmition()
-            else alert("Problem when editing your task.")
+    _submitForm = (editTask : any)=>{
+        editTask(this.props.task_id, this.state.task_title, this.state.task_detail, ()=>{
+            this.props.onFormFinishedSubmition()
         })
     }
 
