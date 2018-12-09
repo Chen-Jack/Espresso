@@ -1,14 +1,15 @@
 // The initial screen when a user opens the app (Before Login)
-import React from 'react';
-import {Button, Text, View} from 'native-base'
+import React from "react";
+import {Text, Button, View} from 'native-base'
 import {AsyncStorage} from 'react-native'
 
 class LandingScreen extends React.Component{
-    constructor(props){
+    
+    constructor(props : any){
         super(props)
 
        
-        this._isLoggedIn()
+        this._isLoggedIn();
     }
 
     register = ()=>{

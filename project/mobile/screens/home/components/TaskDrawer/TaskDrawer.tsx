@@ -1,12 +1,27 @@
 import React from 'react'
 import SideMenu from 'react-native-side-menu'
-import PropTypes from 'prop-types'
 import Content from './Content'
-import {Embassy} from './../TravelingList'
+import {Embassy, LandableContainer} from './../TravelingList'
+import {Taskable} from './../../../../Task'
+import {Layout, Coordinate} from './../../../../utility'
 
 
-export default class TaskDrawer extends React.Component{
-    constructor(props) {
+interface DrawerState{
+    visible: boolean
+}
+
+interface DrawerProps{
+    unallocated_tasks : Taskable[]
+}
+
+
+
+export default class TaskDrawer extends React.Component<DrawerProps, DrawerState> implements LandableContainer{
+    layout : Layout
+    drawer : any
+    content: any
+
+    constructor(props : DrawerProps) {
         super(props)
 
         this.state = {
@@ -14,7 +29,6 @@ export default class TaskDrawer extends React.Component{
         }
 
         this.layout = null;
-        
         this.drawer = React.createRef()
 
     }
@@ -27,7 +41,9 @@ export default class TaskDrawer extends React.Component{
         console.log("Drawer Unmounting");
     }
 
-    isGestureOnTop = ()=>{
+
+
+    isGestureOnTop = (location : Coordinate)=>{
         /*
         Checks if the given coordinates are ontop of the focused landable
         */
@@ -111,8 +127,4 @@ export default class TaskDrawer extends React.Component{
             </SideMenu>
         )
     }
-}
-
-TaskDrawer.propTypes = {
-    unallocated_tasks : PropTypes.array.isRequired,
 }

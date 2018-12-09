@@ -13,7 +13,32 @@ isGestureOnTop()
 all subscribled events must have (coordinates) as their parameters
 
 */
-import TaskList from './../TaskCarousel/TaskList'
+import {TaskList} from './../TaskList'
+import {ManagerContext} from './../../home'
+import {Coordinate} from './../../../../utility'
+import {TaskCard} from './../TaskCard'
+
+export interface Landable{
+    onGestureLoseFocus : ()=>void,
+    onGestureFocus  : ()=>void,
+    onGestureStay : ()=>void,
+    onHandleReleaseGesture : ()=>void,
+    getDate : ()=>string
+}
+
+export interface Travelable{
+    getID : ()=> string
+}
+
+
+
+export interface LandableContainer{
+    getList : ()=> Landable | null
+    isGestureOnTop : (coordinates : Coordinate)=> boolean
+}
+
+export type Subscribeable = (coordinates : Coordinate , cb ?: (err: any)=>void )=>void
+
 
 export default class Embassy{
     /*
@@ -22,21 +47,22 @@ export default class Embassy{
     A class to act as a middleman between all the landables. Not intended to be 
     instantiated. Every instantiated landable should let the Embassy know.
     */
-    static manager = null;
+    static manager : ManagerContext;
 
-    static registeredLandables = []; //Can either be a TaskList, or a container containing TaskLists
-    static onStartEvents = [];
-    static onMoveEvents = [];
-    static onReleaseEvents = [];
+    static registeredLandables : Array<Landable | LandableContainer> = []; //Can either be a TaskList, or a container containing TaskLists
+    static onStartEvents : Subscribeable[] = [];
+    static onMoveEvents : Subscribeable[]  = [];
+    static onReleaseEvents : Subscribeable[] = [];
 
-    static traveler = null;
-    static traveler_origin_list = null;
+    static traveler : any = null;
+    static traveler_origin_list : Landable | null;
 
-    static active_list = null; //React reference to the active TaskList
+    static active_list : Landable | null; //React reference to the active TaskList
 
-    static setManager = (manager)=>{
+    static setManager = (manager : ManagerContext)=>{
         Embassy.manager = manager;
     }
+
     static resetTravelDetails = ()=>{
         /*
         Clears all the Embassy's variables
@@ -47,20 +73,20 @@ export default class Embassy{
             Embassy.active_list = null;
         }
     }
-    static setStartingDetails = (traveler, origin)=>{
+    static setStartingDetails = (traveler : any, origin : Landable | null)=>{
         Embassy.traveler = traveler
         Embassy.traveler_origin_list = origin
     }
     static getTraveler = ()=>{
         return Embassy.traveler
     }
-    static registerLandable = (ref)=>{
+    static registerLandable = (ref : Landable | LandableContainer)=>{
         if(ref){
             Embassy.registeredLandables.push(ref)
         }
 
     }
-    static unregisterLandable = (ref)=>{
+    static unregisterLandable = (ref : Landable | LandableContainer)=>{
         /*
         This function takes a react reference
         Returns true on successful deletion. False when item is not in the array
@@ -76,7 +102,7 @@ export default class Embassy{
         }
         return false
     }
-    static addOnStartHandlers = (handlers) => {
+    static addOnStartHandlers = (handlers : Subscribeable[] | Subscribeable) => {
         // All handlers must have two params, coordinates and a callback
         if(Array.isArray(handlers)){
             for(let func of handlers){
@@ -90,7 +116,7 @@ export default class Embassy{
             console.log("Incorrect handler passed into Embassy.addOnStartHandler");
         }
     }
-    static addOnMoveHandlers = (handlers) => {
+    static addOnMoveHandlers = (handlers : Subscribeable[] | Subscribeable) => {
         
         if(Array.isArray(handlers)){
             for(let func of handlers){
@@ -104,7 +130,7 @@ export default class Embassy{
             console.log("Incorrect handler passed into Embassy.addOnMoveHandler");
         }
     }
-    static addOnReleaseHandlers = (handlers) => {
+    static addOnReleaseHandlers = (handlers : Subscribeable[] | Subscribeable) => {
         if(Array.isArray(handlers)){
             for(let func of handlers){
                 Embassy.onReleaseEvents.push(func)
@@ -117,7 +143,7 @@ export default class Embassy{
             console.log("Incorrect handler passed into Embassy.addOnReleaseHandler");
         }
     }
-    static findList = (coordinates) => {
+    static findList = (coordinates : Coordinate) => {
         /*
         Gets a reference of the TaskList that the gesture is ontop of.
         */
@@ -125,8 +151,9 @@ export default class Embassy{
             if(landable.isGestureOnTop(coordinates)){
                 if(landable instanceof TaskList)
                     return landable
-                else
-                    return landable.getList()
+                else{
+                    return (landable as LandableContainer).getList()
+                }
             }
         }
         return null
@@ -159,7 +186,7 @@ export default class Embassy{
         Embassy.active_list = new_list
         return Embassy.active_list
     }
-    static onStartTraveling = (coordinates, traveler, origin_list)=>{
+    static onStartTraveling = (coordinates : Coordinate, traveler : TaskCard, origin_list : TaskList)=>{
         /*
         Should be called by the draggable that initates the travel
         The traveler and the origin_list are the references to the
@@ -188,7 +215,7 @@ export default class Embassy{
             event(coordinates)
         }
     }
-    static onTravel = (coordinates)=>{
+    static onTravel = (coordinates : Coordinate)=>{
         /*
         Call back to only be used by the traveling Draggable
         */
@@ -221,11 +248,12 @@ export default class Embassy{
             Transfers the contents from the traveler's origin to the 
             target
         */
-       const task_id = Embassy.getTraveler().props.task_id
-       const old_list_date = Embassy.traveler_origin_list.getDate()
+       console.log("Traveler is", Embassy.getTraveler());
+       const task_id = Embassy.getTraveler().getID()
+       const old_list_date = (Embassy.traveler_origin_list as Landable).getDate()
        const new_list_date = target ? target.getDate() : null
 
-       console.log("Transfering", old_list_date, "--->", new_list_date);
+       console.log("Transfering", task_id, old_list_date, "--->", new_list_date);
        if(new_list_date === null){
         //Deallocate
             console.log("Deallocating");

@@ -1,43 +1,84 @@
 //The home page for an account
 
 import React from 'react'
-import {Title, Header, Body,Footer, FooterTab, Container, Content, Text, Button, Toast, Icon} from 'native-base'
-import {AsyncStorage, View, Dimensions, TouchableOpacity } from 'react-native'
+import {Title, Header, Body,Footer, FooterTab, Container, Content, Button, Toast, Icon} from 'native-base'
+import {AsyncStorage, View, Dimensions, TouchableOpacity, Text } from 'react-native'
 import { Calendar } from 'react-native-calendars';
 import {TaskCarousel} from './components/TaskCarousel'
-import {TaskCreationPrompt} from './components/TaskForm'
 import {TaskDrawer} from './components/TaskDrawer'
-import {UserTaskContext,EditModeContext} from './Context'
+import {UserTaskContext, EditModeContext} from './Context'
 import update from 'immutability-helper'
 import { Embassy } from './components/TravelingList';
-import Task from './../../Task'
+import TaskStorage, {Taskable, TaskSet} from './../../Task'
 import {getDay} from './../../utility'
 
-class HomeScreen extends React.Component{
-    constructor(props) {
+export interface ManagerContext{
+    updateStatus : any,
+    reallocateTask: any,
+    deallocateTask: any,
+    allocateTask: any,
+    createTask: any,
+    deleteTask: any,
+    editTask : any,
+    deallocateTasksFromDate: any
+}
+
+export interface EditContext{
+    isEditMode : boolean,
+    toggleEditMode : ()=>void
+}
+
+
+interface HomeScreenState{
+    selected_date: string,
+    unallocated_tasks : Taskable[],
+    allocated_tasks: TaskSet[]
+    promptTaskCreation : boolean,
+    isEditMode: boolean
+    isLoading: boolean,
+    editContext : EditContext
+
+}
+
+class HomeScreen extends React.Component<any,HomeScreenState>{
+    static navigationOptions = {
+        header: null,
+        gesturesEnabled: false, // Prevent swipe back
+    };
+
+
+    today: Date
+    editContext: EditContext
+    manager: ManagerContext
+    carousel: React.RefObject<TaskCarousel>
+    calendar: React.RefObject<Calendar>
+    drawer: TaskDrawer | null
+    
+
+    constructor(props : any) {
         super(props)
         console.disableYellowBox = true;
+
         this.state = {
-            user : {
-                username: ""
-            },
             isLoading : true,
             unallocated_tasks : [],
             allocated_tasks : [],
             selected_date: new Date().toISOString().substring(0,10),
             promptTaskCreation: false,
-            isEditMode: false
+            isEditMode: false,
+            editContext : {
+                isEditMode: false,
+                toggleEditMode : this.toggleEditMode
+            }
         }   
 
         this.carousel = React.createRef()
         this.calendar = React.createRef()
+        this.drawer = null
 
         this.today = new Date()
 
-        this.editContext = {
-            isEditMode : this.state.isEditMode,
-            toggleEditMode : this.toggleEditMode
-        }
+    
 
         this.manager = {
             updateStatus : this.updateCompletionStatusOfState,
@@ -47,51 +88,55 @@ class HomeScreen extends React.Component{
             createTask : this.createTask,
             deleteTask : this.deleteTask,
             editTask: this.editTask,
-            deallocateTasksFromDate : this.deallocateTasksFromDate
-        }
+            deallocateTasksFromDate : this.deallocateAllTasksFromDate
+        } as ManagerContext
 
         //Give the Embassy access to the same context manager
         Embassy.setManager(this.manager) 
      
     }
 
-    static navigationOptions = {
-        header: null,
-        gesturesEnabled: false, // Prevent swipe back
-    };
+ 
+    toggleEditMode = (cb ?: (new_status: boolean )=>void)=>{
+        cb && cb(!this.state.isEditMode)
+        const deep_copy = Object.assign({}, this.state.editContext)
+        deep_copy.isEditMode = !this.state.editContext.isEditMode
 
-    static getTaskManager = ()=>{
-        return this.manager
-    }
-
-    toggleEditMode = ()=>{
         this.setState({
-            isEditMode : !this.state.isEditMode
+            editContext : deep_copy
         }, ()=>{
-            console.log("TOGGLED THE CONTEXT EDITMODE TO", this.state.isEditMode);
-            if(this.state.isEditMode)
-                this.carousel.current.disableCarouselScroll()
-            else
-                this.carousel.current.enableCarouselScroll()
+            console.log("TOGGLED THE CONTEXT EDITMODE TO", this.state.editContext.isEditMode);
+
+            if(this.state.editContext.isEditMode){
+                (this.carousel.current as TaskCarousel).disableCarouselScroll()
+            }
+            else{
+                (this.carousel.current as TaskCarousel).enableCarouselScroll()
+            }
         })
     }
 
-    updateCompletionStatusOfState = (task_id, new_status, cb=()=>{})=>{
-        console.log("Updating completion of task to", new_status);
-
+    updateCompletionStatusOfState = (task_id:string, new_status:boolean, cb ?:(err?:any)=>{})=>{
         const original_allocated_state = this.state.allocated_tasks
         const original_unallocated_state = this.state.unallocated_tasks
-
-        let found = false;        
-        //First Search Through Allocated Tasks
+  
+        // First Search Through Allocated Tasks
+        let found = false;      
         for(let day_index in this.state.allocated_tasks){
-            let day_tasks = this.state.allocated_tasks[day_index].tasks
+            const day_tasks = this.state.allocated_tasks[day_index].tasks
             for(let task_index in day_tasks){
                 if(day_tasks[task_index].task_id === task_id){
-                    const new_state = update(this.state.allocated_tasks, {[day_index]: {tasks: {[task_index] : {completed: {$set : new_status}}}}});
+                    const new_state = update(this.state.allocated_tasks, {
+                        [day_index]: {
+                            tasks: {
+                                [task_index] : {
+                                    completed: {$set : new_status}
+                                }
+                            }
+                        }
+                    });
                     found = true;
 
-                    original_state = this.state.allocated_tasks
                     this.setState({
                         allocated_tasks : new_state
                     }, ()=>console.log("allocated state was set to", this.state.allocated_tasks))
@@ -100,63 +145,80 @@ class HomeScreen extends React.Component{
         }
     
 
-        //Search through unallocated tasks if still haven't found
+        // Search through unallocated tasks if still haven't found
         if(!found){
             for(let i in this.state.unallocated_tasks){
                 if(this.state.unallocated_tasks[i].task_id === task_id){
-                    new_state = update(this.state.unallocated_tasks, {[i] : {completed: {$set : new_status}}})
+                    const new_state = update(this.state.unallocated_tasks, {
+                        [i] : {
+                            completed: {
+                                $set : new_status
+                            }
+                        }
+                    })
                     
-                    original_state = this.state.unallocated_tasks
                     this.setState({
                         unallocated_tasks : new_state
-                    }, ()=>console.log("unallocated state was set to", this.state.unallocated_tasks))
+                    })
                 }
             }
         }
             
-        Task.updateStatus(task_id, new_status, (err)=>{
+        TaskStorage.updateStatus(task_id, new_status, (err)=>{
             if(err){
                 this.setState({
                     allocated_tasks : original_allocated_state,
                     unallocated_tasks : original_unallocated_state
                 })
+                cb && cb(err)
+            }
+            else{
+                cb && cb()
             }
         })
 
     }
 
-    allocateTask = (task_id, new_date, cb=()=>{})=>{
+    allocateTask = (task_id : string, new_date:string)=>{
         const original_allocated_state = this.state.allocated_tasks
         const original_unallocated_state = this.state.unallocated_tasks
 
-        let original_task = {};
-        let day_index_updated = null
-        let task_index_original = null
+        let original_task : Taskable = {
+            task_id : "", 
+            title : "",
+            details : null,
+            completed: false,
+            allocated_date : null
+        };
+        let day_index_updated : number | null = null;
+        let task_index_original : number | null = null;
 
-        //Search through your state to know what indexes to update
+        // Search through your state to know what indexes to update
         for(let task_index in this.state.unallocated_tasks){
             let task = this.state.unallocated_tasks[task_index]
             
             if(task.task_id === task_id){
-                Object.assign(original_task , task)
+                original_task = Object.assign({} , task)
                 original_task.allocated_date = new_date
-                task_index_original = task_index
+                task_index_original = Number(task_index)
             }
             
         }
+        
         for(let day_index in this.state.allocated_tasks){
             let date = this.state.allocated_tasks[day_index].date
             if(date == new_date){
-                day_index_updated = day_index
+                day_index_updated = Number(day_index)
                 break
             }
         }
 
         
-        new_unallocated_state = update(this.state.unallocated_tasks, {
+        const new_unallocated_state = update(this.state.unallocated_tasks, {
             $splice: [[task_index_original, 1]]
         })
-        new_allocated_state = update(this.state.allocated_tasks, {
+
+        const new_allocated_state = update(this.state.allocated_tasks, {
             [day_index_updated] : {
                 tasks : {
                     $unshift : [original_task]
@@ -174,7 +236,7 @@ class HomeScreen extends React.Component{
               })
         })
 
-        Task.allocateTask(task_id, new_date, (err)=>{
+        TaskStorage.allocateTask(task_id, new_date, (err)=>{
             if(err){
                 this.setState({
                     unallocated_tasks : original_unallocated_state,
@@ -185,20 +247,20 @@ class HomeScreen extends React.Component{
        
     }
 
-    deallocateTasksFromDate = (target_date, cb=()=>{})=>{
+    deallocateAllTasksFromDate = (target_date : string, cb ?: ()=>void)=>{
         console.log("deallocating all tasks on date", target_date);
         const original_allocated_state = this.state.allocated_tasks
         const original_unallocated_state = this.state.unallocated_tasks
 
-        const original_task_array = []
-        let original_date_index = null;
+        const original_task_array : Taskable[] = []
+        let original_date_index : number | null = null;
 
-        //Search through your state to know what indexes to update
+        // Search through your state to know what indexes to update
         for(let day_index in this.state.allocated_tasks){
-            let date = this.state.allocated_tasks[day_index].date
-            let day_tasks = this.state.allocated_tasks[day_index].tasks
+            let date : string = this.state.allocated_tasks[day_index].date
+            let day_tasks : Taskable[] = this.state.allocated_tasks[day_index].tasks
             if(date === target_date){
-                original_date_index = day_index
+                original_date_index = Number(day_index)
                 original_task_array.push(...day_tasks)
             }
         }
@@ -221,6 +283,7 @@ class HomeScreen extends React.Component{
             allocated_tasks : new_allocated_state,
             unallocated_tasks : new_unallocated_state
         }, ()=>{
+            cb && cb()
             Toast.show({
                 text: 'All of your tasks were moved back to your board!',
                 buttonText: 'Got it'
@@ -228,36 +291,38 @@ class HomeScreen extends React.Component{
         })
 
         
-        Task.allocateMultipleTasks(original_task_array.map(task=>task.task_id, null, (err)=>{
+        const task_id_arr : string[] = original_task_array.map(task=>task.task_id)
+
+        TaskStorage.allocateMultipleTasks(task_id_arr, null, (err)=>{
             if(err){
                 console.log("ERROR DEALLOCATING EVERYTHING");
                 this.setState({
-                    allocateTask: original_allocated_state,
+                    allocated_tasks: original_allocated_state,
                     unallocated_tasks: original_unallocated_state
                 })
             }
-        }))
+        })
         
     }
 
-    deallocateTask = (task_id, cb=()=>{}) => {
+    deallocateTask = (task_id : string) => {
         console.log("deallocating");
         const original_allocated_state = this.state.allocated_tasks
         const original_unallocated_state = this.state.unallocated_tasks
 
-        let original_task = {};
-        let day_index_original = null
-        let task_index_original = null
+        var original_task : Taskable;
+        let day_index_original : number = -1;
+        let task_index_original : number = -1;
 
         //Search through your state to know what indexes to update
         for(let day_index in this.state.allocated_tasks){
             let day_tasks = this.state.allocated_tasks[day_index].tasks
             
             for(let task_index in day_tasks){
-                if(day_tasks[task_index].id === task_id){
-                    Object.assign(original_task , day_tasks[task_index])
-                    day_index_original = day_index
-                    task_index_original = task_index
+                if(day_tasks[task_index].task_id === task_id){
+                    var original_task = Object.assign({} , day_tasks[task_index])
+                    day_index_original = Number(day_index)
+                    task_index_original = Number(task_index)
                 }
             }
         }
@@ -271,6 +336,7 @@ class HomeScreen extends React.Component{
                 }
             }
         );
+        
 
         const new_unallocated_state = update(this.state.unallocated_tasks, {
             $push : [original_task]
@@ -286,43 +352,46 @@ class HomeScreen extends React.Component{
               })
         })
 
-        Task.allocateTask(task_id, null, (err)=>{
-        
+        TaskStorage.allocateTask(task_id, null, (err)=>{
+            if(err){
+                this.setState({
+                    allocated_tasks: original_allocated_state,
+                    unallocated_tasks: original_unallocated_state
+                })
+            }
         })
     }
 
-    reallocateTask = (task_id, new_date, cb=()=>{})=>{
-        /*
-        Uses an optomistic UX approach. Update the UI before API actually
-        finishes.
-        */
+    reallocateTask = (task_id : string, new_date:string,)=>{
+        console.log("Reallocated", task_id, new_date);
         
-        //Keep original_state incase of failed API call
+        // Keep original_state incase of failed API call
         const original_state = this.state.allocated_tasks
 
-        let original_task = {};
-        let day_index_original = null
-        let task_index_original = null
-        let day_index_updated = null
+        let original_task : Taskable
+        let day_index_original : number
+        let task_index_original : number
+        let day_index_updated : number
         
-        //Gather variables to know what to mutate
+        // Gather variables to know what to mutate
         for(let day_index in this.state.allocated_tasks){
             let day_tasks = this.state.allocated_tasks[day_index].tasks
-            date = this.state.allocated_tasks[day_index].date
+            const  date = this.state.allocated_tasks[day_index].date
 
             if(date === new_date){
-                day_index_updated = day_index
+                day_index_updated = Number(day_index)
             }
             
             for(let task_index in day_tasks){
                 if(day_tasks[task_index].task_id === task_id){
-                    Object.assign(original_task, day_tasks[task_index])
-                    day_index_original = day_index
-                    task_index_original = task_index
+                    original_task = Object.assign({} , day_tasks[task_index])
+                    day_index_original = Number(day_index)
+                    task_index_original = Number(task_index)
                 }
             }   
             
         }
+        console.log("The original task is", original_task);
 
         const updated_task = update(original_task , {allocated_date : {$set : new_date} })
         const new_state = update(this.state.allocated_tasks, 
@@ -345,7 +414,7 @@ class HomeScreen extends React.Component{
         })
     
 
-        Task.allocateTask(task_id, new_date, (err)=>{
+        TaskStorage.allocateTask(task_id, new_date, (err)=>{
             if(err){
                 this.setState({
                     allocated_tasks:  original_state
@@ -357,18 +426,17 @@ class HomeScreen extends React.Component{
         })
     }
 
-    createTask = (title, details, cb=()=>{})=>{
-        console.log("Create Task!!!!");
-        const original_state = this.unallocated_tasks
+    createTask = (title : string, details : string | null, cb=()=>{})=>{
+         // Keep original_state incase of failed API call
+        const original_state = this.state.unallocated_tasks
 
-        Task.createTask(title, details, (err, new_task)=>{
+        TaskStorage.createTask(title, details, (err : any, new_task : Taskable)=>{
             if(err){
                 this.setState({
-                    unallocated_tasks : original_state
+                    unallocated_tasks : original_state,
                 },cb)
             }
             else{
-                console.log("new task is", new_task);
                 const new_state = update(this.state.unallocated_tasks, {
                     $unshift : [new_task]
                 })
@@ -380,22 +448,22 @@ class HomeScreen extends React.Component{
 
     }
 
-    deleteTask = (task_id, cb=()=>{})=>{
+    deleteTask = (task_id : string)=>{
         console.log("DELETING", task_id);
         const original_allocated_state = this.state.allocated_tasks
         const original_unallocated_state = this.state.unallocated_tasks
 
-        let day_index_original = null
-        let task_index_original = null
+        let day_index_original :number | null = null;
+        let task_index_original : number | null = null
         
-        //Search through allocated tasks
+        // Search through allocated tasks
         for(let day_index in this.state.allocated_tasks){
             let day_tasks = this.state.allocated_tasks[day_index].tasks
             
             for(let task_index in day_tasks){
                 if(day_tasks[task_index].task_id === task_id){
-                    day_index_original = day_index
-                    task_index_original = task_index
+                    day_index_original = Number(day_index)
+                    task_index_original = Number(task_index)
 
                     const new_state = update(this.state.allocated_tasks, {
                         [day_index_original] : {
@@ -412,13 +480,13 @@ class HomeScreen extends React.Component{
                 }
             }   
 
-            if(task_index_original && day_index_original){
+            if(task_index_original!== null && day_index_original!== null){
                 break;
             }        
         }
 
         //Search through unallocated tasks if still not found
-        if(!task_index_original && !task_index_original){
+        if(task_index_original=== null && task_index_original === null){
             for(let task of this.state.unallocated_tasks){
                 if(task.task_id === task_id){
                     const new_state = update(this.state.unallocated_tasks, {
@@ -433,7 +501,7 @@ class HomeScreen extends React.Component{
 
 
 
-        Task.deleteTask(task_id, (err)=>{
+        TaskStorage.deleteTask(task_id, (err)=>{
             if(err){
                 this.setState({
                     unallocated_tasks : original_unallocated_state,
@@ -449,22 +517,23 @@ class HomeScreen extends React.Component{
         })
     }
 
-    editTask = (task_id, new_title, new_details, cb=()=>{})=>{
-        console.log("Editing Task");
+    editTask = (task_id : string, new_title : string, new_details : string | null, cb ?: ()=>void )=>{
+        console.log("Editing Task to", new_title, new_details);
         const original_allocated_state = this.state.allocated_tasks
         const original_unallocated_state = this.state.unallocated_tasks
 
-        let day_index_original = null
-        let task_index_original = null
+        let day_index_original : number | null = null;
+        let task_index_original : number | null = null;
         
         //Search through allocated tasks
         for(let day_index in this.state.allocated_tasks){
-            let day_tasks = this.state.allocated_tasks[day_index].tasks
+            let day_tasks = (this.state.allocated_tasks[day_index] as TaskSet).tasks
             
             for(let task_index in day_tasks){
                 if(day_tasks[task_index].task_id === task_id){
-                    day_index_original = day_index
-                    task_index_original = task_index
+                    day_index_original = Number(day_index)
+                    task_index_original = Number(task_index)
+                    
 
                     const new_state = update(this.state.allocated_tasks, {
                         [day_index_original] : {
@@ -476,21 +545,21 @@ class HomeScreen extends React.Component{
                             }
                         }
                     })
-
+                    console.log("found!!!, state now", new_state);
                     this.setState({
                         allocated_tasks : new_state
-                    })
+                    }, cb)
                     break;
                 }
             }   
 
-            if(task_index_original && day_index_original){
+            if(task_index_original!== null && day_index_original!==null){
                 break;
             }        
         }
 
         //Search through unallocated tasks if still not found
-        if(!task_index_original && !task_index_original){
+        if(task_index_original === null && task_index_original===null){
             for(let task_index in this.state.unallocated_tasks){
                 const task = this.state.unallocated_tasks[task_index]
                 if(task.task_id === task_id){
@@ -502,14 +571,13 @@ class HomeScreen extends React.Component{
                     })
                     this.setState({
                         unallocated_tasks : new_state
-                    })
+                    }, cb)
                 }
             }
         }      
 
-        Task.editTask(task_id, new_title, new_details, (err)=>{
+        TaskStorage.editTask(task_id, new_title, new_details, (err : any)=>{
             if(err){
-                cb(err)
                 this.setState({
                     unallocated_tasks : original_unallocated_state,
                     allocated_tasks : original_allocated_state
@@ -520,36 +588,24 @@ class HomeScreen extends React.Component{
                     text: `Updated your task`,
                     buttonText: 'Ok'
                 })
-                cb()
             }
         })
 
     }
 
-    _onDateSelection=(isodate)=>{
+    _onDateSelection= (isodate : string)=>{
         this.setState({
             selected_date: isodate
-        }, (err)=>{
-            if(err)
-                pass
-            else{
-                this.carousel.current.updateToDate(this.state.selected_date)
-            }
+        }, ()=> {
+            (this.carousel.current as TaskCarousel).updateToDate(this.state.selected_date)
         })
     }
 
 
-   _generateEmptyTaskSet = ()=>{
-       /*
-        Generates an array of objects. Each object has the following form
-        {
-            date: String
-            tasks : Array
-        }
-       */
+   _generateEmptyTaskSet  = () : TaskSet[] =>{
         const day_variance = 28; //How many days of tasks you will show.
         const seconds_per_day = 86400;
-        let task_set = [];
+        const task_set = [];
 
         const past_days_allowed = 14; //How far back in time do you want to see
 
@@ -560,20 +616,19 @@ class HomeScreen extends React.Component{
             //Convert from seconds back into miliseconds for date constructor
             const date = new Date((starting_date_in_epoch + (i * seconds_per_day)) * 1000) 
             task_set.push({
-                date: date.toISOString().substring(0,10), //Only select the date part of ISO date
+                date : date.toISOString().substring(0,10), //Only select the date part of ISO date
                 tasks: []
             })
         }
 
-        return task_set
+        return (task_set)
     }
 
-    _populateTaskSet = (tasks)=>{
+    _populateTaskSet = (tasks : Taskable[])=>{
         
-        const unallocated_tasks = []
-        const allocated_tasks = this._generateEmptyTaskSet()
+        const unallocated_tasks : Taskable[] = []
+        const allocated_tasks : Array<TaskSet> = this._generateEmptyTaskSet()
 
-        console.log("populating", tasks);
         for(let task_id in tasks){
             const task = tasks[task_id]
             if(task.allocated_date === null){
@@ -603,7 +658,10 @@ class HomeScreen extends React.Component{
 
     _initalizeApp = ()=>{
         AsyncStorage.getItem("espresso_app", (err, app)=>{
-            const app_data = JSON.parse(app)
+            if(err)
+                return alert("PROBLEM INITIALIZING ESPRESSO")
+
+            const app_data = JSON.parse(app as string)
             if(!app_data){
                 console.log("Initializing App for the first time");
                 const intial_app_state = {
@@ -622,7 +680,6 @@ class HomeScreen extends React.Component{
                 })
             }
             else{
-                console.log("APP DATA", app_data);
                 const tasks = app_data.tasks
                 this._populateTaskSet(tasks)
             }
@@ -643,7 +700,7 @@ class HomeScreen extends React.Component{
             if(!markers_list[day.date])
                 markers_list[day.date] = {dots: []}
 
-            for(task of day.tasks){
+            for(let task of day.tasks){
                 if(task.completed)
                     markers_list[day.date]["dots"].push({key: task.task_id, color: "blue"})
                 else
@@ -655,8 +712,8 @@ class HomeScreen extends React.Component{
 
     render(){
         return <UserTaskContext.Provider value={this.manager}>
-            <EditModeContext.Provider value={this.editContext}>
-                <TaskDrawer ref={(ref)=>{this.drawer = ref}} unallocated_tasks = {this.state.unallocated_tasks}>
+            <EditModeContext.Provider value={this.state.editContext}>
+                <TaskDrawer ref={(ref)=>{this.drawer = ref as TaskDrawer}} unallocated_tasks = {this.state.unallocated_tasks}>
                     <Container style={{overflow:"hidden", height: Dimensions.get('window').height, flexDirection: "column"}}>
                         <Header style={{backgroundColor: '#061328'}}>
                             <Body style={{justifyContent:"center"}}>
@@ -679,7 +736,8 @@ class HomeScreen extends React.Component{
                                     markedDates={{
                                         [this.state.selected_date]: {selected: true, selectedColor: 'red'},
                                         ...this._generateCalendarMarkers()
-                                    }}/>
+                                    }}
+                                    />
                                 {/* <Button onPress={()=>{console.log(this.state)}}>
                                     <Text>State </Text>
                                 </Button> */}
@@ -695,8 +753,7 @@ class HomeScreen extends React.Component{
 
                         <Footer style={{backgroundColor: "#222", width:Dimensions.get('window').width, height: 50, padding:0, margin: 0}} >
                             <FooterTab style={{padding:0,margin:0, flexDirection: "row", width:"100%", justifyContent:"center"}}>
-                                
-
+                            
                                 
                                 <Button style={{justifyContent:"center", alignItems:"center", borderRadius:100}} onPress={this._openDrawer}>
                                     <Icon style={{color:"white"}}  type="Entypo" name="blackboard"/>

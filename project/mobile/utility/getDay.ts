@@ -1,5 +1,6 @@
-export default (date)=>{
+export default (date : Date | string)=>{
     let day_num = 0
+    
     if(date instanceof Date)
         day_num = date.getDay()
     else    //If the date is formatted as a string or something to pass in to a constructor
