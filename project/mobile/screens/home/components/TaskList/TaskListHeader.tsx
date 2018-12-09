@@ -13,6 +13,22 @@ interface TaskListHeaderProps{
     
 
 const TaskListHeader = ({ task_list, date } : TaskListHeaderProps) => {
+
+    const options : Optionable[] = [
+        {
+            title: "Edit",
+            handler: () => { }
+        },
+        {
+            title: "Clear List",
+            handler: () => { }
+        },
+        {
+            title: "3",
+            handler: () => { }
+        },
+    ]
+        
     return <View style={{ flexDirection: "row", width: "100%", backgroundColor: "#222", alignItems: "center", justifyContent: "space-between" }}>
 
         {/* Left Side of Header */}
@@ -24,7 +40,7 @@ const TaskListHeader = ({ task_list, date } : TaskListHeaderProps) => {
         </View>
 
         {/* Right Side of Header */}
-        {task_list.length > 0 && <PopupMenu date={date}/>}
+        {task_list.length > 0 && <PopupMenu date={date} options={options}/>}
 
     </View>
 }

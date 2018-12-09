@@ -11,7 +11,6 @@ interface MenuOptionsProps{
 export default class MenuOptions extends React.Component<MenuOptionsProps>{
     constructor(props: MenuOptionsProps) {
         super(props)
-        // console.log("RECEIVED OPTIONS", this.props.onChooseOption, this.props.options, );
     }
 
     _renderItems = ()=>{

@@ -15,7 +15,8 @@ export interface Optionable {
 
 
 interface PopupMenuProps {
-	date : string // We need this for some of the context functions
+	date : string | null // We need this for binding of the context functions
+	options : Optionable[]
 }
 
 interface PopupMenuState {
@@ -27,7 +28,6 @@ interface PopupMenuState {
 export default class PopupMenu extends React.Component<PopupMenuProps, PopupMenuState>{
 	menu: React.RefObject<any>
 	popup_content: React.RefObject<any>
-	options: Optionable[]
 
 	constructor(props: PopupMenuProps) {
 		super(props)
@@ -41,20 +41,6 @@ export default class PopupMenu extends React.Component<PopupMenuProps, PopupMenu
 			isVisible: false
 		}
 
-		this.options = [
-			{
-				title: "Edit",
-				handler: () => { }
-			},
-			{
-				title: "Clear List",
-				handler: () => { }
-			},
-			{
-				title: "3",
-				handler: () => { }
-			},
-		]
 
 	}
 
@@ -119,7 +105,7 @@ export default class PopupMenu extends React.Component<PopupMenuProps, PopupMenu
 							({ isEditMode, toggleEditMode }: any) => {
 
 								// Read from context and bind the context function to the options
-								for (let option of this.options) {
+								for (let option of this.props.options) {
 									if (option.title === "Edit") {
 										option.handler = toggleEditMode
 									}
@@ -162,7 +148,7 @@ export default class PopupMenu extends React.Component<PopupMenuProps, PopupMenu
 													shadowRadius: 3
 												}}>
 
-													<MenuOptions onChooseOption={this.toggleMenu} options={this.options} />
+													<MenuOptions onChooseOption={this.toggleMenu} options={this.props.options} />
 												</View>
 
 											</Modal>

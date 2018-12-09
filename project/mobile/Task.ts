@@ -81,13 +81,13 @@ export default class TaskStorage{
     static deleteTask(task_id : string, cb ?:(err ?: any)=>void){
         AsyncStorage.getItem("espresso_app", (err,app)=>{
             if(err){
-                cb(err)
+                cb && cb(err)
             }
             const app_data = JSON.parse(app as string)
             const tasks = app_data.tasks
             delete tasks[task_id]
             AsyncStorage.setItem("espresso_app", JSON.stringify(app_data), (err)=>{
-                cb(err)
+                cb && cb(err)
             })
         })
     }
@@ -112,13 +112,13 @@ export default class TaskStorage{
     static allocateTask(task_id :string, date: string | null, cb ?:(err?:any) => void){
        AsyncStorage.getItem("espresso_app", (err,app)=>{
            if(err){
-               cb(err)
+               cb && cb(err)
            }
            const app_data = JSON.parse(app as string)
            const task = app_data.tasks[task_id] as Taskable
            task.allocated_date = date
            AsyncStorage.setItem("espresso_app", JSON.stringify(app_data), (err)=>{
-               cb(err)
+               cb && cb(err)
            })
        })
     }

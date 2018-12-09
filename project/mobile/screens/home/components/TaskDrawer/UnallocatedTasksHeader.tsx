@@ -1,11 +1,17 @@
 import React from 'react'
 import {View, Text} from 'react-native'
+import {PopupMenu} from './../PopupMenu'
+import {Optionable} from './../PopupMenu'
+import {Taskable} from './../../../../Task'
 
-const UnallocatedTasksHeader = ({task_list})=>{
-    // const menuOptions = [{
-    //     title : "Edit",
-    //     handler : function(){}
-    // }]
+interface HeaderProps{
+    task_list: Taskable[]
+}
+
+const UnallocatedTasksHeader : React.FunctionComponent<HeaderProps> = ({task_list})=>{
+
+    const options : Optionable[] = []
+
 
     return <View style={{
             backgroundColor: "#222", 
@@ -17,7 +23,7 @@ const UnallocatedTasksHeader = ({task_list})=>{
             borderTopRightRadius : 10}}>
 
             <Text style={{color:"white", marginHorizontal: 10}}> {task_list.length} tasks </Text>
-            {/* <PopupMenu isEditMode={false} popupOptions={menuOptions}/> */}
+            {/* <PopupMenu date={null} options={options}/> */}
 
         </View>
 }
