@@ -3,17 +3,19 @@ import {View, Text, Button, Toast, Thumbnail} from 'native-base'
 import {TouchableOpacity} from 'react-native'
 import Modal from 'react-native-modal'
 import TaskCreationForm from './TaskCreationForm'
-import PropTypes from 'prop-types'
 
-export default class TaskCreationModalPrompt extends React.Component{
-    constructor(props) {
+interface PromptState{
+    visible : boolean
+}
+
+
+export default class TaskCreationModalPrompt extends React.Component<any, PromptState>{
+    constructor(props: any) {
         super(props)
 
         this.state = {
             visible: false
         }
-
-
     }
 
     togglePrompt = ()=>{

@@ -8,7 +8,7 @@ import Loader from './LoadingCarouselView'
 import { TaskCard } from './../TaskCard'
 import { Layout, Coordinate } from '../../../../utility'
 import { Taskable, TaskSet } from './../../../../Task'
-import { Landable } from '../TravelingList';
+import { Landable, Focusable } from '../TravelingList';
 import { Subscribeable } from '../TravelingList/Embassy';
 
 interface TaskCarouselProps {
@@ -23,11 +23,11 @@ interface TaskCarouselState {
     task_cards_references: TaskCard[]
 }
 
-export default class TaskCarousel extends React.Component<TaskCarouselProps, TaskCarouselState> implements LandableContainer {
+export default class TaskCarousel extends React.Component<TaskCarouselProps, TaskCarouselState> implements Landable {
     STARTING_INDEX: number
-    carousel: React.RefObject<TaskCarousel>
+    carousel: React.RefObject<any>
     wrapper: React.RefObject<View>
-    layout: Layout
+    layout: Layout | null
 
     focused_list_from_gesture_start: TaskList | null
     focused_list: TaskList | null
@@ -53,6 +53,8 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
         this.focused_list = null
         this.focused_list_layout = null
 
+        this.layout = null
+
         this.autoScrollingTimer = null
 
         //There will be a collection of references to each task_list.
@@ -68,7 +70,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
         return this[`task_${index}`]
     }
 
-    getList = (): Landable | null => {
+    getList = (): Focusable | null => {
         return this.focused_list
     }
 
@@ -152,10 +154,10 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
 
         this.autoScrollingTimer = setInterval(() => {
             if (direction === "RIGHT") {
-                this.carousel.current.snapToNext()
+                this.carousel.current && this.carousel.current.snapToNext()
             }
             else if (direction === "LEFT") {
-                this.carousel.current.snapToPrev()
+                this.carousel.current && this.carousel.current.snapToPrev()
             }
             else if (direction === "NONE") {
 
@@ -176,16 +178,20 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
         /*
         Checks to see if the given coordinates should trigger a carousel scroll
         */
-        const scroll_lax = this.layout.width * 0.2
-        if (coordinates.x < scroll_lax) {
-            return "LEFT"
+        if(this.layout){
+            const scroll_lax = this.layout.width * 0.2
+            if (coordinates.x < scroll_lax) {
+                return "LEFT"
+            }
+            else if (coordinates.x > (this.layout.x + this.layout.width) - scroll_lax) {
+                return "RIGHT"
+            }
+            else {
+                return "NONE"
+            }
         }
-        else if (coordinates.x > (this.layout.x + this.layout.width) - scroll_lax) {
-            return "RIGHT"
-        }
-        else {
+        else
             return "NONE"
-        }
     }
 
 

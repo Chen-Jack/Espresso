@@ -3,25 +3,23 @@ import { View, FlatList } from 'react-native'
 import { TaskCard } from './../TaskCard'
 import TaskListHeader from './TaskListHeader'
 import EmptyList from './EmptyList'
-import { Landable } from '../TravelingList';
+import { Focusable, Transferable } from '../TravelingList';
 import { Layout } from './../../../../utility'
 import { Taskable, TaskSet } from './../../../../Task'
-
-
 
 interface TaskListProps {
     // Initialize is a callback that TaskList will call if it possesses the starting index
     // This is used to initize the layout of the initial task list.
-    initialize: any | null
+    initialize ?: any | null
     data: TaskSet,
-    index: number
+    index ?: number
 }
 interface TaskListState {
     isGestureHovering: boolean,
     canScroll: boolean
 }
 
-export default class TaskList extends React.Component<TaskListProps, TaskListState> implements Landable {
+export default class TaskList extends React.Component<TaskListProps, TaskListState> implements Focusable, Transferable{
     list: React.RefObject<any>
     layout: any
 
@@ -37,7 +35,6 @@ export default class TaskList extends React.Component<TaskListProps, TaskListSta
         }
 
     }
-
 
     componentWillUnmount() {
         console.log("TaskList unmounting");
@@ -67,7 +64,7 @@ export default class TaskList extends React.Component<TaskListProps, TaskListSta
     }
 
     measureLayout = (cb: any = () => { }) => {
-        this.list.current.measure((x, y, width: number, height: number, pageX: number, pageY: number) => {
+        this.list.current.measure((x : number, y:number, width: number, height: number, pageX: number, pageY: number) => {
             const layout = {
                 x: pageX,
                 y: pageY,

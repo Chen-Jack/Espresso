@@ -10,7 +10,7 @@ export interface Taskable{
 }
 
 export interface TaskSet{
-    date: string,
+    date: string | null,
     tasks: Taskable[]
 }
 
@@ -37,7 +37,7 @@ export default class TaskStorage{
         })
     }
 
-    static createTask(title : string = "", details : string | null = "", cb ?: (err : any, new_task : Taskable) => void){
+    static createTask(title : string = "", details : string | null = "", cb ?: (err : any, new_task ?: Taskable) => void){
        const new_task = {
            task_id : uuid(),
            title,
@@ -48,7 +48,7 @@ export default class TaskStorage{
 
        AsyncStorage.getItem("espresso_app", (err, app)=>{
            if(err){
-                cb(err)
+                cb && cb(err)
            }
            const app_data = JSON.parse(app as string)
            const tasks = app_data.tasks
@@ -56,7 +56,7 @@ export default class TaskStorage{
 
            AsyncStorage.setItem("espresso_app", JSON.stringify(app_data), (err)=>{
                console.log("Created Task");
-               cb(err, new_task)
+               cb && cb(err, new_task)
            })
        })
     }

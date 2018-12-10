@@ -1,9 +1,10 @@
 import React from 'react'
 import SideMenu from 'react-native-side-menu'
 import Content from './Content'
-import {Embassy, LandableContainer} from './../TravelingList'
+import {Embassy, Landable, Focusable, Transferable} from './../TravelingList'
 import {Taskable} from './../../../../Task'
 import {Layout, Coordinate} from './../../../../utility'
+import { Subscribeable } from '../TravelingList/Embassy';
 
 
 interface DrawerState{
@@ -16,10 +17,10 @@ interface DrawerProps{
 
 
 
-export default class TaskDrawer extends React.Component<DrawerProps, DrawerState> implements LandableContainer{
-    layout : Layout
+export default class TaskDrawer extends React.Component<DrawerProps, DrawerState> implements Landable{
+    layout : Layout | null
     drawer : any
-    content: any
+    content: Content | null
 
     constructor(props : DrawerProps) {
         super(props)
@@ -29,6 +30,7 @@ export default class TaskDrawer extends React.Component<DrawerProps, DrawerState
         }
 
         this.layout = null;
+        this.content = null;
         this.drawer = React.createRef()
 
     }
@@ -37,11 +39,13 @@ export default class TaskDrawer extends React.Component<DrawerProps, DrawerState
         Embassy.addOnStartHandlers(this.closeDrawer)
     }
 
-    componentWillMount(){
+    componentWillUnmount(){
         console.log("Drawer Unmounting");
     }
 
-
+    getList = ()  : Focusable | null =>{
+        return this.content && this.content.getInnerList()
+    }
 
     isGestureOnTop = (location : Coordinate)=>{
         /*
@@ -74,8 +78,8 @@ export default class TaskDrawer extends React.Component<DrawerProps, DrawerState
     _onDrawerOpen = ()=>{
         Embassy.registerLandable(this)
 
-        if(!this.layout){
-            this.content.measureLayout((layout)=>{
+        if(!this.layout && this.content){
+            this.content.measureLayout((layout : Layout)=>{
                 this.layout = layout
             })
         }
@@ -86,21 +90,21 @@ export default class TaskDrawer extends React.Component<DrawerProps, DrawerState
     }
 
 
-    openDrawer = (coordinates, cb=()=>{})=>{
+    openDrawer : Subscribeable = (_ : Coordinate, cb ?: ()=>void)=>{
         this.setState({
             visible: true
         }, ()=>{
             this._onDrawerOpen()
-            cb()
+            cb && cb()
         })  
     }
 
-    closeDrawer = (coordinates, cb=()=>{})=>{
+    closeDrawer : Subscribeable = ( _ : Coordinate, cb ?: ()=>void)=>{
         this.setState({
             visible : false
         }, ()=>{
             this._onDrawerClose()
-            cb()
+            cb && cb()
         })  
 
     }
@@ -115,7 +119,7 @@ export default class TaskDrawer extends React.Component<DrawerProps, DrawerState
 
                 onClose={this.closeDrawer}
                 disableGestures = {true}
-                onChange = {(isOpen)=>{
+                onChange = {(isOpen : boolean)=>{
                     this.setState({
                         visible: isOpen
                     })

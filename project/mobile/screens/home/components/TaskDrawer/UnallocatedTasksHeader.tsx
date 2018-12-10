@@ -10,7 +10,11 @@ interface HeaderProps{
 
 const UnallocatedTasksHeader : React.FunctionComponent<HeaderProps> = ({task_list})=>{
 
-    const options : Optionable[] = []
+    const options : Optionable[] = [
+        {title: "uh",
+            handler: ()=>{}
+        }
+    ]
 
 
     return <View style={{
@@ -23,7 +27,7 @@ const UnallocatedTasksHeader : React.FunctionComponent<HeaderProps> = ({task_lis
             borderTopRightRadius : 10}}>
 
             <Text style={{color:"white", marginHorizontal: 10}}> {task_list.length} tasks </Text>
-            {/* <PopupMenu date={null} options={options}/> */}
+            <PopupMenu date={null} options={options}/>
 
         </View>
 }

@@ -10,7 +10,7 @@ interface FilterBarState{
 export default class FilterBar extends React.Component<FilterBarProps, FilterBarState>{
     MAX_CHAR_LIMIT : number
     
-    constructor(props) {
+    constructor(props : FilterBarProps) {
         super(props)
 
         this.state = {
@@ -20,7 +20,7 @@ export default class FilterBar extends React.Component<FilterBarProps, FilterBar
         this.MAX_CHAR_LIMIT = 30
     }
 
-    _changeTextHandler = (new_text)=>{
+    _changeTextHandler = (new_text : string)=>{
         
         this.setState({
             text : new_text

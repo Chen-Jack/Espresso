@@ -4,8 +4,18 @@ import {AsyncStorage} from 'react-native'
 import PropTypes from 'prop-types'
 import {UserTaskContext} from './../../Context'
 
-export default class TaskCreationForm extends React.Component{
-    constructor(props) {
+interface FormProps{
+    onFormFinishedSubmition : ()=>void
+}
+
+interface FormState{
+    form_errors : string[],
+    task_title : string,
+    task_detail: string
+}
+
+export default class TaskCreationForm extends React.Component<FormProps, FormState>{
+    constructor(props: FormProps) {
         super(props)
         this.state = {
             form_errors : [],
@@ -14,7 +24,7 @@ export default class TaskCreationForm extends React.Component{
         }
     }
 
-    _submitForm = (createTask)=>{
+    _submitForm = (createTask : any)=>{
         createTask(this.state.task_title, this.state.task_detail, ()=>{
             this.props.onFormFinishedSubmition()
         })
@@ -22,7 +32,7 @@ export default class TaskCreationForm extends React.Component{
 
     render(){
         return <UserTaskContext.Consumer>
-        {({createTask})=>{
+        {({createTask} : any)=>{
             return <View style={{padding: 20 , backgroundColor: "white"}}>
                 {this.state.form_errors.map((err)=>{
                     return <View>
@@ -39,9 +49,4 @@ export default class TaskCreationForm extends React.Component{
         }}
         </UserTaskContext.Consumer>
     }
-}
-
-
-TaskCreationForm.propTypes = {
-    onFormFinishedSubmition : PropTypes.func
 }

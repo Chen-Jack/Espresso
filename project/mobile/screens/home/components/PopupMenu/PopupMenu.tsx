@@ -56,7 +56,7 @@ export default class PopupMenu extends React.Component<PopupMenuProps, PopupMenu
 		if (!this.state.isVisible) {
 			Promise.all([
 				new Promise((resolve) => {
-					this.menu.current.measure((x, y, width, height, pageX, pageY) => {
+					this.menu.current.measure((x : number, y : number, width: number, height: number, pageX: number, pageY: number) => {
 						const location = { x: pageX, y: pageY }
 						this.setState({
 							location: location
@@ -66,7 +66,7 @@ export default class PopupMenu extends React.Component<PopupMenuProps, PopupMenu
 				new Promise((resolve) => {
 					//If the dimensions havent been measured yet
 					if (this.state.dimensions.width === 0 && this.state.dimensions.height === 0) {
-						this.popup_content.current.measure((x, y, width, height, pageX, pageY) => {
+						this.popup_content.current.measure((x: number, y: number, width: number, height: number, pageX: number, pageY: number) => {
 							const dimensions = {
 								x: x,
 								y: y,

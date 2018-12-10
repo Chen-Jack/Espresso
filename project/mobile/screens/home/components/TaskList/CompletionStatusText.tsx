@@ -1,10 +1,12 @@
 import React from 'react'
 import { Text } from 'react-native'
+import {Taskable} from './../../../../Task'
 
+interface TextProps{
+    task_list : Taskable[]
+}
 
-
-
-const CompletionStatusText = ({ task_list }) => {
+const CompletionStatusText : React.FunctionComponent<TextProps> = ({ task_list }) => {
     let curr = 0;
     for (let task of task_list) {
         if (task.completed) curr++

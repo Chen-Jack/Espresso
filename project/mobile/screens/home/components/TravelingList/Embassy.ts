@@ -1,29 +1,25 @@
-/*
-
-TSAK LSIT MUST IMPLEMENT
-onGestureLoseFocus
-onGestureFocus 
-onGestureStay
-onHandleReleaseGesture
-
-IF TASK LIST CONTAINER, MUST IMPLEMENT
-getList()
-isGestureOnTop()
-
-all subscribled events must have (coordinates) as their parameters
-
-*/
 import {TaskList} from './../TaskList'
 import {ManagerContext} from './../../home'
 import {Coordinate} from './../../../../utility'
 import {TaskCard} from './../TaskCard'
 
-export interface Landable{
+
+export interface Focusable{
     onGestureLoseFocus : ()=>void,
     onGestureFocus  : ()=>void,
     onGestureStay : ()=>void,
     onHandleReleaseGesture : ()=>void,
-    getDate : ()=>string
+}
+
+export interface Transferable{
+    getDate : () => string | null
+}
+export interface Landable{
+    /*
+    Is capable of capturing Travelable movements
+    */
+    getList : ()=> Focusable | null
+    isGestureOnTop : (coordinates : Coordinate)=> boolean
 }
 
 
@@ -32,13 +28,7 @@ export interface Travelable{
 }
 
 
-
-export interface LandableContainer{
-    getList : ()=> Landable | null
-    isGestureOnTop : (coordinates : Coordinate)=> boolean
-}
-
-export type Subscribeable = (coordinates : Coordinate , cb ?: (err: any)=>void )=>void
+export type Subscribeable = (coordinates : Coordinate , cb ?: (err ?: any)=>void )=>void
 
 
 export default class Embassy{
@@ -50,15 +40,15 @@ export default class Embassy{
     */
     static manager : ManagerContext;
 
-    static registeredLandables : Array<Landable | LandableContainer> = []; //Can either be a TaskList, or a container containing TaskLists
+    static registeredLandables : Landable[] = []; //Can either be a TaskList, or a container containing TaskLists
     static onStartEvents : Subscribeable[] = [];
     static onMoveEvents : Subscribeable[]  = [];
     static onReleaseEvents : Subscribeable[] = [];
 
     static traveler : any = null;
-    static traveler_origin_list : Landable | null;
+    static traveler_origin_list : Focusable | null;
 
-    static active_list : Landable | null; //React reference to the active TaskList
+    static active_list : Focusable | null; //React reference to the active TaskList
 
     static setManager = (manager : ManagerContext)=>{
         Embassy.manager = manager;
@@ -74,20 +64,23 @@ export default class Embassy{
             Embassy.active_list = null;
         }
     }
-    static setStartingDetails = (traveler : any, origin : Landable | null)=>{
+    static setStartingDetails = (traveler : Travelable | null, origin : Focusable | null)=>{
+        /*
+        On the start of a gesture, the travelable and it's origin should be registered.
+        */
         Embassy.traveler = traveler
         Embassy.traveler_origin_list = origin
     }
     static getTraveler = ()=>{
         return Embassy.traveler
     }
-    static registerLandable = (ref : Landable | LandableContainer)=>{
+    static registerLandable = (ref : Landable)=>{
         if(ref){
             Embassy.registeredLandables.push(ref)
         }
 
     }
-    static unregisterLandable = (ref : Landable | LandableContainer)=>{
+    static unregisterLandable = (ref : Landable)=>{
         /*
         This function takes a react reference
         Returns true on successful deletion. False when item is not in the array
@@ -95,7 +88,7 @@ export default class Embassy{
         if(ref === null)
             return true
 
-        for(let i in Embassy.registeredLandables){
+        for(let i =0; i<Embassy.registeredLandables.length; i++){
             if(Embassy.registeredLandables[i] === ref){
                 Embassy.registeredLandables.splice(i, 1)
                 return true
@@ -103,6 +96,7 @@ export default class Embassy{
         }
         return false
     }
+
     static addOnStartHandlers = (handlers : Subscribeable[] | Subscribeable) => {
         // All handlers must have two params, coordinates and a callback
         if(Array.isArray(handlers)){
@@ -146,20 +140,17 @@ export default class Embassy{
     }
     static findList = (coordinates : Coordinate) => {
         /*
-        Gets a reference of the TaskList that the gesture is ontop of.
+        Gets a reference to a focusable that the gesture is ontop of.
         */
         for( let landable of Embassy.registeredLandables){
             if(landable.isGestureOnTop(coordinates)){
-                if(landable instanceof TaskList)
-                    return landable
-                else{
-                    return (landable as LandableContainer).getList()
-                }
+                return landable.getList()
             }
         }
         return null
     }
-    static setActiveList = (new_list) => {
+
+    static setActiveList = (new_list : Focusable | null) => {
         /*
         Updates the current list that the traveler is on top of. 
         The prev target then should lose focus, while the new target gains focus.
@@ -172,7 +163,7 @@ export default class Embassy{
 
         if(prev_list === new_list){
             // Target is still the same landable
-            Embassy.active_list.onGestureStay()
+            Embassy.active_list && Embassy.active_list.onGestureStay()
         }
         else{
             // There is a target switch
@@ -187,7 +178,8 @@ export default class Embassy{
         Embassy.active_list = new_list
         return Embassy.active_list
     }
-    static onStartTraveling = (coordinates : Coordinate, traveler : TaskCard, origin_list : TaskList)=>{
+
+    static onStartTraveling = (coordinates : Coordinate, traveler : TaskCard, origin_list : Focusable)=>{
         /*
         Should be called by the draggable that initates the travel
         The traveler and the origin_list are the references to the
@@ -199,18 +191,6 @@ export default class Embassy{
         Embassy.setStartingDetails(traveler, origin_list)
         Embassy.setActiveList(origin_list)
 
-        // const promises = Embassy.onStartEvents.map((evt)=>{
-        //     return new Promise((resolve, reject) => {
-        //         evt(coordinates, (err)=>{
-        //             if(err){
-        //                 reject(err)
-        //             }
-        //             else{
-        //                 resolve()
-        //             }
-        //         })
-        //     });
-        // })
 
         for(let event of Embassy.onStartEvents){
             event(coordinates)
@@ -228,12 +208,12 @@ export default class Embassy{
         }
     }
 
-    static onFinishTraveling = (coordinates)=>{
-        const final_target_list = Embassy.findList(coordinates)
+    static onFinishTraveling = (coordinates : Coordinate)=>{
+        const final_target_list = Embassy.findList(coordinates) as Transferable & Focusable
         if(final_target_list){
             final_target_list.onHandleReleaseGesture()
         }
-
+        
         Embassy.performTransfer(final_target_list)
         
         for(let event of Embassy.onReleaseEvents){
@@ -244,17 +224,20 @@ export default class Embassy{
     }
 
 
-    static performTransfer = (target)=>{
+    static performTransfer = (target : Transferable | null)=>{
         /*
             Transfers the contents from the traveler's origin to the 
             target
         */
-       console.log("Traveler is", Embassy.getTraveler());
+    //    console.log("Traveler is", Embassy.getTraveler());
+        const old_target = Embassy.traveler_origin_list as Transferable | null
+
        const task_id = Embassy.getTraveler().getID()
-       const old_list_date = (Embassy.traveler_origin_list as Landable).getDate()
+       const old_list_date = old_target && old_target.getDate()
        const new_list_date = target ? target.getDate() : null
 
        console.log("Transfering", task_id, old_list_date, "--->", new_list_date);
+
        if(new_list_date === null){
         //Deallocate
             console.log("Deallocating");
