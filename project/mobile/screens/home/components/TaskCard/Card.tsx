@@ -6,6 +6,11 @@ import Collapsible from 'react-native-collapsible';
 import CardOptions from './CardOptions'
 import { Taskable } from '../../../../Task';
 
+// KYAAAAAaaaA~ x3 xD
+/*
+I love shelly <3 doki doki :3 xD xP :T :p :P x3 83 ^__^ >__> >__< >x< owo o3o o-o O_O o.o o-O O-O Q_Q T-T T_T *_* ^-^ x_x @_@ 
+    -_- n_n .___. (> ^^ )> .-. ~_~ 8D 8-D >:D :^) ^o^ u_u :) :o 8===D 
+*/
 
 interface TaskCardProps{
     parent_list : any,
@@ -28,6 +33,9 @@ export default class TaskCard extends React.Component<TaskCardProps, TaskCardSta
     getID = ()=>{
         return this.props.task.task_id
     }
+    getDate = ()=>{
+        return this.props.task.allocated_date
+    }
     toggleCard = ()=>{
         this.setState({
             isCollapsed: !this.state.isCollapsed
@@ -46,7 +54,7 @@ export default class TaskCard extends React.Component<TaskCardProps, TaskCardSta
             <EditModeContext.Consumer>
             {({isEditMode})=><UserTaskContext.Consumer>
                 {({updateStatus} : any)=>{
-                    console.log("The card is in edit mode? ", isEditMode);
+                    // console.log("The card is in edit mode? ", isEditMode);
                     return <Draggable 
                         origin_list = {this.props.parent_list} 
                         source = {this}

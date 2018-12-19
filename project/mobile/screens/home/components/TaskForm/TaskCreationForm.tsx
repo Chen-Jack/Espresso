@@ -1,6 +1,6 @@
 import React from 'react'
 import {View, Textarea, Text, Button} from 'native-base'
-import {AsyncStorage} from 'react-native'
+import {AsyncStorage, TextInput} from 'react-native'
 import PropTypes from 'prop-types'
 import {UserTaskContext} from './../../Context'
 
@@ -25,9 +25,13 @@ export default class TaskCreationForm extends React.Component<FormProps, FormSta
     }
 
     _submitForm = (createTask : any)=>{
-        createTask(this.state.task_title, this.state.task_detail, ()=>{
+        createTask(this.state.task_title, this.state.task_detail, (err)=>{
+            if(err){
+                return console.log("ERROR WHEN CREATING TASK", err);
+            }
             this.props.onFormFinishedSubmition()
         })
+        this.props.onFormFinishedSubmition()
     }
 
     render(){
@@ -40,8 +44,14 @@ export default class TaskCreationForm extends React.Component<FormProps, FormSta
                     </View>
                 })}
                 <Text> Create Task</Text>
-                <Textarea placeholder="Title" onChangeText={(txt)=>this.setState({task_title: txt})}/>
-                <Textarea placeholder="Details (Optional)" onChangeText={(txt)=>this.setState({task_detail: txt})}/>
+                <TextInput 
+                    clearButtonMode = {'while-editing'}
+                    placeholder="Title" autoFocus={true}  
+                    onChangeText={(txt)=>this.setState({task_title: txt})}/>
+                <TextInput 
+                    clearButtonMode = {'while-editing'}
+                    placeholder="Details (Optional)" 
+                    onChangeText={(txt)=>this.setState({task_detail: txt})}/>
                 <Button onPress={()=>this._submitForm(createTask)}>
                     <Text>Submit</Text>
                 </Button>   

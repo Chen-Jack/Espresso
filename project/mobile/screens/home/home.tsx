@@ -2,7 +2,7 @@
 
 import React from 'react'
 import {Title, Header, Body,Footer, FooterTab, Container, Content, Button, Toast, Icon} from 'native-base'
-import {AsyncStorage, View, Dimensions, TouchableOpacity, Text } from 'react-native'
+import {AsyncStorage, View, Dimensions, TouchableOpacity, Text, Alert } from 'react-native'
 import { Calendar } from 'react-native-calendars';
 import {TaskCarousel} from './components/TaskCarousel'
 import {TaskDrawer} from './components/TaskDrawer'
@@ -11,6 +11,8 @@ import update from 'immutability-helper'
 import { Embassy } from './components/TravelingList';
 import TaskStorage, {Taskable, TaskSet} from './../../Task'
 import {getDay} from './../../utility'
+import {TaskList} from './components/TaskList'
+import uuid from 'uuid/v4';
 
 export interface ManagerContext{
     updateStatus : any,
@@ -57,7 +59,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
 
     constructor(props : any) {
         super(props)
-        console.disableYellowBox = true;
+        // console.disableYellowBox = true;
 
         this.state = {
             isLoading : true,
@@ -420,21 +422,25 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
                     allocated_tasks:  original_state
                 }, ()=>{
                     console.log("Error with updating task date", err);
-                    alert("Error with api call")
+                    // Alert.alert("Error with api call")
                 })
             }
         })
     }
 
-    createTask = (title : string, details : string | null, cb=()=>{})=>{
+    createTask = (title : string, details : string | null, cb : (err ?: any)=>void)=>{
          // Keep original_state incase of failed API call
         const original_state = this.state.unallocated_tasks
+
+
 
         TaskStorage.createTask(title, details, (err : any, new_task : Taskable)=>{
             if(err){
                 this.setState({
                     unallocated_tasks : original_state,
-                },cb)
+                },()=>{
+                    cb(err)
+                })
             }
             else{
                 const new_state = update(this.state.unallocated_tasks, {
@@ -607,30 +613,32 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         const seconds_per_day = 86400;
         const task_set = [];
 
-        const past_days_allowed = 14; //How far back in time do you want to see
+        const past_days_allowed = 0; //How far back in time do you want to see
 
-        let starting_date_in_epoch = Math.floor(Date.now()/1000 - (seconds_per_day * past_days_allowed))
-
+        let starting_date_in_epoch = Math.floor((new Date).getTime() - (seconds_per_day * past_days_allowed))
+        console.log("Staritng date is", starting_date_in_epoch, new Date(starting_date_in_epoch));
         for(let i = 0; i < day_variance; i++){
 
             //Convert from seconds back into miliseconds for date constructor
-            const date = new Date((starting_date_in_epoch + (i * seconds_per_day)) * 1000) 
+            const date = new Date((starting_date_in_epoch + (i * seconds_per_day * 1000))) 
             task_set.push({
-                date : date.toISOString().substring(0,10), //Only select the date part of ISO date
+                date : date.toLocaleDateString(), //Only select the date part of ISO date
                 tasks: []
             })
         }
-
         return (task_set)
     }
 
     _populateTaskSet = (tasks : Taskable[])=>{
         
         const unallocated_tasks : Taskable[] = []
-        const allocated_tasks : Array<TaskSet> = this._generateEmptyTaskSet()
+        const allocated_tasks : TaskSet[] = this._generateEmptyTaskSet()
+
+        console.log("ATTEMPTING TO POPULATE", tasks, "INTO", allocated_tasks);
 
         for(let task_id in tasks){
             const task = tasks[task_id]
+            console.log("TASK is....", task);
             if(task.allocated_date === null){
                 unallocated_tasks.push(task)
             }
@@ -653,35 +661,49 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
 
 
     componentDidMount(){
+        console.log("MOUNTED LETS GO @@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         this._initalizeApp()
     }
 
     _initalizeApp = ()=>{
+        console.log("INITALIZING APP");
         AsyncStorage.getItem("espresso_app", (err, app)=>{
-            if(err)
-                return alert("PROBLEM INITIALIZING ESPRESSO")
-
-            const app_data = JSON.parse(app as string)
-            if(!app_data){
-                console.log("Initializing App for the first time");
-                const intial_app_state = {
-                    tasks: {}
-                }
-
-                AsyncStorage.setItem("espresso_app", JSON.stringify(intial_app_state), (err)=>{
-                    if(err)
-                        console.log("Error, initializing first time");
-                    else{
-                        this.setState({
-                            allocated_tasks : this._generateEmptyTaskSet(),
-                            isLoading: false
-                        })
-                    }
+            if(err){
+                console.log("ERROR INITIALIZING. PROBLEM GETTING SAVE DATA");
+                // return Alert.alert("PROBLEM INITIALIZING ESPRESSO")
+                this.setState({
+                    isLoading : false,
+                    unallocated_tasks : [],
+                    allocated_tasks : []
                 })
             }
             else{
-                const tasks = app_data.tasks
-                this._populateTaskSet(tasks)
+                console.log("NO PROBLEMS GETTING KEY");
+                const app_data = JSON.parse(app as string)
+                if(!app_data){
+                    console.log("Initializing App for the first time");
+                    const intial_app_state = {
+                        tasks: {}
+                    }
+
+                    AsyncStorage.setItem("espresso_app", JSON.stringify(intial_app_state), (err)=>{
+                        if(err){
+                            console.log("Error, initializing first time");
+                            // return Alert.alert("PROBLEM INITIALIZING ESPRESSO")
+                        }
+                        else{
+                            this.setState({
+                                allocated_tasks : this._generateEmptyTaskSet(),
+                                isLoading: false
+                            })
+                        }
+                    })
+                }
+                else{
+                    console.log("EVERYTHING IS OKAY", "Receieved", app_data.tasks);
+                    const tasks = app_data.tasks
+                    this._populateTaskSet(tasks)
+                }
             }
         })
     }

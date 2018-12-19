@@ -233,7 +233,8 @@ export default class Embassy{
         const old_target = Embassy.traveler_origin_list as Transferable | null
 
        const task_id = Embassy.getTraveler().getID()
-       const old_list_date = old_target && old_target.getDate()
+    //    const old_list_date = old_target && old_target.getDate()
+        const old_list_date = Embassy.getTraveler().getDate()
        const new_list_date = target ? target.getDate() : null
 
        console.log("Transfering", task_id, old_list_date, "--->", new_list_date);
