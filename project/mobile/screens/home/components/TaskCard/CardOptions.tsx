@@ -10,7 +10,7 @@ interface EditModeOptionsProps{
 }
 
 const EditModeOptions : React.FunctionComponent<EditModeOptionsProps> = ({task})=>{
-    console.log("Called?");
+    // console.log("Called?");
     return <View style={{flexDirection:"row"}}>
         <EditTaskButton task={task}/>
         <DeleteButton task_id = {task.task_id}/>
@@ -27,7 +27,7 @@ interface CardOptionsProps{
 }
 
 const CardOptions : React.FunctionComponent<CardOptionsProps> = ({task, details, isEditMode, isCollapsed, toggleDetails})=>{
-    console.log("receieved", isEditMode);
+    // console.log("receieved", isEditMode);
     if(isEditMode){
         return <View style={{flexDirection:"row",alignItems:"center"}}>
             <EditModeOptions task={task}/>

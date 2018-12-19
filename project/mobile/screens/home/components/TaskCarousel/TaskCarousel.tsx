@@ -9,6 +9,7 @@ import { TaskCard } from './../TaskCard'
 import { Layout, Coordinate } from '../../../../utility'
 import { Taskable, TaskSet } from './../../../../Task'
 import { Landable, Focusable } from '../TravelingList';
+import uuid from 'uuid/v4';
 import { Subscribeable } from '../TravelingList/Embassy';
 
 interface TaskCarouselProps {
@@ -225,13 +226,13 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
 
     }
 
-    enableCarouselScroll: Subscribeable = () => {
+    enableCarouselScroll: Subscribeable = ( _ : Coordinate) => {
         this.setState({
             canScroll: true
         })
     }
 
-    disableCarouselScroll: Subscribeable = () => {
+    disableCarouselScroll: Subscribeable = ( _ : Coordinate) => {
         this.setState({
             canScroll: false
         })
@@ -269,11 +270,15 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
 
     _renderTaskList = ({ item: task_set, index }: { item: TaskSet, index: number }) => {
 
-        return <View style={{ margin: 20, height: "85%", width: "85%", backgroundColor: "#ddd", borderRadius: 10, alignSelf: "center" }}>
-            <TaskList initialize={(index === this.STARTING_INDEX) ? this._initializeLayout : null}
-                ref={(ref) => { this[`task_${index}`] = ref }}
-                index={index}
-                data={task_set} />
+        return <View 
+                key = {uuid()}
+                style={{ margin: 20, height: "85%", width: "85%", backgroundColor: "#ddd", borderRadius: 10, alignSelf: "center" }}>
+               
+                <TaskList initialize={(index === this.STARTING_INDEX) ? this._initializeLayout : null}
+                    ref={(ref) => { this[`task_${index}`] = ref }}
+                    index={index}
+                    date = {task_set.date}
+                    tasks={task_set.tasks} />
         </View>
     }
 
@@ -306,6 +311,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
 
             {
                 (this.props.isLoading) ? <Loader /> : <Carousel
+                    
                     firstItem={this.STARTING_INDEX}
                     ref={this.carousel}
                     onSnapToItem={this._onSnapHandler}

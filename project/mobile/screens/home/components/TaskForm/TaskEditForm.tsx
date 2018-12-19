@@ -2,6 +2,7 @@ import React from 'react'
 import {UserTaskContext} from './../../Context'
 import PropTypes from 'prop-types'
 import {View, Button, Textarea, Text} from 'native-base'
+import { TextInput } from 'react-native';
 
 interface EditFormProps{
     task_id : string
@@ -43,14 +44,17 @@ export default class TaskEditForm extends React.Component<EditFormProps, EditFor
                     </View>
                 })}
                 <Text> Update Task </Text>
-                <Textarea 
+                <TextInput 
+                    autoFocus= {true}
+                    clearButtonMode = {'while-editing'}
                     placeholder="Title" 
                     value = {this.state.task_title} 
                     onChangeText={
                         (txt)=>this.setState({task_title: txt})
                     }/>
 
-                <Textarea 
+                <TextInput 
+                    clearButtonMode = {'while-editing'}
                     placeholder="Details (Optional)" 
                     value = {this.state.task_detail}  
                     onChangeText={(txt)=>this.setState({

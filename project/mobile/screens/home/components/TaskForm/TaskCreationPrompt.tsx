@@ -19,9 +19,8 @@ export default class TaskCreationModalPrompt extends React.Component<any, Prompt
     }
 
     togglePrompt = ()=>{
-        const next_state = !this.state.visible
         this.setState({
-            visible: next_state
+            visible: !this.state.visible
         })
     }
 
@@ -41,10 +40,9 @@ export default class TaskCreationModalPrompt extends React.Component<any, Prompt
             <Modal
                 onBackdropPress= {this.togglePrompt}
                 isVisible={this.state.visible}>
-                <View>
-                    
-                    <TaskCreationForm onFormFinishedSubmition={this._finishFormSubmission}/>
 
+                <View>    
+                    <TaskCreationForm onFormFinishedSubmition={this._finishFormSubmission}/>
                 </View>
             </Modal>
         </View>

@@ -78,6 +78,7 @@ export default class DrawerContent extends React.Component<ContentProps, Content
     }
 
     render() {
+        console.log("WAIT, ITS", this.props.task_data);
         return (
             <View style={{ backgroundColor: "#ddd", height: Dimensions.get('window').height, width: "100%" }}>
 
@@ -91,10 +92,14 @@ export default class DrawerContent extends React.Component<ContentProps, Content
                     <UnallocatedTasksHeader task_list={this.props.task_data} />
                     <TaskList
                         ref={this.inner_list}
-                        data={{
-                            date: null,
-                            tasks: this.filterTaskList(this.props.task_data)
-                        }}
+                        date = {null}
+                        tasks = {this.props.task_data}
+                        // data={{
+                        //     date: null,
+                        //     // tasks: this.filterTaskList(this.props.task_data)
+                        //     tasks: this.props.task_data || []
+                        //     // tasks: []
+                        // }}
                     />
                 </View>
 

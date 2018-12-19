@@ -6,12 +6,15 @@ import EmptyList from './EmptyList'
 import { Focusable, Transferable } from '../TravelingList';
 import { Layout } from './../../../../utility'
 import { Taskable, TaskSet } from './../../../../Task'
+import uuid from 'uuid/v4';
 
 interface TaskListProps {
     // Initialize is a callback that TaskList will call if it possesses the starting index
     // This is used to initize the layout of the initial task list.
     initialize ?: any | null
-    data: TaskSet,
+    date : string | null
+    tasks : Taskable[]
+    // data: TaskSet,
     index ?: number
 }
 interface TaskListState {
@@ -41,9 +44,10 @@ export default class TaskList extends React.Component<TaskListProps, TaskListSta
     }
 
     _renderListItem = ({ item, index }: { item: Taskable, index: number }) => {
+        // console.log("CARD IS RENDERING, task");
         return (
             <TaskCard
-                parent_list={this}
+                // parent_list={this}
                 task={item}
                 index={index} />
         )
@@ -78,7 +82,7 @@ export default class TaskList extends React.Component<TaskListProps, TaskListSta
 
 
     getDate = () => {
-        return this.props.data.date || null
+        return this.props.date || null
     }
 
     toggleScroll = (status: boolean | undefined) => {
@@ -88,21 +92,21 @@ export default class TaskList extends React.Component<TaskListProps, TaskListSta
     }
 
     onGestureStay = () => {
-        console.log(`${this.props.data.date} still focused`);
+        console.log(`${this.props.date} still focused`);
     }
 
     onGestureFocus = () => {
-        console.log(`${this.props.data.date} is focused`);
+        console.log(`${this.props.date} is focused`);
         // this._onEnterHandler()
     }
 
     onGestureLoseFocus = () => {
-        console.log(`${this.props.data.date} lost focus`);
+        console.log(`${this.props.date} lost focus`);
         // this._onLeaveHandler()
     }
 
     onHandleReleaseGesture = () => {
-        console.log(`${this.props.data.date} captured the released gesture`);
+        console.log(`${this.props.date} captured the released gesture`);
     }
 
 
@@ -117,6 +121,7 @@ export default class TaskList extends React.Component<TaskListProps, TaskListSta
     }
 
     render() {
+        console.log("TASK LIST RECEIEVED", this.props.tasks);
         let focus_style = { backgroundColor: (this.state.isGestureHovering ? "yellow" : null) }
         let landable_style = { flex: 1, ...focus_style, width: "100%", height: "100%" }
         return (<View
@@ -125,25 +130,25 @@ export default class TaskList extends React.Component<TaskListProps, TaskListSta
             style={{ flex: 1 }}>
 
             {/* TASK LIST HEADER */}
-            {(this.props.data.date !== null) &&
+            {(this.props.date !== null) &&
                 <TaskListHeader
-                    task_list={this.props.data.tasks}
-                    date={this.props.data.date} />
+                    task_list={this.props.tasks}
+                    date={this.props.date} />
             }
 
 
             {/* TASK LIST BODY  */}
-            {this.props.data.tasks.length === 0 ?
+            {this.props.tasks.length === 0 ?
                 <EmptyList /> :
                 <View style={{ width: "100%", height: "100%" }}>
                     <FlatList
+                        keyExtractor = {(item, index)=> item.task_id}
                         scrollEnabled={this.state.canScroll}
-                        index={this.props.index}
-                        data={this.props.data.tasks}
+                        data={this.props.tasks}
                         renderItem={this._renderListItem}
                         style={landable_style} />
                 </View>
-            }
+            } 
         </View>)
 
     }
