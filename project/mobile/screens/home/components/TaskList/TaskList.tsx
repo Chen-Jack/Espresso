@@ -121,7 +121,6 @@ export default class TaskList extends React.Component<TaskListProps, TaskListSta
     }
 
     render() {
-        console.log("TASK LIST RECEIEVED", this.props.tasks);
         let focus_style = { backgroundColor: (this.state.isGestureHovering ? "yellow" : null) }
         let landable_style = { flex: 1, ...focus_style, width: "100%", height: "100%" }
         return (<View

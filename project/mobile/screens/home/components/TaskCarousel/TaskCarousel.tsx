@@ -45,7 +45,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
             task_cards_references: []
         }
 
-        this.STARTING_INDEX = 14;
+        this.STARTING_INDEX = 0;
 
         this.carousel = React.createRef()
         this.wrapper = React.createRef()
