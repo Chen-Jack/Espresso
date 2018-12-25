@@ -220,6 +220,15 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
                     this.timer_ref = null
                 }
                 else{
+                    const coordinates : Coordinate = {
+                        x : e.nativeEvent.pageX,
+                        y: e.nativeEvent.pageY
+                    } 
+                    
+                    Embassy.onFinishTraveling(coordinates, (final_destination)=>{
+                        console.log("FINAL DESTINATION IS", final_destination);
+                    })
+
                     Animated.parallel([
                         // Animated.timing(                
                         //     this.state.modal_scale,         
@@ -252,12 +261,12 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
                     })
                 
 
-                    const coordinates = {
-                        x : e.nativeEvent.pageX,
-                        y: e.nativeEvent.pageY
-                    } as Coordinate
+                    // const coordinates = {
+                    //     x : e.nativeEvent.pageX,
+                    //     y: e.nativeEvent.pageY
+                    // } as Coordinate
                     
-                    Embassy.onFinishTraveling(coordinates)
+                    // Embassy.onFinishTraveling(coordinates)
                     this.gesture_started = false
                 }
             }

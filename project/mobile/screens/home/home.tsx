@@ -57,7 +57,6 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
 
     constructor(props : any) {
         super(props)
-        // console.disableYellowBox = true;
 
         this.state = {
             isLoading : true,
@@ -251,7 +250,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         const original_allocated_state = this.state.allocated_tasks
         const original_unallocated_state = this.state.unallocated_tasks
 
-        let original_task_array : Taskable[] = []
+        let deallocated_tasks : Taskable[] = []
         let original_date_index : number | null = null;
 
         // Search through your state to know what indexes to update
@@ -260,7 +259,10 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
             let day_tasks : Taskable[] = this.state.allocated_tasks[day_index].tasks
             if(date === target_date){
                 original_date_index = Number(day_index)
-                original_task_array = (day_tasks.map((task)=>Object.assign({}, task)))
+                deallocated_tasks = (day_tasks.map((task)=>{
+                    task.allocated_date = null 
+                    return Object.assign({}, task)
+                }))
             }
         }
 
@@ -275,7 +277,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         );
 
         const new_unallocated_state = update(this.state.unallocated_tasks, {
-            $push : original_task_array
+            $push : deallocated_tasks
         })
 
         this.setState({
@@ -290,7 +292,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         })
 
         
-        const task_id_arr : string[] = original_task_array.map(task=>task.task_id)
+        const task_id_arr : string[] = deallocated_tasks.map(task=>task.task_id)
 
         TaskStorage.allocateMultipleTasks(task_id_arr, null, (err)=>{
             if(err){
