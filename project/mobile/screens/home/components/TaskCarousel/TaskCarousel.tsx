@@ -255,11 +255,20 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
 
 
     updateToDate = (date: string) => {
-        const index = this.props.task_data.findIndex((task) => {
-            return task.date === date ? true : false
-        })
-        if (index)
+        let index = -1
+        
+        for (let i in this.props.task_data){
+            const task_set = this.props.task_data[i]
+            if(task_set.date === date){
+                index = parseInt(i)
+                break;
+            }
+        }
+
+        if (index !== -1)
             this.carousel.current.snapToItem(index)
+        else
+            console.log("Index not found on calendar");
     }
 
     _handleNewDateSelection = (data_index: number) => {
@@ -271,7 +280,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
     _renderTaskList = ({ item: task_set, index }: { item: TaskSet, index: number }) => {
 
         return <View 
-                key = {uuid()}
+                key=  {index}
                 style={{ margin: 20, height: "85%", width: "85%", backgroundColor: "#ddd", borderRadius: 10, alignSelf: "center" }}>
                
                 <TaskList initialize={(index === this.STARTING_INDEX) ? this._initializeLayout : null}

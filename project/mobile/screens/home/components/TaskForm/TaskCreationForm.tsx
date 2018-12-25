@@ -25,13 +25,12 @@ export default class TaskCreationForm extends React.Component<FormProps, FormSta
     }
 
     _submitForm = (createTask : any)=>{
-        createTask(this.state.task_title, this.state.task_detail, (err)=>{
+        createTask(this.state.task_title, this.state.task_detail, (err: any)=>{
             if(err){
                 return console.log("ERROR WHEN CREATING TASK", err);
             }
             this.props.onFormFinishedSubmition()
         })
-        this.props.onFormFinishedSubmition()
     }
 
     render(){
