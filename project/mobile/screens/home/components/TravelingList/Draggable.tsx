@@ -53,7 +53,7 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
             modal_scale: new Animated.Value(1)
         }
 
-        this.animation_speed = 350;
+        this.animation_speed = 500;
         
         this.time_of_last_press = Date.now();
         this.waiting_for_second_tap = false;
@@ -67,6 +67,54 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
         this.initial_position = {x: 0, y: 0}
 
         this.draggable = React.createRef()
+    }
+
+    getAnimationType = (final_destination : number)=>{
+        if(final_destination === Embassy.SAME_TARGET){
+            console.log("back to square 1");
+            return Animated.timing(
+                this.state.pan,
+                {
+                    toValue: this.initial_position,
+                    duration: this.animation_speed
+                }
+            )
+        }
+        else if(final_destination === Embassy.NEW_TARGET){
+            console.log("time to shrink");
+            return Animated.timing(
+                this.state.scale,
+                {
+                    toValue: 0,
+                    duration: this.animation_speed
+                }
+            )
+        }
+        else if(final_destination === Embassy.TARGET_LEFT){
+            console.log("GO LEFTTT");
+            this.initial_position.x = -1500
+            return Animated.timing(
+                this.state.pan,
+                {
+                    toValue: this.initial_position,
+                    duration: this.animation_speed * 1.75
+                }
+            )
+        }
+        else if(final_destination === Embassy.TARGET_RIGHT){
+            console.log("GOO RIGHHT");
+            this.initial_position.x = 2000
+            return Animated.timing(
+                this.state.pan,
+                {
+                    toValue: this.initial_position,
+                    duration: this.animation_speed * 1.75
+                }
+            )
+        }
+        else{
+            console.log("Count not recognize the corresponding animation type for that target...");
+        }
     }
 
     _onLayoutHandler = (e : any)=>{
@@ -227,9 +275,18 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
                     
                     Embassy.onFinishTraveling(coordinates, (final_destination)=>{
                         console.log("FINAL DESTINATION IS", final_destination);
+                        const animation = this.getAnimationType(final_destination)
+                        animation && animation.start(()=>{
+                            this.setState({
+                                focus: false
+                            }, ()=>{
+                                this.state.pan.setValue({x: 0, y: 0});
+                                this.state.pan.flattenOffset();
+                            })
+                        })
                     })
 
-                    Animated.parallel([
+                    // Animated.parallel([
                         // Animated.timing(                
                         //     this.state.modal_scale,         
                         //     {
@@ -237,13 +294,13 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
                         //         duration: this.animation_speed,              
                         //     }
                         // ),
-                        Animated.timing(
-                            this.state.pan,
-                            {
-                                toValue: this.initial_position,
-                                duration: 1000
-                            }
-                        ),
+                        // Animated.timing(
+                        //     this.state.pan,
+                        //     {
+                        //         toValue: this.initial_position,
+                        //         duration: 500
+                        //     }
+                        // ),
                         // Animated.timing(
                         //     this.state.scale,
                         //     {
@@ -251,22 +308,15 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
                         //         duration: this.animation_speed
                         //     }
                         // )
-                    ]).start(()=>{  
-                        this.setState({
-                            focus: false
-                        }, ()=>{
-                            this.state.pan.setValue({x: 0, y: 0});
-                            this.state.pan.flattenOffset();
-                        })
-                    })
+                    // ]).start(()=>{  
+                    //     this.setState({
+                    //         focus: false
+                    //     }, ()=>{
+                    //         this.state.pan.setValue({x: 0, y: 0});
+                    //         this.state.pan.flattenOffset();
+                    //     })
+                    // })
                 
-
-                    // const coordinates = {
-                    //     x : e.nativeEvent.pageX,
-                    //     y: e.nativeEvent.pageY
-                    // } as Coordinate
-                    
-                    // Embassy.onFinishTraveling(coordinates)
                     this.gesture_started = false
                 }
             }

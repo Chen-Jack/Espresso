@@ -42,7 +42,6 @@ class TaskCalendar extends React.Component<CalendarProps, CalendarState>{
                 markers_list[date_iso_form] = {dots: []}
 
             for(let task of task_set.tasks){
-                console.log(task);
                 if(task.completed)
                     markers_list[date_iso_form]["dots"].push({key: task.task_id, color: "blue"})
                 else
@@ -50,7 +49,6 @@ class TaskCalendar extends React.Component<CalendarProps, CalendarState>{
             }
         }
         
-        console.log("Markers_list", markers_list);
         return markers_list
     }
 

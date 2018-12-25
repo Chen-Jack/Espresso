@@ -163,9 +163,11 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
         this.autoScrollingTimer = setInterval(() => {
             if (direction === "RIGHT") {
                 this.carousel.current && this.carousel.current.snapToNext()
+                Embassy.carouselTurn(1)
             }
             else if (direction === "LEFT") {
                 this.carousel.current && this.carousel.current.snapToPrev()
+                Embassy.carouselTurn(-1)
             }
             else if (direction === "NONE") {
 

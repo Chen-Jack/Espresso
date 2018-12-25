@@ -40,6 +40,11 @@ export default class Embassy{
     A class to act as a middleman between all the landables. Not intended to be 
     instantiated. Every instantiated landable should let the Embassy know.
     */
+    static SAME_TARGET = 0
+    static NEW_TARGET = 1
+    static TARGET_LEFT = 2
+    static TARGET_RIGHT = 3
+
     static manager : ManagerContext;
 
     static registeredLandables : Landable[] = []; //Can either be a TaskList, or a container containing TaskLists
@@ -52,8 +57,17 @@ export default class Embassy{
 
     static active_list : Focusable | null; //React reference to the active TaskList
 
+    static carousel_offset = 0  // Keeps track of how many times the carousel has turned since the gesture started.
+
     static setManager = (manager : ManagerContext)=>{
         Embassy.manager = manager;
+    }
+
+    static carouselTurn(turn : number){
+        /*
+        Intended to be called when the carousel rotates when the card is over the edge of the carousel.
+        */
+        Embassy.carousel_offset += turn
     }
 
     static resetTravelDetails = ()=>{
@@ -61,6 +75,8 @@ export default class Embassy{
         Clears all the Embassy's variables
         */
         Embassy.setStartingDetails(null,null)
+        Embassy.carousel_offset = 0
+
         if(Embassy.active_list){
             Embassy.active_list.onGestureLoseFocus()
             Embassy.active_list = null;
@@ -280,21 +296,35 @@ export default class Embassy{
         /*
         i) Directly on new target
         ii) New target is the same as the origin
-
         iii) No new target, origin was a carousel
-            a) No new target, origin is still on screen
+            a) no new target, origin is off screen(right side)
             b) no new target, origin is off screen (left side)
-            c) no new target, origin is off screen(right side)
+            c) No new target, origin is still on screen
         
         iv) No new target, origin was a drawer
+            Covered by case iii a, this is done by having the drawer auto open.
         */
        
         if(final_target_list !== null && (final_target_list !== Embassy.traveler_origin_list))
-            cb("You have a new target")
+            // case i
+            cb(Embassy.NEW_TARGET)
         else if(final_target_list !== null && (final_target_list === Embassy.traveler_origin_list ))
-            cb("SAME")
+            // case ii
+            cb(Embassy.SAME_TARGET)
         else if(final_target_list === null){
-            
+            //case iii a-c
+            if(Embassy.carousel_offset >= 1){
+                // case a
+                cb(Embassy.TARGET_LEFT)
+            }
+            else if(Embassy.carousel_offset <= -1){
+                // case b
+                cb(Embassy.TARGET_RIGHT)
+            }
+            else{
+                // case c
+                cb(Embassy.SAME_TARGET)
+            }
         }
         
 
