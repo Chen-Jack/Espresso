@@ -3,7 +3,7 @@
 import React from 'react'
 import {Title, Header, Body,Footer, FooterTab, Container, Content, Button, Toast, Icon} from 'native-base'
 import {AsyncStorage, View, Dimensions, TouchableOpacity, Text, Alert } from 'react-native'
-import { Calendar } from 'react-native-calendars';
+import {TaskCalendar} from './components/Calendar'
 import {TaskCarousel} from './components/TaskCarousel'
 import {TaskDrawer} from './components/TaskDrawer'
 import {UserTaskContext, EditModeContext} from './Context'
@@ -11,8 +11,8 @@ import update from 'immutability-helper'
 import { Embassy } from './components/TravelingList';
 import TaskStorage, {Taskable, TaskSet} from './../../Task'
 import {getDay} from './../../utility'
-import {TaskList} from './components/TaskList'
-import uuid from 'uuid/v4';
+
+console.disableYellowBox = true;
 
 export interface ManagerContext{
     updateStatus : any,
@@ -50,16 +50,13 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
 
 
     today: Date
-    editContext: EditContext
     manager: ManagerContext
     carousel: React.RefObject<TaskCarousel>
-    calendar: React.RefObject<Calendar>
     drawer: TaskDrawer | null
     
 
     constructor(props : any) {
         super(props)
-        // console.disableYellowBox = true;
 
         this.state = {
             isLoading : true,
@@ -75,7 +72,6 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         }   
 
         this.carousel = React.createRef()
-        this.calendar = React.createRef()
         this.drawer = null
 
         this.today = new Date()
@@ -254,22 +250,25 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         const original_allocated_state = this.state.allocated_tasks
         const original_unallocated_state = this.state.unallocated_tasks
 
-        const original_task_array : Taskable[] = []
+        let deallocated_tasks : Taskable[] = []
         let original_date_index : number | null = null;
 
         // Search through your state to know what indexes to update
         for(let day_index in this.state.allocated_tasks){
-            let date : string = this.state.allocated_tasks[day_index].date
+            let date : string = this.state.allocated_tasks[day_index].date as string
             let day_tasks : Taskable[] = this.state.allocated_tasks[day_index].tasks
             if(date === target_date){
                 original_date_index = Number(day_index)
-                original_task_array.push(...day_tasks)
+                deallocated_tasks = (day_tasks.map((task)=>{
+                    task.allocated_date = null 
+                    return Object.assign({}, task)
+                }))
             }
         }
 
         const new_allocated_state = update(this.state.allocated_tasks, 
             {
-                [original_date_index] : { // Remove Item from Old Date
+                [original_date_index as number] : { // Remove Item from Old Date
                     tasks: {
                         $set: []
                     }
@@ -278,7 +277,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         );
 
         const new_unallocated_state = update(this.state.unallocated_tasks, {
-            $push : original_task_array
+            $push : deallocated_tasks
         })
 
         this.setState({
@@ -293,7 +292,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         })
 
         
-        const task_id_arr : string[] = original_task_array.map(task=>task.task_id)
+        const task_id_arr : string[] = deallocated_tasks.map(task=>task.task_id)
 
         TaskStorage.allocateMultipleTasks(task_id_arr, null, (err)=>{
             if(err){
@@ -393,7 +392,6 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
             }   
             
         }
-        console.log("The original task is", original_task);
 
         const updated_task = update(original_task , {allocated_date : {$set : new_date} })
         const new_state = update(this.state.allocated_tasks, 
@@ -551,7 +549,6 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
                             }
                         }
                     })
-                    console.log("found!!!, state now", new_state);
                     this.setState({
                         allocated_tasks : new_state
                     }, cb)
@@ -609,6 +606,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
 
 
    _generateEmptyTaskSet  = () : TaskSet[] =>{
+       
         const day_variance = 28; //How many days of tasks you will show.
         const seconds_per_day = 86400;
         const task_set = [];
@@ -616,16 +614,17 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         const past_days_allowed = 0; //How far back in time do you want to see
 
         let starting_date_in_epoch = Math.floor((new Date).getTime() - (seconds_per_day * past_days_allowed))
-        console.log("Staritng date is", starting_date_in_epoch, new Date(starting_date_in_epoch));
+
         for(let i = 0; i < day_variance; i++){
 
             //Convert from seconds back into miliseconds for date constructor
             const date = new Date((starting_date_in_epoch + (i * seconds_per_day * 1000))) 
             task_set.push({
-                date : date.toLocaleDateString(), //Only select the date part of ISO date
+                date : date.toISOString().substring(0,10), //Only select the date part of ISO date
                 tasks: []
             })
         }
+
         return (task_set)
     }
 
@@ -634,11 +633,9 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         const unallocated_tasks : Taskable[] = []
         const allocated_tasks : TaskSet[] = this._generateEmptyTaskSet()
 
-        console.log("ATTEMPTING TO POPULATE", tasks, "INTO", allocated_tasks);
 
         for(let task_id in tasks){
             const task = tasks[task_id]
-            console.log("TASK is....", task);
             if(task.allocated_date === null){
                 unallocated_tasks.push(task)
             }
@@ -689,7 +686,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
                     AsyncStorage.setItem("espresso_app", JSON.stringify(intial_app_state), (err)=>{
                         if(err){
                             console.log("Error, initializing first time");
-                            // return Alert.alert("PROBLEM INITIALIZING ESPRESSO")
+                            return Alert.alert("PROBLEM INITIALIZING ESPRESSO")
                         }
                         else{
                             this.setState({
@@ -716,21 +713,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         this.drawer.openDrawer()
     }
 
-    _generateCalendarMarkers = ()=>{
-        const markers_list = {}
-        for(let day of this.state.allocated_tasks){
-            if(!markers_list[day.date])
-                markers_list[day.date] = {dots: []}
 
-            for(let task of day.tasks){
-                if(task.completed)
-                    markers_list[day.date]["dots"].push({key: task.task_id, color: "blue"})
-                else
-                    markers_list[day.date]["dots"].push({key: task.task_id, color: "red"})
-            }
-        }
-        return markers_list
-    }
 
     render(){
         return <UserTaskContext.Provider value={this.manager}>
@@ -749,20 +732,12 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
                         <Content style={{ height: Dimensions.get('window').height, width: Dimensions.get('window').width, backgroundColor: "#fff"}} scrollEnabled = {false}>
                             <View style={{paddingBottom:50,height: Dimensions.get('window').height, width: Dimensions.get('window').width}}>
                         
-                                <Calendar
-                                    hideExtraDays={true}
-                                    style={{paddingVertical: 5}}
-                                    markingType={'multi-dot'}
+                                <TaskCalendar
                                     onDayPress={(day)=>{
                                         this._onDateSelection(day.dateString)}}
-                                    markedDates={{
-                                        [this.state.selected_date]: {selected: true, selectedColor: 'red'},
-                                        ...this._generateCalendarMarkers()
-                                    }}
+                                    allocated_tasks = {this.state.allocated_tasks}
                                     />
-                                {/* <Button onPress={()=>{console.log(this.state)}}>
-                                    <Text>State </Text>
-                                </Button> */}
+
                                 <TaskCarousel
                                     ref = {this.carousel}
                                     isLoading = {this.state.isLoading}

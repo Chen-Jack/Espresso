@@ -5,6 +5,7 @@ import {UserTaskContext, EditModeContext} from '../../Context'
 import Collapsible from 'react-native-collapsible';
 import CardOptions from './CardOptions'
 import { Taskable } from '../../../../Task';
+import {Travelable} from './../TravelingList/Embassy'
 
 // KYAAAAAaaaA~ x3 xD
 /*
@@ -22,7 +23,7 @@ interface TaskCardState{
     isCollapsed: boolean
 }
 
-export default class TaskCard extends React.Component<TaskCardProps, TaskCardState>{
+export default class TaskCard extends React.Component<TaskCardProps, TaskCardState> implements Travelable{
     constructor(props : TaskCardProps) {
         super(props)
 

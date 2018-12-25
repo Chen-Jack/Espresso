@@ -75,6 +75,13 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
         return this.focused_list
     }
 
+    getLayout = (): Layout =>{
+        if(this.focused_list_layout)
+            return this.focused_list_layout
+        else
+            return {x:0, y: 0, width:0, height: 0}
+    }
+
     componentDidMount() {
         Embassy.registerLandable(this)
 
@@ -156,9 +163,11 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
         this.autoScrollingTimer = setInterval(() => {
             if (direction === "RIGHT") {
                 this.carousel.current && this.carousel.current.snapToNext()
+                Embassy.carouselTurn(1)
             }
             else if (direction === "LEFT") {
                 this.carousel.current && this.carousel.current.snapToPrev()
+                Embassy.carouselTurn(-1)
             }
             else if (direction === "NONE") {
 
@@ -255,11 +264,20 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
 
 
     updateToDate = (date: string) => {
-        const index = this.props.task_data.findIndex((task) => {
-            return task.date === date ? true : false
-        })
-        if (index)
+        let index = -1
+        
+        for (let i in this.props.task_data){
+            const task_set = this.props.task_data[i]
+            if(task_set.date === date){
+                index = parseInt(i)
+                break;
+            }
+        }
+
+        if (index !== -1)
             this.carousel.current.snapToItem(index)
+        else
+            console.log("Index not found on calendar");
     }
 
     _handleNewDateSelection = (data_index: number) => {
@@ -271,7 +289,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
     _renderTaskList = ({ item: task_set, index }: { item: TaskSet, index: number }) => {
 
         return <View 
-                key = {uuid()}
+                key=  {index}
                 style={{ margin: 20, height: "85%", width: "85%", backgroundColor: "#ddd", borderRadius: 10, alignSelf: "center" }}>
                
                 <TaskList initialize={(index === this.STARTING_INDEX) ? this._initializeLayout : null}

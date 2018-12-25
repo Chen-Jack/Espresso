@@ -2,6 +2,7 @@ import {TaskList} from './../TaskList'
 import {ManagerContext} from './../../home'
 import {Coordinate} from './../../../../utility'
 import {TaskCard} from './../TaskCard'
+import {Layout} from './../../../../utility'
 
 
 export interface Focusable{
@@ -20,6 +21,7 @@ export interface Landable{
     */
     getList : ()=> Focusable | null
     isGestureOnTop : (coordinates : Coordinate)=> boolean
+    getLayout : ()=> Layout
 }
 
 
@@ -34,10 +36,15 @@ export type Subscribeable = (coordinates : Coordinate , cb ?: (err ?: any)=>void
 export default class Embassy{
     /*
     I love shelly <3 doki doki :3 xD xP :T :p :P x3 83 ^__^ >__> >__< >x< owo o3o o-o O_O o.o o-O O-O Q_Q T-T T_T *_* ^-^ x_x @_@ 
-    -_- n_n .___. (> ^^ )> .-. ~_~ 8D 8-D >:D :^) ^o^ u_u :) :o 8===D 
+    -_- n_n .___. (> ^^ )> .-. ~_~ 8D >:D :^) ^o^ u_u :) :o owo uwu
     A class to act as a middleman between all the landables. Not intended to be 
     instantiated. Every instantiated landable should let the Embassy know.
     */
+    static SAME_TARGET = 0
+    static NEW_TARGET = 1
+    static TARGET_LEFT = 2
+    static TARGET_RIGHT = 3
+
     static manager : ManagerContext;
 
     static registeredLandables : Landable[] = []; //Can either be a TaskList, or a container containing TaskLists
@@ -50,8 +57,17 @@ export default class Embassy{
 
     static active_list : Focusable | null; //React reference to the active TaskList
 
+    static carousel_offset = 0  // Keeps track of how many times the carousel has turned since the gesture started.
+
     static setManager = (manager : ManagerContext)=>{
         Embassy.manager = manager;
+    }
+
+    static carouselTurn(turn : number){
+        /*
+        Intended to be called when the carousel rotates when the card is over the edge of the carousel.
+        */
+        Embassy.carousel_offset += turn
     }
 
     static resetTravelDetails = ()=>{
@@ -59,6 +75,8 @@ export default class Embassy{
         Clears all the Embassy's variables
         */
         Embassy.setStartingDetails(null,null)
+        Embassy.carousel_offset = 0
+
         if(Embassy.active_list){
             Embassy.active_list.onGestureLoseFocus()
             Embassy.active_list = null;
@@ -138,13 +156,71 @@ export default class Embassy{
             console.log("Incorrect handler passed into Embassy.addOnReleaseHandler");
         }
     }
+
+    static removeOnReleaseHandlers = (handlers: Subscribeable[] | Subscribeable)=>{
+        if(Array.isArray(handlers)){
+            for(let handler of handlers){
+                Embassy.onReleaseEvents.forEach((func, index)=>{
+                    if(func === handler){
+                        Embassy.onReleaseEvents.splice(index, 1)
+                    }
+                })
+            }
+        }
+        else if(typeof handlers === "function"){
+            Embassy.onReleaseEvents.forEach((func, index)=>{
+                if(func === handlers){
+                    Embassy.onReleaseEvents.splice(index, 1)
+                    console.log("Successfully removed event", Embassy.onReleaseEvents);
+                    return
+                }
+            })
+        }
+        else{
+            console.log("Incorrect handler passed into Embassy.removeOnReleaseHandler");
+        }
+    }
+
+    static removeOnStartHandlers = (handlers: Subscribeable[] | Subscribeable)=>{
+        if(Array.isArray(handlers)){
+            for(let handler of handlers){
+                Embassy.onStartEvents.forEach((func, index)=>{
+                    if(func === handler){
+                        Embassy.onStartEvents.splice(index, 1)
+                    }
+                })
+            }
+        }
+        else if(typeof handlers === "function"){
+            Embassy.onStartEvents.forEach((func, index)=>{
+                if(func === handlers){
+                    Embassy.onStartEvents.splice(index, 1)
+                    console.log("Successfully removed event", Embassy.onReleaseEvents);
+                    return
+                }
+            })
+        }
+        else{
+            console.log("Incorrect handler passed into Embassy.removeOnReleaseHandler");
+        }
+    }
+
+
     static findList = (coordinates : Coordinate) => {
         /*
         Gets a reference to a focusable that the gesture is ontop of.
         */
+        const landable = Embassy.findLandable(coordinates)
+        if(landable)
+            return landable.getList()
+        else
+            return null
+    }
+
+    static findLandable = (coordinates: Coordinate)=>{
         for( let landable of Embassy.registeredLandables){
             if(landable.isGestureOnTop(coordinates)){
-                return landable.getList()
+                return landable
             }
         }
         return null
@@ -179,17 +255,18 @@ export default class Embassy{
         return Embassy.active_list
     }
 
-    static onStartTraveling = (coordinates : Coordinate, traveler : TaskCard, origin_list : Focusable)=>{
+    static onStartTraveling = (coordinates : Coordinate, traveler : TaskCard)=>{
         /*
         Should be called by the draggable that initates the travel
         The traveler and the origin_list are the references to the
         card that started the gesture.
         Traveler_task_list is the tasklist the traveler comes from.
         */
-      
-        console.log("Hm", Embassy.manager);
-        Embassy.setStartingDetails(traveler, origin_list)
+  
+        const origin_list = Embassy.findList(coordinates)
+        console.log("ORIGIN LIST IS", origin_list);
         Embassy.setActiveList(origin_list)
+        Embassy.setStartingDetails(traveler, origin_list)
 
 
         for(let event of Embassy.onStartEvents){
@@ -208,14 +285,60 @@ export default class Embassy{
         }
     }
 
-    static onFinishTraveling = (coordinates : Coordinate)=>{
-        const final_target_list = Embassy.findList(coordinates) as Transferable & Focusable
-        if(final_target_list){
-            final_target_list.onHandleReleaseGesture()
+    static onFinishTraveling = (coordinates : Coordinate, cb : (final_destination : any )=>void )=>{
+        /*
+        The cb is how the draggable should move in relation to what it is released on top of.
+        */
+        const landable = Embassy.findLandable(coordinates)
+        const final_target_list = landable && landable.getList() as Transferable & Focusable
+        
+        // Determine which case is the finish.
+        /*
+        i) Directly on new target
+        ii) New target is the same as the origin
+        iii) No new target, origin was a carousel
+            a) no new target, origin is off screen(right side)
+            b) no new target, origin is off screen (left side)
+            c) No new target, origin is still on screen
+        
+        iv) No new target, origin was a drawer
+            Covered by case iii a, this is done by having the drawer auto open.
+        */
+       
+        if(final_target_list !== null && (final_target_list !== Embassy.traveler_origin_list))
+            // case i
+            cb(Embassy.NEW_TARGET)
+        else if(final_target_list !== null && (final_target_list === Embassy.traveler_origin_list ))
+            // case ii
+            cb(Embassy.SAME_TARGET)
+        else if(final_target_list === null){
+            //case iii a-c
+            if(Embassy.carousel_offset >= 1){
+                // case a
+                cb(Embassy.TARGET_LEFT)
+            }
+            else if(Embassy.carousel_offset <= -1){
+                // case b
+                cb(Embassy.TARGET_RIGHT)
+            }
+            else{
+                // case c
+                cb(Embassy.SAME_TARGET)
+            }
         }
         
-        Embassy.performTransfer(final_target_list)
-        
+
+
+        if(landable){
+            if(final_target_list){
+                final_target_list.onHandleReleaseGesture()
+            }
+            
+            Embassy.performTransfer(final_target_list)
+          
+        }
+
+          
         for(let event of Embassy.onReleaseEvents){
             event(coordinates)
         }
