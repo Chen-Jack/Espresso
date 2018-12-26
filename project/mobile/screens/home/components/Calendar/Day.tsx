@@ -1,14 +1,17 @@
-import React from 'react'
-import {Text, View} from 'react-native'
+import React, { SyntheticEvent } from 'react'
+import {Text, View, TouchableOpacity} from 'react-native'
 import uuid from 'uuid/v4'
 import { Coordinate, Layout } from '../../../../utility';
 import { Focusable, Transferable } from '../TravelingList';
+import { DateObject } from 'react-native-calendars';
+import {Embassy} from './../TravelingList'
 
 interface DayProps{
-    date: any
+    date: DateObject
     join: any,
     leave: any
     markings: any[]
+    onPress: (date: DateObject)=>void
 }
 
 class Day extends React.Component<DayProps> implements Focusable, Transferable {
@@ -35,9 +38,11 @@ class Day extends React.Component<DayProps> implements Focusable, Transferable {
 
     onGestureLoseFocus = ()=>{
         console.log(this.props.date.dateString, "lost focus");
+        Embassy.materializeTraveler()
     }
     onGestureFocus  = ()=>{
         console.log(this.props.date.dateString, "gained focus");
+        Embassy.ghostTraveler()
     }
     onGestureStay = ()=>{
         console.log(this.props.date.dateString, "stayed focus");
@@ -107,9 +112,11 @@ class Day extends React.Component<DayProps> implements Focusable, Transferable {
     }
 
     render(){
-        return <View style={{flex:1, backgroundColor:"purple"}} ref={ ref => this.wrapper = ref} onLayout={this._onLayout}>
+        return <TouchableOpacity onPress={()=>this.props.onPress(this.props.date)}  style={{flex:1, backgroundColor:"purple"}}>
+                <View style={{width:"100%"}} ref={ ref => this.wrapper = ref} onLayout={this._onLayout}>
             <Text style={{width:"100%", textAlign:"center"}}> {this.props.date.day} </Text>
         </View>
+        </TouchableOpacity>
     }
 }
 

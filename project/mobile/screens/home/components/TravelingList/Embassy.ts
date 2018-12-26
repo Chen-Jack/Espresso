@@ -254,6 +254,16 @@ export default class Embassy{
         return Embassy.active_list
     }
 
+    static ghostTraveler = ()=>{
+        // Makes the traveler lower opacity
+        Embassy.getTraveler().ghost()
+    }
+
+    static materializeTraveler = ()=>{
+        // Makes the traveler normal opacity
+        Embassy.getTraveler().materialize()
+    }
+
     static onStartTraveling = (coordinates : Coordinate, traveler : TaskCard)=>{
         /*
         Should be called by the draggable that initates the travel
@@ -263,11 +273,12 @@ export default class Embassy{
         */
   
         const origin_list = Embassy.findList(coordinates)
-        console.log("ORIGIN LIST IS", origin_list);
+        // console.log("ORIGIN LIST IS", origin_list);
         Embassy.setActiveList(origin_list)
         Embassy.setStartingDetails(traveler, origin_list)
 
 
+        console.log("a total of", Embassy.onStartEvents.length);
         for(let event of Embassy.onStartEvents){
             event(coordinates)
         }

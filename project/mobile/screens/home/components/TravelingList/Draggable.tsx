@@ -59,7 +59,7 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
         this.waiting_for_second_tap = false;
         this.ms_to_trigger_double_tap = 350;
 
-        this.ms_to_trigger_long_press = 200; 
+        this.ms_to_trigger_long_press = 300; 
         this.timer_ref = null   
         this.gesture_started = false
 
@@ -265,33 +265,23 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
     long_press_callback = (e : GestureResponderEvent, gestureState : PanResponderGestureState)=>{
         console.log("LONG PRESS ", e.nativeEvent, gestureState);
 
+        const coordinates = {
+            x : e.nativeEvent.pageX,
+            y: e.nativeEvent.pageY
+        } as Coordinate
+
+    
+
+
+        Embassy.onStartTraveling(coordinates, this.props.source, /*this.props.origin_list*/)
+        
+
         this.draggable.current.measure(  
             (x : number, y: number, width : number, height : number, pageX: number, pageY: number) => {
             this.initial_position = {
                 x: pageX,
                 y: pageY
             };
-        })
-        
-        this.setState({
-            focus: true
-        }, ()=>{
-            Animated.parallel([
-                Animated.spring(                
-                    this.state.modal_scale,          
-                    {
-                        toValue: 1.1,                   
-                        friction: 3, 
-                    }
-                ),
-                Animated.spring(
-                    this.state.scale,
-                    {
-                        toValue: 0,
-                        friction: 3
-                    }
-                )
-            ]).start()
         })
 
         const center_offset = {
@@ -305,13 +295,32 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
             y: gestureState.y0 - center_offset.y
         });
 
-    
-        const coordinates = {
-            x : e.nativeEvent.pageX,
-            y: e.nativeEvent.pageY
-        } as Coordinate
+         
+        this.setState({
+            focus: true
+        }, ()=>{
+            console.log("Done focus set");
+            Animated.parallel([
+                Animated.spring(                
+                    this.state.modal_scale,          
+                    {
+                        toValue: 1.1,                   
+                        friction: 3, 
+                        useNativeDriver : true
+                    }
+                ),
+                Animated.spring(
+                    this.state.scale,
+                    {
+                        toValue: 0,
+                        friction: 3,
+                        useNativeDriver : true
+                    }
+                )
+            ]).start()
+        })
 
-        Embassy.onStartTraveling(coordinates, this.props.source, /*this.props.origin_list*/)
+    
         
         this.gesture_started = true
     }
@@ -337,7 +346,7 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
         let translateStyle = {transform: [{translateX: this.state.pan.x}, {translateY: this.state.pan.y}]}
         let modalScaleStyle = {transform:[{scaleX: this.state.modal_scale}, {scaleY: this.state.modal_scale}]}
 
-
+     
         let modalStyle = {transform: translateStyle.transform.concat(modalScaleStyle.transform)}
         let scaleStyle = {transform:[{scaleX: this.state.scale}, {scaleY: this.state.scale}]}
         return ( 

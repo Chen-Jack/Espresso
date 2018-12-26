@@ -45,7 +45,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
             task_cards_references: []
         }
 
-        this.STARTING_INDEX = 0;
+        this.STARTING_INDEX = 60;
 
         this.carousel = React.createRef()
         this.wrapper = React.createRef()
@@ -65,6 +65,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
     componentWillUnmount() {
         console.log("Carousel Unmounting");
     }
+
 
 
     _getReference = (index: number) => {
@@ -114,15 +115,19 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
         //Subscribed Event Handler
         for (let i = 0; i < this.props.task_data.length; i++) {
             const ref = this._getReference(i)
-            ref.toggleScroll(false)
+            ref && ref.toggleScroll(false)
         }
+    }
+    
+    disableCurrentListScroll : Subscribeable = ()=>{
+        this.focused_list && this.focused_list.toggleScroll(false)
     }
 
     enableAllListScroll: Subscribeable = () => {
         //Subscribed Event Handler
         for (let i = 0; i < this.props.task_data.length; i++) {
             const ref = this._getReference(i)
-            ref.toggleScroll(true)
+            ref && ref.toggleScroll(true)
         }
     }
 
@@ -182,7 +187,17 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
         clearInterval(this.autoScrollingTimer)
         this.autoScrollingTimer = null
     }
-
+    // shouldComponentUpdate(nextProps,nextState){
+    //     if(this.state.task_cards_references === nextState.task_cards_references &&
+    //         this.props === nextProps){
+    //             console.log("NOT Rerendering");
+    //             return false
+    //         }
+    //         else{
+    //             console.log("rererendering");
+    //             return true
+    //         }
+    // }
 
     whichEdgeIsGestureOn = (coordinates: Coordinate) => {
         /*
@@ -264,6 +279,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
 
 
     updateToDate = (date: string) => {
+        console.log("Updating to", date," and comparing to", this.props.task_data);
         let index = -1
         
         for (let i in this.props.task_data){
@@ -302,7 +318,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
 
     updateFocusedListLayout = (index: number) => {
         const ref = this._getReference(index)
-        ref.measureLayout((layout: Layout) => {
+        ref && ref.measureLayout((layout: Layout) => {
             this.focused_list = ref
             this.focused_list_layout = layout
         })
@@ -333,7 +349,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
                     firstItem={this.STARTING_INDEX}
                     ref={this.carousel}
                     onSnapToItem={this._onSnapHandler}
-                    useScrollView={true}
+                    // useScrollView={true}
                     lockScrollWhileSnapping={true}
                     showsHorizontalScrollIndicator={true}
                     scrollEnabled={this.state.canScroll}

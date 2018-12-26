@@ -416,7 +416,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
              //Add Item To New Date, but only
              // if the date is within our state. otherwise, theres no need
              // to add it to our state
-            new_state = update(this.state.allocated_tasks, 
+            new_state = update(new_state, 
                 {
                     [day_index_updated]: {
                         tasks: {
@@ -625,11 +625,11 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
 
    _generateEmptyTaskSet  = () : TaskSet[] =>{
        
-        const day_variance = 28; //How many days of tasks you will show.
+        const day_variance = 120; //How many days of tasks you will show.
         const seconds_per_day = 86400;
         const task_set = [];
 
-        const past_days_allowed = 0; //How far back in time do you want to see
+        const past_days_allowed = 60; //How far back in time do you want to see
 
         let starting_date_in_epoch = Math.floor((new Date).getTime() - (seconds_per_day * past_days_allowed * 1000))
 

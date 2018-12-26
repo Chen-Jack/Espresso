@@ -1,5 +1,5 @@
 import React from 'react'
-import {Calendar} from 'react-native-calendars'
+import {Calendar, DateObject} from 'react-native-calendars'
 import {TaskSet} from './../../../../Task'
 import {Text, View, TouchableOpacity} from 'react-native'
 import { Landable, Embassy } from '../TravelingList';
@@ -8,7 +8,7 @@ import Day from './Day'
 import { Button } from 'native-base';
 
 interface CalendarProps{
-    onDayPress : (day:any)=>void
+    onDayPress : (date: DateObject)=>void
     allocated_tasks : TaskSet[]
 }
 
@@ -63,12 +63,10 @@ class TaskCalendar extends React.Component<CalendarProps, CalendarState> impleme
 
             if(isOnTop){
                 
-                console.log("called true");
                 return true
             }
         }
         
-        console.log("called false");
         return false
     }
 
@@ -119,11 +117,12 @@ class TaskCalendar extends React.Component<CalendarProps, CalendarState> impleme
             onMonthChange={this._onMonthChange}
             // hideExtraDays={true}
             markingType={'multi-dot'}
-            onDayPress={this.props.onDayPress}
+            // onDayPress={this.props.onDayPress}
             dayComponent={({date, marking, onLongPress, onPress, state}) => {
                 // console.log("day component received", date, marking);
                 return (
                             <Day 
+                                onPress={this.props.onDayPress}
                                 markings = {marking !== false ? marking : []}
                                 join={this.register_day_component} 
                                 leave={this.unregister_day_component} 
