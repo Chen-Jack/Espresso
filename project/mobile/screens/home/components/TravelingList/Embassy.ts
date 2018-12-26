@@ -256,12 +256,14 @@ export default class Embassy{
 
     static ghostTraveler = ()=>{
         // Makes the traveler lower opacity
-        Embassy.getTraveler().ghost()
+        const traveler = Embassy.getTraveler()
+        traveler && traveler.ghost()
     }
 
     static materializeTraveler = ()=>{
         // Makes the traveler normal opacity
-        Embassy.getTraveler().materialize()
+        const traveler = Embassy.getTraveler()
+        traveler && traveler.materialize()
     }
 
     static onStartTraveling = (coordinates : Coordinate, traveler : TaskCard)=>{

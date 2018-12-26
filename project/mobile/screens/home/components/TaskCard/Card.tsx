@@ -67,7 +67,7 @@ export default class TaskCard extends React.Component<TaskCardProps, TaskCardSta
         })
     }
     componentDidMount(){
-        console.log("Card Mounting", this.props.task.task_id, this.props);
+        console.log("Card Mounting");
     }
     componentWillUnmount(){
         console.log("TaskCard Unmounting");

@@ -120,8 +120,10 @@ class TaskCalendar extends React.Component<CalendarProps, CalendarState> impleme
             // onDayPress={this.props.onDayPress}
             dayComponent={({date, marking, onLongPress, onPress, state}) => {
                 // console.log("day component received", date, marking);
+                console.log("state is", state);
                 return (
                             <Day 
+                                date_state = {state}
                                 onPress={this.props.onDayPress}
                                 markings = {marking !== false ? marking : []}
                                 join={this.register_day_component} 

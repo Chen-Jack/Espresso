@@ -3,14 +3,16 @@ import {Text, View, TouchableOpacity} from 'react-native'
 import uuid from 'uuid/v4'
 import { Coordinate, Layout } from '../../../../utility';
 import { Focusable, Transferable } from '../TravelingList';
-import { DateObject } from 'react-native-calendars';
+import { DateObject, Marking } from 'react-native-calendars';
 import {Embassy} from './../TravelingList'
+import Markings from './Markings'
 
 interface DayProps{
+    date_state: string
     date: DateObject
     join: any,
     leave: any
-    markings: any[]
+    markings: Marking[] | []
     onPress: (date: DateObject)=>void
 }
 
@@ -112,11 +114,21 @@ class Day extends React.Component<DayProps> implements Focusable, Transferable {
     }
 
     render(){
-        return <TouchableOpacity onPress={()=>this.props.onPress(this.props.date)}  style={{flex:1, backgroundColor:"purple"}}>
-                <View style={{width:"100%"}} ref={ ref => this.wrapper = ref} onLayout={this._onLayout}>
-            <Text style={{width:"100%", textAlign:"center"}}> {this.props.date.day} </Text>
+        const textColor = {color: "rgba(0,0,0,0.75)"}
+        console.log("receieved prop", this.props.state);
+        if(this.props.date_state === "today")
+            textColor.color = "purple"
+        else if(this.props.date_state === "disabled")
+            textColor.color = "rgba(0,0,0,0.3)"
+        
+        return <View style={{flex:1, justifyContent:"center", alignItems:"center"}}>
+            <TouchableOpacity onPress={()=>this.props.onPress(this.props.date)} style={{width:"100%"}} >
+                <View style={{width:"100%", justifyContent:"center", alignItems:"center"}} ref={ ref => this.wrapper = ref} onLayout={this._onLayout}>
+                    <Text style={[{width:"100%", textAlign:"center"},textColor]}> {this.props.date.day} </Text>
+                </View>
+            </TouchableOpacity>
+            {this.props.date_state !== "disabled" && <Markings markings={this.props.markings}/>}
         </View>
-        </TouchableOpacity>
     }
 }
 
