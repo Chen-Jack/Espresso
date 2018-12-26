@@ -19,7 +19,7 @@ interface DraggableState{
 }
 
 export default class Draggable extends React.Component<DraggableProps, DraggableState>{
-    _panResponder : PanResponderInstance | undefined
+    _panResponder : PanResponderInstance
 
     animation_speed : number
     time_of_last_press : number
@@ -67,6 +67,144 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
         this.initial_position = {x: 0, y: 0}
 
         this.draggable = React.createRef()
+
+
+
+        this._panResponder = PanResponder.create({
+            // onStartShouldSetResponder: (evt, gesture) => true,
+            // onStartShouldSetResponderCapture: (evt,gesture)=> true,
+            onStartShouldSetPanResponder : () => true,
+            // onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
+
+            // onMoveShouldSetResponder: (evt, gestureState) => true,
+            // onMoveShouldSetResponderCapture : (evt, gesture) => true,
+            onMoveShouldSetPanResponder: () => true,
+            // onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
+
+            onPanResponderGrant: (e, gestureState) => {
+                e.persist() //Must persist event to access async
+                const time_of_press = Date.now();
+
+
+                if(this.waiting_for_second_tap){ 
+                    if(time_of_press - this.time_of_last_press < this.ms_to_trigger_double_tap){
+                        clearTimeout(this.timer_ref)
+                        this.timer_ref = null
+                       
+                        this.waiting_for_second_tap = false;
+                        this.props.doubleTapHandler()
+                    }
+
+                    this.time_of_last_press = time_of_press
+                }
+                else{   // First Tap
+                    this.waiting_for_second_tap = true;
+                    this.time_of_last_press = time_of_press
+                }
+                
+                //Start timeout for long press
+                this.timer_ref = setTimeout(  
+                    this.long_press_callback.bind(this, e, gestureState), 
+                    this.ms_to_trigger_long_press
+                )
+            },
+
+            onPanResponderMove : ({nativeEvent}, gestureState) => {
+                if(!this.gesture_started){
+                    // If you move when you arent allowed to move yet, clear the timer
+                    clearTimeout(this.timer_ref)
+                    this.timer_ref = null
+                }
+                else{
+                    const center_offset = {
+                        x: this.default_size.width/2,
+                        y: this.default_size.height/2
+                    }
+                    this.state.pan.setValue({
+                        x: gestureState.moveX - center_offset.x, 
+                        y: gestureState.moveY - center_offset.y
+                    })
+
+                    
+                    const coordinates = {
+                        x : nativeEvent.pageX,
+                        y: nativeEvent.pageY
+                    }
+                    Embassy.onTravel(coordinates)
+                    
+ 
+                }
+            },
+
+
+            // onResponderTerminationRequest: (e,gesturestate) => {
+            //     return false
+            // },
+
+            onPanResponderTerminationRequest: () => false,
+
+
+            onPanResponderRelease: (e) => {
+                if(!this.gesture_started){
+                    //Released too early before actually starting gesture
+                    clearTimeout(this.timer_ref)
+                    this.timer_ref = null
+                }
+                else{
+                    const coordinates : Coordinate = {
+                        x : e.nativeEvent.pageX,
+                        y: e.nativeEvent.pageY
+                    } 
+                    
+                    Embassy.onFinishTraveling(coordinates, (final_destination)=>{
+                        console.log("FINAL DESTINATION IS", final_destination);
+                        const animation = this.getAnimationType(final_destination)
+                        // animation && animation.start(()=>{
+                            this.setState({
+                                focus: false
+                            }, ()=>{
+                                this.state.pan.setValue({x: 0, y: 0});
+                                this.state.pan.flattenOffset();
+                            })
+                        // })
+                    })
+
+                    // Animated.parallel([
+                        // Animated.timing(                
+                        //     this.state.modal_scale,         
+                        //     {
+                        //         toValue: 0,                 
+                        //         duration: this.animation_speed,              
+                        //     }
+                        // ),
+                        // Animated.timing(
+                        //     this.state.pan,
+                        //     {
+                        //         toValue: this.initial_position,
+                        //         duration: 500
+                        //     }
+                        // ),
+                        // Animated.timing(
+                        //     this.state.scale,
+                        //     {
+                        //         toValue: 1,
+                        //         duration: this.animation_speed
+                        //     }
+                        // )
+                    // ]).start(()=>{  
+                    //     this.setState({
+                    //         focus: false
+                    //     }, ()=>{
+                    //         this.state.pan.setValue({x: 0, y: 0});
+                    //         this.state.pan.flattenOffset();
+                    //     })
+                    // })
+                
+                    this.gesture_started = false
+                }
+            }
+
+          });
     }
 
     getAnimationType = (final_destination : number)=>{
@@ -186,142 +324,6 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
               friction: 3
             }
           ).start();  
-
-        this._panResponder = PanResponder.create({
-            // onStartShouldSetResponder: (evt, gesture) => true,
-            // onStartShouldSetResponderCapture: (evt,gesture)=> true,
-            onStartShouldSetPanResponder : () => true,
-            // onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
-
-            // onMoveShouldSetResponder: (evt, gestureState) => true,
-            // onMoveShouldSetResponderCapture : (evt, gesture) => true,
-            onMoveShouldSetPanResponder: () => true,
-            // onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
-
-            onPanResponderGrant: (e, gestureState) => {
-                e.persist() //Must persist event to access async
-                const time_of_press = Date.now();
-
-
-                if(this.waiting_for_second_tap){ 
-                    if(time_of_press - this.time_of_last_press < this.ms_to_trigger_double_tap){
-                        clearTimeout(this.timer_ref)
-                        this.timer_ref = null
-                       
-                        this.waiting_for_second_tap = false;
-                        this.props.doubleTapHandler()
-                    }
-
-                    this.time_of_last_press = time_of_press
-                }
-                else{   // First Tap
-                    this.waiting_for_second_tap = true;
-                    this.time_of_last_press = time_of_press
-                }
-                
-                //Start timeout for long press
-                this.timer_ref = setTimeout(  
-                    this.long_press_callback.bind(this, e, gestureState), 
-                    this.ms_to_trigger_long_press
-                )
-            },
-
-            onPanResponderMove : ({nativeEvent}, gestureState) => {
-                if(!this.gesture_started){
-                    // If you move when you arent allowed to move yet, clear the timer
-                    clearTimeout(this.timer_ref)
-                    this.timer_ref = null
-                }
-                else{
-                    const center_offset = {
-                        x: this.default_size.width/2,
-                        y: this.default_size.height/2
-                    }
-                    this.state.pan.setValue({
-                        x: gestureState.moveX - center_offset.x, 
-                        y: gestureState.moveY - center_offset.y
-                    })
-
-                    
-                    const coordinates = {
-                        x : nativeEvent.pageX,
-                        y: nativeEvent.pageY
-                    }
-                    Embassy.onTravel(coordinates)
-                    
- 
-                }
-            },
-
-
-            // onResponderTerminationRequest: (e,gesturestate) => {
-            //     return false
-            // },
-
-            onPanResponderTerminationRequest: () => false,
-
-
-            onPanResponderRelease: (e) => {
-                if(!this.gesture_started){
-                    //Released too early before actually starting gesture
-                    clearTimeout(this.timer_ref)
-                    this.timer_ref = null
-                }
-                else{
-                    const coordinates : Coordinate = {
-                        x : e.nativeEvent.pageX,
-                        y: e.nativeEvent.pageY
-                    } 
-                    
-                    Embassy.onFinishTraveling(coordinates, (final_destination)=>{
-                        console.log("FINAL DESTINATION IS", final_destination);
-                        const animation = this.getAnimationType(final_destination)
-                        animation && animation.start(()=>{
-                            this.setState({
-                                focus: false
-                            }, ()=>{
-                                this.state.pan.setValue({x: 0, y: 0});
-                                this.state.pan.flattenOffset();
-                            })
-                        })
-                    })
-
-                    // Animated.parallel([
-                        // Animated.timing(                
-                        //     this.state.modal_scale,         
-                        //     {
-                        //         toValue: 0,                 
-                        //         duration: this.animation_speed,              
-                        //     }
-                        // ),
-                        // Animated.timing(
-                        //     this.state.pan,
-                        //     {
-                        //         toValue: this.initial_position,
-                        //         duration: 500
-                        //     }
-                        // ),
-                        // Animated.timing(
-                        //     this.state.scale,
-                        //     {
-                        //         toValue: 1,
-                        //         duration: this.animation_speed
-                        //     }
-                        // )
-                    // ]).start(()=>{  
-                    //     this.setState({
-                    //         focus: false
-                    //     }, ()=>{
-                    //         this.state.pan.setValue({x: 0, y: 0});
-                    //         this.state.pan.flattenOffset();
-                    //     })
-                    // })
-                
-                    this.gesture_started = false
-                }
-            }
-
-          });
     }
 
     componentWillUnmount(){

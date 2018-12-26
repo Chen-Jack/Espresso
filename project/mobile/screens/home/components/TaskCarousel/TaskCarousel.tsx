@@ -75,12 +75,12 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
         return this.focused_list
     }
 
-    getLayout = (): Layout =>{
-        if(this.focused_list_layout)
-            return this.focused_list_layout
-        else
-            return {x:0, y: 0, width:0, height: 0}
-    }
+    // getLayout = (): Layout =>{
+    //     if(this.focused_list_layout)
+    //         return this.focused_list_layout
+    //     else
+    //         return {x:0, y: 0, width:0, height: 0}
+    // }
 
     componentDidMount() {
         Embassy.registerLandable(this)

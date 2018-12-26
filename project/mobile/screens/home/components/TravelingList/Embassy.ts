@@ -1,4 +1,3 @@
-import {TaskList} from './../TaskList'
 import {ManagerContext} from './../../home'
 import {Coordinate} from './../../../../utility'
 import {TaskCard} from './../TaskCard'
@@ -19,9 +18,9 @@ export interface Landable{
     /*
     Is capable of capturing Travelable movements
     */
-    getList : ()=> Focusable | null
+    getList : (coordinates : Coordinate)=> Focusable | null
     isGestureOnTop : (coordinates : Coordinate)=> boolean
-    getLayout : ()=> Layout
+    // getLayout : ()=> Layout
 }
 
 
@@ -212,7 +211,7 @@ export default class Embassy{
         */
         const landable = Embassy.findLandable(coordinates)
         if(landable)
-            return landable.getList()
+            return landable.getList(coordinates)
         else
             return null
     }
@@ -290,7 +289,7 @@ export default class Embassy{
         The cb is how the draggable should move in relation to what it is released on top of.
         */
         const landable = Embassy.findLandable(coordinates)
-        const final_target_list = landable && landable.getList() as Transferable & Focusable
+        const final_target_list = landable && landable.getList(coordinates) as Transferable & Focusable
         
         // Determine which case is the finish.
         /*
@@ -359,6 +358,7 @@ export default class Embassy{
     //    const old_list_date = old_target && old_target.getDate()
         const old_list_date = Embassy.getTraveler().getDate()
        const new_list_date = target ? target.getDate() : null
+       if(!target) console.log("Could not find target");
 
        console.log("Transfering", task_id, old_list_date, "--->", new_list_date);
 

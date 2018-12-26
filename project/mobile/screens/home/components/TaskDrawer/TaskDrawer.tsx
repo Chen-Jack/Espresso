@@ -1,7 +1,7 @@
 import React from 'react'
 import SideMenu from 'react-native-side-menu'
 import Content from './Content'
-import {Embassy, Landable, Focusable, Transferable} from './../TravelingList'
+import {Embassy, Landable, Focusable} from './../TravelingList'
 import {Taskable} from './../../../../Task'
 import {Layout, Coordinate} from './../../../../utility'
 import { Subscribeable } from '../TravelingList/Embassy';
