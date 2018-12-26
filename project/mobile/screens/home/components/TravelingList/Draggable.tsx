@@ -19,7 +19,7 @@ interface DraggableState{
 }
 
 export default class Draggable extends React.Component<DraggableProps, DraggableState>{
-    _panResponder : PanResponderInstance | undefined
+    _panResponder : PanResponderInstance
 
     animation_speed : number
     time_of_last_press : number
@@ -59,7 +59,7 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
         this.waiting_for_second_tap = false;
         this.ms_to_trigger_double_tap = 350;
 
-        this.ms_to_trigger_long_press = 200; 
+        this.ms_to_trigger_long_press = 300; 
         this.timer_ref = null   
         this.gesture_started = false
 
@@ -67,125 +67,8 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
         this.initial_position = {x: 0, y: 0}
 
         this.draggable = React.createRef()
-    }
 
-    getAnimationType = (final_destination : number)=>{
-        if(final_destination === Embassy.SAME_TARGET){
-            console.log("back to square 1");
-            return Animated.timing(
-                this.state.pan,
-                {
-                    toValue: this.initial_position,
-                    duration: this.animation_speed
-                }
-            )
-        }
-        else if(final_destination === Embassy.NEW_TARGET){
-            console.log("time to shrink");
-            return Animated.timing(
-                this.state.scale,
-                {
-                    toValue: 0,
-                    duration: this.animation_speed
-                }
-            )
-        }
-        else if(final_destination === Embassy.TARGET_LEFT){
-            console.log("GO LEFTTT");
-            this.initial_position.x = -1500
-            return Animated.timing(
-                this.state.pan,
-                {
-                    toValue: this.initial_position,
-                    duration: this.animation_speed * 1.75
-                }
-            )
-        }
-        else if(final_destination === Embassy.TARGET_RIGHT){
-            console.log("GOO RIGHHT");
-            this.initial_position.x = 2000
-            return Animated.timing(
-                this.state.pan,
-                {
-                    toValue: this.initial_position,
-                    duration: this.animation_speed * 1.75
-                }
-            )
-        }
-        else{
-            console.log("Count not recognize the corresponding animation type for that target...");
-        }
-    }
 
-    _onLayoutHandler = (e : any)=>{
-        this.default_size = {
-            width: e.nativeEvent.layout.width,
-            height: e.nativeEvent.layout.height
-        }
-    }
-
-    long_press_callback = (e : GestureResponderEvent, gestureState : PanResponderGestureState)=>{
-        console.log("LONG PRESS ", e.nativeEvent, gestureState);
-
-        this.draggable.current.measure(  
-            (x : number, y: number, width : number, height : number, pageX: number, pageY: number) => {
-            this.initial_position = {
-                x: pageX,
-                y: pageY
-            };
-        })
-        
-        this.setState({
-            focus: true
-        }, ()=>{
-            Animated.parallel([
-                Animated.spring(                
-                    this.state.modal_scale,          
-                    {
-                        toValue: 1.1,                   
-                        friction: 3, 
-                    }
-                ),
-                Animated.spring(
-                    this.state.scale,
-                    {
-                        toValue: 0,
-                        friction: 3
-                    }
-                )
-            ]).start()
-        })
-
-        const center_offset = {
-            x: this.default_size.width/2,
-            y: this.default_size.height/2
-        }
-
-        this.state.pan.setOffset({x: this.state.pan.x._value, y: this.state.pan.y._value})
-        this.state.pan.setValue({
-            x: gestureState.x0 - center_offset.x,
-            y: gestureState.y0 - center_offset.y
-        });
-
-    
-        const coordinates = {
-            x : e.nativeEvent.pageX,
-            y: e.nativeEvent.pageY
-        } as Coordinate
-
-        Embassy.onStartTraveling(coordinates, this.props.source, /*this.props.origin_list*/)
-        
-        this.gesture_started = true
-    }
-
-    componentWillMount(){
-        Animated.spring(                  // Animate over time
-            this.state.scale,            // The animated value to drive
-            {
-              toValue: 1,                   // Animate to opacity: 1 (opaque)
-              friction: 3
-            }
-          ).start();  
 
         this._panResponder = PanResponder.create({
             // onStartShouldSetResponder: (evt, gesture) => true,
@@ -276,14 +159,14 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
                     Embassy.onFinishTraveling(coordinates, (final_destination)=>{
                         console.log("FINAL DESTINATION IS", final_destination);
                         const animation = this.getAnimationType(final_destination)
-                        animation && animation.start(()=>{
+                        // animation && animation.start(()=>{
                             this.setState({
                                 focus: false
                             }, ()=>{
                                 this.state.pan.setValue({x: 0, y: 0});
                                 this.state.pan.flattenOffset();
                             })
-                        })
+                        // })
                     })
 
                     // Animated.parallel([
@@ -324,6 +207,134 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
           });
     }
 
+    getAnimationType = (final_destination : number)=>{
+        if(final_destination === Embassy.SAME_TARGET){
+            console.log("back to square 1");
+            return Animated.timing(
+                this.state.pan,
+                {
+                    toValue: this.initial_position,
+                    duration: this.animation_speed
+                }
+            )
+        }
+        else if(final_destination === Embassy.NEW_TARGET){
+            console.log("time to shrink");
+            return Animated.timing(
+                this.state.scale,
+                {
+                    toValue: 0,
+                    duration: this.animation_speed
+                }
+            )
+        }
+        else if(final_destination === Embassy.TARGET_LEFT){
+            console.log("GO LEFTTT");
+            this.initial_position.x = -1500
+            return Animated.timing(
+                this.state.pan,
+                {
+                    toValue: this.initial_position,
+                    duration: this.animation_speed * 1.75
+                }
+            )
+        }
+        else if(final_destination === Embassy.TARGET_RIGHT){
+            console.log("GOO RIGHHT");
+            this.initial_position.x = 2000
+            return Animated.timing(
+                this.state.pan,
+                {
+                    toValue: this.initial_position,
+                    duration: this.animation_speed * 1.75
+                }
+            )
+        }
+        else{
+            console.log("Count not recognize the corresponding animation type for that target...");
+        }
+    }
+
+    _onLayoutHandler = (e : any)=>{
+        this.default_size = {
+            width: e.nativeEvent.layout.width,
+            height: e.nativeEvent.layout.height
+        }
+    }
+
+    long_press_callback = (e : GestureResponderEvent, gestureState : PanResponderGestureState)=>{
+        console.log("LONG PRESS ", e.nativeEvent, gestureState);
+
+        const coordinates = {
+            x : e.nativeEvent.pageX,
+            y: e.nativeEvent.pageY
+        } as Coordinate
+
+    
+
+
+        Embassy.onStartTraveling(coordinates, this.props.source, /*this.props.origin_list*/)
+        
+
+        this.draggable.current.measure(  
+            (x : number, y: number, width : number, height : number, pageX: number, pageY: number) => {
+            this.initial_position = {
+                x: pageX,
+                y: pageY
+            };
+        })
+
+        const center_offset = {
+            x: this.default_size.width/2,
+            y: this.default_size.height/2
+        }
+
+        this.state.pan.setOffset({x: this.state.pan.x._value, y: this.state.pan.y._value})
+        this.state.pan.setValue({
+            x: gestureState.x0 - center_offset.x,
+            y: gestureState.y0 - center_offset.y
+        });
+
+         
+        this.setState({
+            focus: true
+        }, ()=>{
+            console.log("Done focus set");
+            Animated.parallel([
+                Animated.spring(                
+                    this.state.modal_scale,          
+                    {
+                        toValue: 1.1,                   
+                        friction: 3, 
+                        useNativeDriver : true
+                    }
+                ),
+                Animated.spring(
+                    this.state.scale,
+                    {
+                        toValue: 0,
+                        friction: 3,
+                        useNativeDriver : true
+                    }
+                )
+            ]).start()
+        })
+
+    
+        
+        this.gesture_started = true
+    }
+
+    componentWillMount(){
+        Animated.spring(                  // Animate over time
+            this.state.scale,            // The animated value to drive
+            {
+              toValue: 1,                   // Animate to opacity: 1 (opaque)
+              friction: 3
+            }
+          ).start();  
+    }
+
     componentWillUnmount(){
         console.log("Draggable Unmounting");
     }
@@ -335,7 +346,7 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
         let translateStyle = {transform: [{translateX: this.state.pan.x}, {translateY: this.state.pan.y}]}
         let modalScaleStyle = {transform:[{scaleX: this.state.modal_scale}, {scaleY: this.state.modal_scale}]}
 
-
+     
         let modalStyle = {transform: translateStyle.transform.concat(modalScaleStyle.transform)}
         let scaleStyle = {transform:[{scaleX: this.state.scale}, {scaleY: this.state.scale}]}
         return ( 

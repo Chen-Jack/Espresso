@@ -369,14 +369,18 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
         // Keep original_state incase of failed API call
         const original_state = this.state.allocated_tasks
 
+
+        console.log("Origina state is", original_state);
+
         let original_task : Taskable
-        let day_index_original : number
-        let task_index_original : number
-        let day_index_updated : number
+        let day_index_original : number | null = null
+        let task_index_original : number | null = null
+        let day_index_updated : number | null = null
         
         // Gather variables to know what to mutate
         for(let day_index in this.state.allocated_tasks){
             let day_tasks = this.state.allocated_tasks[day_index].tasks
+            console.log("no its not that")
             const  date = this.state.allocated_tasks[day_index].date
 
             if(date === new_date){
@@ -392,22 +396,36 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
             }   
             
         }
+        console.log("Day_index_updated", day_index_updated);
+        console.log("Day index original", day_index_original);
+        console.log("Task_index_original", task_index_original);
 
+        
         const updated_task = update(original_task , {allocated_date : {$set : new_date} })
-        const new_state = update(this.state.allocated_tasks, 
-            {
-                [day_index_updated]: { //Add Item To New Date
-                    tasks: {
-                        $unshift: [updated_task]
-                    }
-                },
-                [day_index_original] : { // Remove Item from Old Date
-                    tasks: {
-                        $splice: [[task_index_original, 1]]
-                    }
+
+        let new_state = update(this.state.allocated_tasks, {
+            // Remove Item from Old Date state
+            [day_index_original] : { 
+                tasks: {
+                    $splice: [[task_index_original, 1]]
                 }
             }
-        );
+        })
+        
+        if(day_index_updated !== null){
+             //Add Item To New Date, but only
+             // if the date is within our state. otherwise, theres no need
+             // to add it to our state
+            new_state = update(new_state, 
+                {
+                    [day_index_updated]: {
+                        tasks: {
+                            $unshift: [updated_task]
+                        }
+                    }
+                }
+            );
+        }
 
         this.setState({
             allocated_tasks : new_state
@@ -607,13 +625,13 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
 
    _generateEmptyTaskSet  = () : TaskSet[] =>{
        
-        const day_variance = 28; //How many days of tasks you will show.
+        const day_variance = 120; //How many days of tasks you will show.
         const seconds_per_day = 86400;
         const task_set = [];
 
-        const past_days_allowed = 0; //How far back in time do you want to see
+        const past_days_allowed = 60; //How far back in time do you want to see
 
-        let starting_date_in_epoch = Math.floor((new Date).getTime() - (seconds_per_day * past_days_allowed))
+        let starting_date_in_epoch = Math.floor((new Date).getTime() - (seconds_per_day * past_days_allowed * 1000))
 
         for(let i = 0; i < day_variance; i++){
 
@@ -624,7 +642,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
                 tasks: []
             })
         }
-
+        console.log(task_set);
         return (task_set)
     }
 

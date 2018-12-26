@@ -6,6 +6,8 @@ import Collapsible from 'react-native-collapsible';
 import CardOptions from './CardOptions'
 import { Taskable } from '../../../../Task';
 import {Travelable} from './../TravelingList/Embassy'
+import { Animated } from 'react-native';
+import { AnimatedValue } from 'react-navigation';
 
 // KYAAAAAaaaA~ x3 xD
 /*
@@ -20,7 +22,8 @@ interface TaskCardProps{
 }
 
 interface TaskCardState{
-    isCollapsed: boolean
+    isCollapsed: boolean,
+    opacity: AnimatedValue
 }
 
 export default class TaskCard extends React.Component<TaskCardProps, TaskCardState> implements Travelable{
@@ -28,9 +31,30 @@ export default class TaskCard extends React.Component<TaskCardProps, TaskCardSta
         super(props)
 
         this.state={
-            isCollapsed : true
+            isCollapsed : true,
+            opacity: new Animated.Value(1)
         }
     }
+    ghost = ()=>{
+        Animated.timing(
+            this.state.opacity,
+            {
+                toValue: 0.75,
+                duration: 300
+            }
+        ).start()
+    }
+
+    materialize = ()=>{
+        Animated.timing(
+            this.state.opacity,
+            {
+                toValue: 1,
+                duration: 300
+            }
+        ).start()
+    }
+
     getID = ()=>{
         return this.props.task.task_id
     }
@@ -43,7 +67,7 @@ export default class TaskCard extends React.Component<TaskCardProps, TaskCardSta
         })
     }
     componentDidMount(){
-        console.log("Card Mounting", this.props.task.task_id, this.props);
+        console.log("Card Mounting");
     }
     componentWillUnmount(){
         console.log("TaskCard Unmounting");
@@ -60,7 +84,7 @@ export default class TaskCard extends React.Component<TaskCardProps, TaskCardSta
                         origin_list = {this.props.parent_list} 
                         source = {this}
                         doubleTapHandler = {()=>{updateStatus(this.props.task.task_id, !this.props.task.completed)}}>
-
+                        <Animated.View style={{opacity: this.state.opacity}}>
                         <Card>
                             <CardItem bordered>
                                 <View style={{width:"100%", flexDirection:"row", alignItems: "center", justifyContent: "space-between"}}>
@@ -91,7 +115,7 @@ export default class TaskCard extends React.Component<TaskCardProps, TaskCardSta
                                 </CardItem>
                             </Collapsible>
                         </Card>
-
+                        </Animated.View>
                     </Draggable>
                 }}
             </UserTaskContext.Consumer>
