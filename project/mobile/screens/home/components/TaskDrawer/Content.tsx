@@ -93,13 +93,7 @@ export default class DrawerContent extends React.Component<ContentProps, Content
                     <TaskList
                         ref={this.inner_list}
                         date = {null}
-                        tasks = {this.props.task_data}
-                        // data={{
-                        //     date: null,
-                        //     // tasks: this.filterTaskList(this.props.task_data)
-                        //     tasks: this.props.task_data || []
-                        //     // tasks: []
-                        // }}
+                        tasks = {this.filterTaskList(this.props.task_data)}
                     />
                 </View>
 

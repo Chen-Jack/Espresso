@@ -205,13 +205,18 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
         */
         if(this.layout){
             const scroll_lax = this.layout.width * 0.2
-            if (coordinates.x < scroll_lax) {
-                return "LEFT"
+            if( (this.layout.y < coordinates.y) && (coordinates.y < this.layout.y + this.layout.height)) {
+                if (coordinates.x < scroll_lax) {
+                    return "LEFT"
+                }
+                else if (coordinates.x > (this.layout.x + this.layout.width) - scroll_lax) {
+                    return "RIGHT"
+                }
+                else {
+                    return "NONE"
+                }
             }
-            else if (coordinates.x > (this.layout.x + this.layout.width) - scroll_lax) {
-                return "RIGHT"
-            }
-            else {
+            else{
                 return "NONE"
             }
         }
