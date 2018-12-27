@@ -6,6 +6,7 @@ import { Focusable, Transferable } from '../TravelingList';
 import { DateObject, Marking } from 'react-native-calendars';
 import {Embassy} from './../TravelingList'
 import Markings from './Markings'
+import { Interface } from 'readline';
 
 interface DayProps{
     date_state: string
@@ -16,7 +17,11 @@ interface DayProps{
     onPress: (date: DateObject)=>void
 }
 
-class Day extends React.Component<DayProps> implements Focusable, Transferable {
+interface DayState{
+    isGestureFocusing : boolean
+}
+
+class Day extends React.Component<DayProps, DayState> implements Focusable, Transferable {
     id: string
     layout: Layout
     wrapper: any
@@ -32,6 +37,10 @@ class Day extends React.Component<DayProps> implements Focusable, Transferable {
             width:0,
             height:0
         }
+
+        this.state = {
+            isGestureFocusing : false
+        }
     }
 
     getDate = ()=>{
@@ -39,11 +48,21 @@ class Day extends React.Component<DayProps> implements Focusable, Transferable {
     }
 
     onGestureLoseFocus = ()=>{
-        console.log(this.props.date.dateString, "lost focus");
+        console.log(this.props.date.dateString, "lost focus!!!!");
+        this.setState({
+            isGestureFocusing: false
+        }, ()=>{
+            console.log("Updated state to false");
+        })
         Embassy.materializeTraveler()
     }
     onGestureFocus  = ()=>{
-        console.log(this.props.date.dateString, "gained focus");
+        console.log(this.props.date.dateString, "gained focus!!!!");
+        this.setState({
+            isGestureFocusing: true
+        }, ()=>{
+            console.log("UPdated state to true");
+        })
         Embassy.ghostTraveler()
     }
     onGestureStay = ()=>{
@@ -96,11 +115,15 @@ class Day extends React.Component<DayProps> implements Focusable, Transferable {
         this.updateMeasurement()
     }
 
-    shouldComponentUpdate(nextProps : DayProps){
-        if(this.props === nextProps)
+    shouldComponentUpdate(nextProps : DayProps, nextState: DayState){
+        if(this.props === nextProps && this.state === nextState){
+            console.log("Dont update");
             return false
-        else
+        }
+        else{
+            console.log("YES UPDATE");
             return true
+        }
     }
 
     componentDidMount(){
@@ -114,19 +137,22 @@ class Day extends React.Component<DayProps> implements Focusable, Transferable {
     }
 
     render(){
+        console.log("Rendered");
         const textColor = {color: "rgba(0,0,0,0.75)"}
-        console.log("receieved prop", this.props.state);
         if(this.props.date_state === "today")
             textColor.color = "purple"
         else if(this.props.date_state === "disabled")
             textColor.color = "rgba(0,0,0,0.3)"
+
+        // const focusStyle = {backgroundColor: this.state.isGestureFocusing ? "red" : "white"}
         
-        return <View style={{flex:1, justifyContent:"center", alignItems:"center"}}>
-            <TouchableOpacity onPress={()=>this.props.onPress(this.props.date)} style={{width:"100%"}} >
+        return <View style={{ flex:1, justifyContent:"center", alignItems:"center"}}>
+            <TouchableOpacity onPress={()=>this.props.onPress(this.props.date)} style={[ {backgroundColor: this.state.isGestureFocusing ? "red" : "white", width:25, height:25, borderRadius: 100, justifyContent:"center", alignItems:"center"}]} >
                 <View style={{width:"100%", justifyContent:"center", alignItems:"center"}} ref={ ref => this.wrapper = ref} onLayout={this._onLayout}>
                     <Text style={[{width:"100%", textAlign:"center"},textColor]}> {this.props.date.day} </Text>
                 </View>
             </TouchableOpacity>
+
             {this.props.date_state !== "disabled" && <Markings markings={this.props.markings}/>}
         </View>
     }

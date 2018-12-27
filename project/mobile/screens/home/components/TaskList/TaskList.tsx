@@ -24,13 +24,13 @@ interface TaskListState {
 
 export default class TaskList extends React.Component<TaskListProps, TaskListState> implements Focusable, Transferable{
     list: React.RefObject<any>
-    layout: any
+    // layout: any
 
     constructor(props: TaskListProps) {
         super(props)
 
         this.list = React.createRef()
-        this.layout = null
+        // this.layout = null
 
         this.state = {
             isGestureHovering: false,
@@ -75,7 +75,7 @@ export default class TaskList extends React.Component<TaskListProps, TaskListSta
                 width: width,
                 height: height
             }
-            this.layout = layout
+            // this.layout = layout
             cb(layout)
         })
     }
@@ -120,13 +120,28 @@ export default class TaskList extends React.Component<TaskListProps, TaskListSta
         }
     }
 
+    shouldComponentUpdate(nextProps:TaskListProps, nextState:TaskListState){
+        
+        console.log(this.props, nextProps);
+        console.log(this.state, nextState);
+        if(this.props === nextProps && this.state == nextState){
+            console.log("Yep");
+            return false
+        }
+        else{
+            console.log("Nope");
+            return true
+        }
+    }
+
     render() {
+        console.log("Tasklist is rendering");
         let focus_style = { backgroundColor: (this.state.isGestureHovering ? "yellow" : null) }
         let landable_style = { flex: 1, ...focus_style, width: "100%", height: "100%" }
         return (<View
             onLayout={this.onLayoutHandler}
             ref={this.list}
-            style={{ flex: 1 }}>
+            style={{ flex: 1, overflow:"hidden" }}>
 
             {/* TASK LIST HEADER */}
             {(this.props.date !== null) &&

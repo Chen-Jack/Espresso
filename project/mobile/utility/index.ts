@@ -1,3 +1,5 @@
 export {default as getDay} from './getDay'
 export {default as Layout} from './Interfaces/layout'
 export {default as Coordinate} from './Interfaces/coordinates'
+export {default as isObjectEqual} from './isObjectEqual'
+export {default as isArrayEqual} from './isArrayEqual'

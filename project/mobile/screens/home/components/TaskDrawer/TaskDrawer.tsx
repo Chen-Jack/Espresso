@@ -113,12 +113,13 @@ export default class TaskDrawer extends React.Component<DrawerProps, DrawerState
             visible: true
         })
 
+        Embassy.registerLandable(this)
+
         console.log("Opened drawer");
         if( !this.state.registered_events){
             this.setState({
                 registered_events: true
             }, ()=>{
-                Embassy.registerLandable(this)
                 Embassy.addOnStartHandlers(this.onCardPickedUp)
                 Embassy.addOnReleaseHandlers(this.onCardReleased)
             })
@@ -137,12 +138,12 @@ export default class TaskDrawer extends React.Component<DrawerProps, DrawerState
         this.setState({
             visible: false
         })
-
+        Embassy.unregisterLandable(this)
         if(!this.state.gestureInProgress){ // Don't remove the events if it's causeed by the events themselves
             this.setState({
                 registered_events: false
             }, ()=>{
-                Embassy.unregisterLandable(this)
+                
                 Embassy.removeOnStartHandlers(this.onCardPickedUp)
                 Embassy.removeOnReleaseHandlers(this.onCardReleased)
             })

@@ -159,14 +159,14 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
                     Embassy.onFinishTraveling(coordinates, (final_destination)=>{
                         console.log("FINAL DESTINATION IS", final_destination);
                         const animation = this.getAnimationType(final_destination)
-                        // animation && animation.start(()=>{
+                        animation && animation.start(()=>{
                             this.setState({
                                 focus: false
                             }, ()=>{
                                 this.state.pan.setValue({x: 0, y: 0});
                                 this.state.pan.flattenOffset();
                             })
-                        // })
+                        })
                     })
 
                     // Animated.parallel([
@@ -306,7 +306,7 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
                     {
                         toValue: 1.1,                   
                         friction: 3, 
-                        useNativeDriver : true
+                        // useNativeDriver : true
                     }
                 ),
                 Animated.spring(
@@ -314,7 +314,7 @@ export default class Draggable extends React.Component<DraggableProps, Draggable
                     {
                         toValue: 0,
                         friction: 3,
-                        useNativeDriver : true
+                        // useNativeDriver : true
                     }
                 )
             ]).start()

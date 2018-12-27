@@ -141,12 +141,11 @@ export default class PopupMenu extends React.Component<PopupMenuProps, PopupMenu
 													justifyContent: "center",
 													alignItems: "center",
 													top: this.state.location.y,
-													left: this.state.location.x - 100,
+													left: this.state.location.x - 150,
 													backgroundColor: "white",
 													shadowOpacity: 0.5, shadowColor: "black",
 													shadowOffset: { width: 5, height: 5 },
-													shadowRadius: 3
-												}}>
+													shadowRadius: 3}}>
 
 													<MenuOptions onChooseOption={this.toggleMenu} options={this.props.options} />
 												</View>

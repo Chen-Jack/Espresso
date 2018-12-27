@@ -22,11 +22,7 @@ const TaskListHeader = ({ task_list, date } : TaskListHeaderProps) => {
         {
             title: "Clear List",
             handler: () => { }
-        },
-        {
-            title: "3",
-            handler: () => { }
-        },
+        }
     ]
         
     return <View style={{ flexDirection: "row", width: "100%", backgroundColor: "#222", alignItems: "center", justifyContent: "space-between" }}>

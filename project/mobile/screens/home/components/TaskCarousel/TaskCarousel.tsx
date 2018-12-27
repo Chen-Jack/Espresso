@@ -1,15 +1,14 @@
 import React from 'react'
-import Carousel from 'react-native-snap-carousel'
+import Carousel, { CarouselProps } from 'react-native-snap-carousel'
 import { View } from 'native-base'
 import { Dimensions } from 'react-native'
 import { TaskList } from '../TaskList'
-import { Embassy, LandableContainer } from '../TravelingList'
+import { Embassy } from '../TravelingList'
 import Loader from './LoadingCarouselView'
 import { TaskCard } from './../TaskCard'
 import { Layout, Coordinate } from '../../../../utility'
-import { Taskable, TaskSet } from './../../../../Task'
+import { TaskSet } from './../../../../Task'
 import { Landable, Focusable } from '../TravelingList';
-import uuid from 'uuid/v4';
 import { Subscribeable } from '../TravelingList/Embassy';
 
 interface TaskCarouselProps {
@@ -87,12 +86,11 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
         Embassy.registerLandable(this)
 
 
-        const onStartHandlers: Subscribeable[] = [this._onCardPickedUp, this.disableAllListScroll,
-        this.disableCarouselScroll]
+        const onStartHandlers: Subscribeable[] = [this._onCardPickedUp, this.disableCurrentListScroll, this.disableCarouselScroll]
 
         const onMoveHandlers: Subscribeable[] = [this._onCardMoved]
 
-        const onReleaseHandlers: Subscribeable[] = [this._onCardReleased, this.enableAllListScroll,
+        const onReleaseHandlers: Subscribeable[] = [this._onCardReleased, this.enableCurrentListScroll,
         this.enableCarouselScroll]
 
         Embassy.addOnStartHandlers(onStartHandlers)
@@ -102,13 +100,9 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
     }
 
     _onSnapHandler = (index: number) => {
-        this._handleNewDateSelection(index)
-
-        this.focused_list && this.focused_list.onGestureLoseFocus()
-
         this.updateFocusedListLayout(index)
-
-
+        this._handleNewDateSelection(index)
+        this.focused_list && this.focused_list.onGestureLoseFocus()
     }
 
     disableAllListScroll: Subscribeable = () => {
@@ -121,6 +115,10 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
     
     disableCurrentListScroll : Subscribeable = ()=>{
         this.focused_list && this.focused_list.toggleScroll(false)
+    }
+
+    enableCurrentListScroll : Subscribeable = ()=>{
+        this.focused_list && this.focused_list.toggleScroll(true)
     }
 
     enableAllListScroll: Subscribeable = () => {
@@ -173,6 +171,7 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
             else if (direction === "LEFT") {
                 this.carousel.current && this.carousel.current.snapToPrev()
                 Embassy.carouselTurn(-1)
+                
             }
             else if (direction === "NONE") {
 
@@ -187,17 +186,16 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
         clearInterval(this.autoScrollingTimer)
         this.autoScrollingTimer = null
     }
-    // shouldComponentUpdate(nextProps,nextState){
-    //     if(this.state.task_cards_references === nextState.task_cards_references &&
-    //         this.props === nextProps){
-    //             console.log("NOT Rerendering");
-    //             return false
-    //         }
-    //         else{
-    //             console.log("rererendering");
-    //             return true
-    //         }
-    // }
+    shouldComponentUpdate(nextProps :TaskCarouselProps ,nextState:TaskCarouselState){
+        if(this.state === nextState && this.props === nextProps){
+                console.log("NOT Rerendering");
+                return false
+            }
+            else{
+                console.log("rererendering");
+                return true
+            }
+    }
 
     whichEdgeIsGestureOn = (coordinates: Coordinate) => {
         /*
@@ -311,7 +309,18 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
 
         return <View 
                 key=  {index}
-                style={{ margin: 20, height: "85%", width: "85%", backgroundColor: "#ddd", borderRadius: 10, alignSelf: "center" }}>
+                style={{ 
+                    marginVertical: 10, 
+                    height: "90%", 
+                    width: "100%", 
+                    backgroundColor: "#ccc", 
+                    alignSelf: "center",
+                    
+                    shadowOpacity: 0.7, 
+                    shadowColor: "black",
+                    shadowOffset: { width: 5, height: 5 },
+                    shadowRadius: 5
+                    }}>
                
                 <TaskList initialize={(index === this.STARTING_INDEX) ? this._initializeLayout : null}
                     ref={(ref) => { this[`task_${index}`] = ref }}
@@ -323,10 +332,12 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
 
     updateFocusedListLayout = (index: number) => {
         const ref = this._getReference(index)
-        ref && ref.measureLayout((layout: Layout) => {
-            this.focused_list = ref
-            this.focused_list_layout = layout
-        })
+        // ref && ref.measureLayout((layout: Layout) => {
+        //     this.focused_list = ref
+        //     this.focused_list_layout = layout
+        // })
+
+        ref && (this.focused_list = ref)
     }
 
     _initializeLayout = (list: TaskList, layout: Layout) => {
@@ -346,7 +357,14 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
         return (<View
             ref={this.wrapper}
             onLayout={this._onLayout}
-            style={{ flexDirection: "column", flex: 1, width: "100%", marginBottom: 50, paddingBottom: 10, backgroundColor: "#2460c1" }}>
+            style={{ 
+                flexDirection: "column", 
+                flex: 1, 
+                width: "100%",
+                marginBottom: 50, 
+                paddingBottom: 10, 
+                backgroundColor: "white" /*"#2460c1"*/,
+            }}>
 
             {
                 (this.props.isLoading) ? <Loader /> : <Carousel
@@ -354,14 +372,13 @@ export default class TaskCarousel extends React.Component<TaskCarouselProps, Tas
                     firstItem={this.STARTING_INDEX}
                     ref={this.carousel}
                     onSnapToItem={this._onSnapHandler}
-                    // useScrollView={true}
+                    useScrollView={true}
                     lockScrollWhileSnapping={true}
-                    showsHorizontalScrollIndicator={true}
                     scrollEnabled={this.state.canScroll}
                     data={this.props.task_data}
                     renderItem={this._renderTaskList}
                     sliderWidth={Dimensions.get('window').width}
-                    itemWidth={Dimensions.get('window').width}
+                    itemWidth={Dimensions.get('window').width*0.75}
                 />
             }
 

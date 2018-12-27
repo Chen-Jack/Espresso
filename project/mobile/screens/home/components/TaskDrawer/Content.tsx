@@ -80,7 +80,7 @@ export default class DrawerContent extends React.Component<ContentProps, Content
     render() {
         console.log("WAIT, ITS", this.props.task_data);
         return (
-            <View style={{ backgroundColor: "#ddd", height: Dimensions.get('window').height, width: "100%" }}>
+            <View style={{ backgroundColor: "#eee", height: Dimensions.get('window').height, width: "100%" }}>
 
                 <DrawerHeader />
                 <FilterBar onChangeText={this._onFilterBarChangeText} />

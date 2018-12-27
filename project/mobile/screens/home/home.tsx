@@ -625,11 +625,11 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
 
    _generateEmptyTaskSet  = () : TaskSet[] =>{
        
-        const day_variance = 120; //How many days of tasks you will show.
+        const day_variance = 75; //How many days of tasks you will show.
         const seconds_per_day = 86400;
         const task_set = [];
 
-        const past_days_allowed = 60; //How far back in time do you want to see
+        const past_days_allowed = 30; //How far back in time do you want to see
 
         let starting_date_in_epoch = Math.floor((new Date).getTime() - (seconds_per_day * past_days_allowed * 1000))
 
@@ -738,7 +738,7 @@ class HomeScreen extends React.Component<any,HomeScreenState>{
             <EditModeContext.Provider value={this.state.editContext}>
                 <TaskDrawer ref={(ref)=>{this.drawer = ref as TaskDrawer}} unallocated_tasks = {this.state.unallocated_tasks}>
                     <Container style={{overflow:"hidden", height: Dimensions.get('window').height, flexDirection: "column"}}>
-                        <Header style={{backgroundColor: '#061328'}}>
+                        <Header style={{backgroundColor: '#222'}}>
                             <Body style={{justifyContent:"center"}}>
                                 <Title style={{position:"absolute", left: 10, color:"#fff"}}>{`${getDay(this.today)} | ${this.today.toLocaleDateString()}`}</Title>
                                 <TouchableOpacity onPress={()=>this.props.navigation.navigate("settings")} style={{position:"absolute", right:10}}>

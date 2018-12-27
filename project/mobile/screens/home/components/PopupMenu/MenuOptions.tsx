@@ -35,7 +35,7 @@ export default class MenuOptions extends React.Component<MenuOptionsProps>{
         }
     }
     render(){
-        return <List style={{width: 100}}>
+        return <List style={{width: 150}}>
             {this._renderItems()}
         </List>
     }

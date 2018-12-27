@@ -51,10 +51,6 @@ class TaskCalendar extends React.Component<CalendarProps, CalendarState> impleme
         }
     }
 
-    // getLayout = (): any=>{
-        
-    // }
-
     isGestureOnTop = (coordinates : Coordinate)=>{
         const day_components : Day[] = Object.values(this.mounted_day_components)
         let isOnTop = false
@@ -84,11 +80,23 @@ class TaskCalendar extends React.Component<CalendarProps, CalendarState> impleme
             if(markers_list[date_iso_form] === undefined)
                 markers_list[date_iso_form] = {dots: []}
 
+            let isAllCompleted = false
             for(let task of task_set.tasks){
-                if(task.completed)
-                    markers_list[date_iso_form]["dots"].push({key: task.task_id, color: "blue"})
-                else
-                    markers_list[date_iso_form]["dots"].push({key: task.task_id, color: "red"})
+                if(!task.completed){
+                    break;
+                }
+                isAllCompleted = true
+            }
+            for(let task of task_set.tasks){
+                if(isAllCompleted){
+                    markers_list[date_iso_form]["dots"].push({key: task.task_id, color: "green"})
+                }
+                else{
+                    if(task.completed)
+                        markers_list[date_iso_form]["dots"].push({key: task.task_id, color: "blue"})
+                    else
+                        markers_list[date_iso_form]["dots"].push({key: task.task_id, color: "red"})
+                }
             }
         }
         
@@ -114,13 +122,10 @@ class TaskCalendar extends React.Component<CalendarProps, CalendarState> impleme
             </Button> */}
 
             <Calendar
+        
             onMonthChange={this._onMonthChange}
-            // hideExtraDays={true}
             markingType={'multi-dot'}
-            // onDayPress={this.props.onDayPress}
             dayComponent={({date, marking, onLongPress, onPress, state}) => {
-                // console.log("day component received", date, marking);
-                console.log("state is", state);
                 return (
                             <Day 
                                 date_state = {state}
